@@ -1,0 +1,38 @@
+<html>    
+    <head>    
+        <title>{{t}}</title>    
+        <link rel="stylesheet" type="text/css"  href="{{ url_for('static',filename='assets/style.css')}}" >    
+    </head>    
+<body>    
+    <h1>{{h}}</h1>    
+    <hr>    
+        {% if scenes[0] %}    
+    <h3>Result of the Search : </h3>    
+    <table>    
+        <tr id="row">       
+            <td class="name">Model Name</td>    
+            <td class="type">Model type</td>    
+            <td class="version">Version</td>    
+            <td class="generator">Model generator</td>    
+            <td class="copyright">Copyright</td>   
+        <td class="func">Delete</td>    
+        <td class="func">Modify</td>    
+        </tr>    
+        {% for scene in scenes %}    
+        <tr class="datas">     
+            <td class="name">{{ scene["name"]  }}</td>    
+            <td class="type">{{ scene["type"] }}</td>    
+            <td class="version">{{ scene["version"] }}</td>    
+            <td class="generator">{{ scene["generator"] }}</td>    
+            <td class="copyright">{{ scene["copyright"] }}</td>
+            <td class="func1"><a href="./remove?_id={{ scene['_id'] }}"><button type="submit">DELETE</button></a></td>    
+            <td class="func1"><a href="./update?_id={{ scene['_id'] }}"><button type="submit">EDIT</button></a></td>    
+        </tr>    
+        {% endfor %}    
+    {% else %}    
+        <h4>No Result Found !!</h4>    
+    {% endif %}    
+    </table>    
+   <a href="/">Return to List</a>    
+</body>    
+</html>  

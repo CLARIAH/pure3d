@@ -1,0 +1,44 @@
+<html>    
+   <head>    
+            <title>{{t}}</title>    
+        </head>    
+        <style>       
+            h1{    
+                font-family:"Arial Black", Gadget, sans-serif;    
+            }    
+            body{    
+                background-color:white;    
+            }    
+        </style>    
+    <body>    
+        <h1>{{h}}</h1>    
+        <hr>    
+        <h3>Update tasks with a reference</h3>    
+        <form action="/action3" method="POST">    
+        {% for task in tasks %}    
+            Unique Object ID : {{ task['_id'] }}<br/>    
+        <input type="text" name="_id" value="{{ task['_id'] }}" hidden>    
+        
+        <table>    
+        <tr>    
+        <td>Model Name</td><td> : </td><td><input type="text" name="name" value="{{ task['name'] }}" placeholder="{{ task['name'] }}"></td>    
+        </tr>    
+        <tr>    
+        <td>Model Type</td><td> : </td><td><input type="text" name="type" value="{{ task['type'] }}" placeholder="{{ task['type'] }}"></td>     
+        </tr>    
+        <tr>    
+        <td>Version</td><td> : </td><td><input type="text" name="version" value="{{ task['version'] }}" placeholder="{{ task['version'] }}"></td>    
+        </tr>    
+        <tr>    
+        <td>Generator</td><td> : </td><td><input type="text" name="generator" value="{{ task['generator'] }}" placeholder="{{ task['generator'] }}"></td>    
+        </tr>    
+        <td>Copyright</td><td> : </td><td><input type="text" name="copyright" value="{{ task['copyright'] }}" placeholder="{{ task['copyright'] }}"></td>    
+        </tr> 
+        </table>    
+        {% endfor %}    
+            <button type="submit"> Update Annotation </button>    
+            <br/>    
+        </form>    
+        <a href="/">Return to List</a>    
+</body>    
+</html>   
