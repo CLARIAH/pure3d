@@ -8,8 +8,7 @@ We will be using terms of the [OAIS standard for
 archiving](https://www2.archivists.org/groups/standards-committee/open-archival-information-system-oais):
 SIP => AIP => DIP, or: Submission => Archiving => Dissemination. The IP stands
 for Information Package.
-![IMG_3810.jpeg](IMG_3810.jpeg)
-
+![](attachments/IMG_3810.jpeg)
 ## Editions
 
 A 3D-edition is a 3D model enriched with annotations, articles, tours, overlays
@@ -23,8 +22,7 @@ overall transformations that are needed to make the 3D data viewable in current
 3D viewers.  The result of editing is a 3D-edition, which can be submitted to
 the Pure3D infrastructure, where it becomes archived for the long term, and
 from where it can be disseminated to users: the readers of 3D editions.
-![wholepicture2022-05-30.png](wholepicture2022-05-30.png)
-
+![](attachments/wholepicture2022-05-30.png)
 # SIP
 
 *This is about the producers of data, the editors of a scholarly edition.*
@@ -86,7 +84,7 @@ parts have to be implemented by other means.
 *This is about the consumers of data, those that read/study a digital edition.*
 
 Users must be able to search/browse the archived editions and their contents, and read those editions. They must be able to view the 3D data in a 3D-viewer, with all the annotations and related materials accessible. More specifications can be found here: 
-![PURE3D Wireframe.pdf](PURE3D%20Wireframe.pdf)
+![](attachments/PURE3DWireframe.pdf)
 
 ## Implementation
 We intend to write a dedicated web interface for the dissemination part, based on Flask. Possibly index the annotations and related materials in a separate MongoDB database, in order to provide searching on the contents of datasets. 
