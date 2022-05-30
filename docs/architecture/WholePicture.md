@@ -84,7 +84,7 @@ parts have to be implemented by other means.
 *This is about the consumers of data, those that read/study a digital edition.*
 
 Users must be able to search/browse the archived editions and their contents, and read those editions. They must be able to view the 3D data in a 3D-viewer, with all the annotations and related materials accessible. More specifications can be found here: 
-![](attachments/PURE3DWireframe.pdf)
+![wireframe pdf](attachments/PURE3DWireframe.pdf)
 
 ## Implementation
 We intend to write a dedicated web interface for the dissemination part, based on Flask. Possibly index the annotations and related materials in a separate MongoDB database, in order to provide searching on the contents of datasets. 
