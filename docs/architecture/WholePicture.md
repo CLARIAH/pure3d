@@ -25,7 +25,7 @@ the Pure3D infrastructure, where it becomes archived for the long term, and
 from where it can be disseminated to users: the readers of 3D editions.
 ![](attachments/wholepicture2022-05-30.png)
 
-# [[SIP]]
+# [SIP](SIP.md)
 
 *This is about the producers of data, the editors of a scholarly edition.*
 
@@ -50,7 +50,7 @@ single dataset to the archive.
 We intend to build very simple systems for SIP, AIP and DIP initially. These will serve to discover and design all interactions we need between these systems when the users of the infrastructure are doing their work.
 Later we might replace these simple systems by full fledge components built by dedicated open source communities, such as the ones behind Packrat and Archivematica.
 
-# [[AIP]]
+# [AIP](AIP.md)
 
 *This is about archiving a 3D edition, and providing long-term access to it.*
 
@@ -69,7 +69,7 @@ overview:
 
 We intend to use a vanilla repository solution. The challenge will be to put the mechanisms in place for handling the articles and annotations that have been added to the 3D data by the edition writers. This will require custom code when we ingest such data and when we disseminate it.
 
-# [[DIP]]
+# [DIP](DIP.md)
 
 *This is about the consumers of data, those that read/study a digital edition.*
 
