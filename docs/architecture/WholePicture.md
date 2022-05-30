@@ -9,6 +9,7 @@ archiving](https://www2.archivists.org/groups/standards-committee/open-archival-
 SIP => AIP => DIP, or: Submission => Archiving => Dissemination. The IP stands
 for Information Package.
 ![](attachments/IMG_3810.jpeg)
+
 ## Editions
 
 A 3D-edition is a 3D model enriched with annotations, articles, tours, overlays
@@ -23,7 +24,8 @@ overall transformations that are needed to make the 3D data viewable in current
 the Pure3D infrastructure, where it becomes archived for the long term, and
 from where it can be disseminated to users: the readers of 3D editions.
 ![](attachments/wholepicture2022-05-30.png)
-# SIP
+
+# [[SIP]]
 
 *This is about the producers of data, the editors of a scholarly edition.*
 
@@ -43,20 +45,12 @@ possibly corrective actions too.  When the edition is finished, a publish
 action submits the 3D model, the annotations and the related materials as a
 single dataset to the archive.
 
-## Implementation
+## Implementation note
 
-We can either use functionality of Archivematica to provide a submission
-workspace, which we then extend with Pure3D specific functions, such as
-annotation capturing and 3D-quality control.  Or we use NextCloud functionality
-for file transfer, and have 3D viewers installed that take their models from
-NextCloud and save their annotations to NextCloud.  Instead of NextCloud we
-could use other file sharing solutions.  This looks very much like the
-individual sandboxes that already have been provided to some subprojects of
-Pure3D. We could arrive at the full solution by taking the sandbox solution
-and develop it step by step. The first step, from personal, volatile
-sandboxes to a unified, persistent system is already underway.
+We intend to build very simple systems for SIP, AIP and DIP initially. These will serve to discover and design all interactions we need between these systems when the users of the infrastructure are doing their work.
+Later we might replace these simple systems by full fledge components built by dedicated open source communities, such as the ones behind Packrat and Archivematica.
 
-# AIP
+# [[AIP]]
 
 *This is about archiving a 3D edition, and providing long-term access to it.*
 
@@ -71,22 +65,18 @@ overview:
 * harvesting: let other archives harvest metadata
 * PIDs: provide persistent identifiers for datasets
 
-## Implementation
+## Implementation note
 
-We intend to use [Archivematica](https://www.archivematica.org/en/) as our
-vanilla repository solution. It provides support for the ingest process, and
-this overlaps with the SIP task above. We have to look closer in order to
-determine which part of the ingest task can be left to Archivematica, and which
-parts have to be implemented by other means.
+We intend to use a vanilla repository solution. The challenge will be to put the mechanisms in place for handling the articles and annotations that have been added to the 3D data by the edition writers. This will require custom code when we ingest such data and when we disseminate it.
 
-# DIP
+# [[DIP]]
 
 *This is about the consumers of data, those that read/study a digital edition.*
 
 Users must be able to search/browse the archived editions and their contents, and read those editions. They must be able to view the 3D data in a 3D-viewer, with all the annotations and related materials accessible. More specifications can be found here: 
 ![wireframe pdf](attachments/PURE3DWireframe.pdf)
 
-## Implementation
+## Implementation note
 We intend to write a dedicated web interface for the dissemination part, based on Flask. Possibly index the annotations and related materials in a separate MongoDB database, in order to provide searching on the contents of datasets. 
 
 

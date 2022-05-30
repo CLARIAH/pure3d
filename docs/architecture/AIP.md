@@ -4,5 +4,10 @@ The SIPs come from [[SIP]], and the DIPs go to [[DIP]].
 The AIPs are stored and harvestable, they get a PID.
 
 ## Ingredients
-An on-premise installation of Archivematica.
-Harvesting scripts that maintain an "index" of the AIPs in a MongoDb for the sake of disseminating editions.
+* A securely backed up filesystem with a proper data layout, something like the
+[Oxford Common File Layout](https://ocfl.io/1.0/spec/).
+* A MongoDB database for storing metadata and annotations
+* An index system for the full text contents of articles, annotations, and metadata.
+
+Later we might replace this by more or less off-the-shelf archive software, such as
+[Archivematica](https://www.archivematica.org/en/) or [Packrat](https://github.com/Smithsonian/dpo-packrat).
