@@ -48,7 +48,7 @@ single dataset to the archive.
 ## Implementation note
 
 We intend to build very simple systems for SIP, AIP and DIP initially. These will serve to discover and design all interactions we need between these systems when the users of the infrastructure are doing their work.
-Later we might replace these simple systems by full fledge components built by dedicated open source communities, such as the ones behind Packrat and [Archivematica](https://www.archivematica.org/en/).
+Later we might replace these simple systems by full fledge components built by dedicated open source communities, such as the ones behind [Packrat](https://github.com/Smithsonian/dpo-packrat) and [Archivematica](https://www.archivematica.org/en/).
 
 # [AIP](AIP.md)
 
