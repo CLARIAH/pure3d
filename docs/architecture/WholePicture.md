@@ -8,8 +8,7 @@ We will be using terms of the [OAIS standard for
 archiving](https://www2.archivists.org/groups/standards-committee/open-archival-information-system-oais):
 SIP => AIP => DIP, or: Submission => Archiving => Dissemination. The IP stands
 for Information Package.
-![](attachments/IMG_3810.jpeg)
-
+![](attachments/flipover.jpeg)
 ## Editions
 
 A 3D-edition is a 3D model enriched with annotations, articles, tours, overlays
@@ -48,7 +47,7 @@ single dataset to the archive.
 ## Implementation note
 
 We intend to build very simple systems for SIP, AIP and DIP initially. These will serve to discover and design all interactions we need between these systems when the users of the infrastructure are doing their work.
-Later we might replace these simple systems by full fledge components built by dedicated open source communities, such as the ones behind Packrat and [Archivematica](https://www.archivematica.org/en/).
+Later we might replace these simple systems by full fledge components built by dedicated open source communities, such as the ones behind [Packrat]([Packrat](https://github.com/Smithsonian/dpo-packrat) and [Archivematica](https://www.archivematica.org/en/).
 
 # [AIP](AIP.md)
 

@@ -28,6 +28,8 @@ Here is a sequence of events to support
 Here is the file and folder layout of a workspace
 * folder `meta`: with json files containing metadata. These files can be created/updated by filling out forms, or they can be directly manufactured by the edition writers, or both.
 	* file `dc.json`: the file with Dublin Core metadata
+	* a `license.txt` file, containing the text of a license
+	* a `license.json` file, containing attributes of the license, e.g. its url, whether it is open, and something that codes the permissions that Pure3D has to show it to users for viewing/downloading
 	* `.json` files corresponding with other supported metadata schemes
 * folder `description`: contains the introductory texts of the edition, as a set of markdown files. These markdown files may link to each other and to files in the `media` folder below. There will be some overlap between the content of these files and the more formal content of the metadata files.
 	* `intro.md`: short introduction to the edition
@@ -37,6 +39,8 @@ Here is the file and folder layout of a workspace
 * folder `3d`: with the 3D data files.
 	* subfolder `original` with original resolution files of a single 3D model; probably a single `.obj` or `.gltf` file possibly augmented with `.mtl` files etc.
 	* subfolder `derivatives` with a subfolder for each supported viewer, e.g. `voyager`. And for each viewer subdirectories named `low`, `high`, `medium` with a derivative of that quality of the original.
+* folder `candy` with a few screenshots that give a candid view on the 3D data, to be used in iconic representations of the edition in several places of the Pure3D interface.
+* folder `fallback` with screenshots and plain texts of how key parts of the edition look in the viewer. This is meant as a fallback for the very long-term when most of the software that supports editions have become obsolete beyond repair.
 * folder `media`: with text/image/video material that can be referenced in articles and annotation bodies. May contain subfolders, the organisation is up to the edition writers.
 * folder `articles`: where articles, created within the Voyager, are saved.  This folder is under edit control of the system, although the editors can read its files.
 * folder `annotations`: where annotations, created within the Voyager, are stored. This folder is under edit control of the system, although the editors can read its files.
