@@ -12,7 +12,7 @@ When finished, it will run on infrastructure of the [KNAW/Humanities Cluster](ht
 [DANS](https://dans.knaw.nl/nl/) is overseeing that Pure3D supports the [FAIR principles](https://www.go-fair.org/fair-principles/).
 
 # Documentation
-Technical documentation is in the [docs](https://github.com/CLARIAH/pure3d/blob/main/docs/index.md)
+Technical documentation is in the [docs](https://github.com/CLARIAH/pure3d/blob/main/docs/index.md).
 
 # Team
 At the University of Maastricht (see also [here](https://pure3d.eu/index.php/about/team/)):
@@ -26,7 +26,7 @@ At KNAW/HuC:
 * [Mario Mieldijk](https://nl.linkedin.com/in/mario-mieldijk-8b640422) Lead engineer concern infrastructure KNAW/HuC.
 * [Dirk Roorda](https://pure.knaw.nl/portal/en/persons/dirk-roorda) Lead developer, works at KNAW/HuC.
 
-At DANS, see also [here](https://dans.knaw.nl/en/collaborations/pure3d/)):
+At DANS, (see also [here](https://dans.knaw.nl/en/collaborations/pure3d/)):
 * [Hella Hollander](https://pure.knaw.nl/portal/en/persons/hella-hollander)
 * [Jerry de Vries](https://pure.knaw.nl/portal/en/persons/jerry-de-vries)
 * [Raul Tavares](https://dans.knaw.nl/en/about/team/)
