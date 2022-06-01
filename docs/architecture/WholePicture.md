@@ -8,7 +8,7 @@ We will be using terms of the [OAIS standard for
 archiving](https://www2.archivists.org/groups/standards-committee/open-archival-information-system-oais):
 SIP => AIP => DIP, or: Submission => Archiving => Dissemination. The IP stands
 for Information Package.
-![](attachments/flipover.jpeg)
+![400](attachments/flipover.jpeg)
 ## Editions
 
 A 3D-edition is a 3D model enriched with annotations, articles, tours, overlays
