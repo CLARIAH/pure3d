@@ -11,36 +11,181 @@ The ingest system is an online file system that gives authenticated users the fo
 * Deployment of Smithsonian Voyager in such a way that users save into the workspace that they are using
 * A way to get the contents of a workspace into the AIP system.
 
-# Description
-Here is a sequence of events to support
-* An edition writer logs in and requests a space to create a new edition
-* The system asks for essential metadata (Dublin Core) and saves that to file
-* Then it creates a fresh workspace, with a set of predefined folders, and puts the previously collected Dublin Core metadata in it
-* The edition writer can share this workspace with co-workers by means of an invitation system. Invited coworkers must be able to authenticate themselves in order to get read/write access.
-* The edition writers upload 3D data into a dedicated directory. They also upload related media into another dedicated toplevel directory.
-* There are guidelines and tools to help the writers to upload 3D data of good quality and to produce derivatives that are optimized to show in 3D viewers
-* They can view the 3D data in the Smithsonian Voyager viewer, in which they can make annotations and write articles, with almost arbitrary HTML content.
-* When they save work from within the 3D viewer, annotations, articles and tours are saved in dedicated directories.
-* At anytime, a dialogue can be invoked to modify the Dublin Core metadata. There are also dialogues to enter metadata according various other schemes.
-* When all edition writers agree that the work is publishable, the workspace can be published. That means, it contents is copied to the AIP storage and put in place there. It will become the first version of a new edition.
-* Edition writers may also request to update an existing edition. They get a workspace, filled with the contents of an existing AIP, and they can do essentially the same work as described above. Upon publishing, the workspace is saved as a new *version* of the edition in question.
+# Workspaces and user roles
+Work on editions happens in an online *workspace*, offered by the Pure3D infrastructure.
+A workspace is an online folders with a predefined structure, see below. 
+Some folders are under direct control of the editors, other folders contain generated/derived materials.
+
+Authenticated users can ask to set up such a workspace, of which they become a user in the role of *admin*. 
+
+These are the rights associated with the roles:
+* *reader*: read, comment access to the workspace
+* *editor*: read, comment, write access to the workspace
+* *admin*: read, comment, write, admin access to the workspace
+
+Admin tasks are:
+* invite other users to the workspace
+* delete users from the workspace
+* change the roles of workspace users
+* publish and archive the edition that is made in the workspace
+* clear the workspace after the work is done
+
+# Conflict reduction
+When multiple users have write access to the same resources, save conflicts may occur. Unhandled save conflicts may lead to data loss. There are several strategies to handle save conflicts.
+* **LOCK** prevent simultaneous write access by a locking system
+* **COPY** make multiple copies in case of conflict and merge them later
+* **PASSIVE** we leave it to the underlying systems, e.g. MongoDB or the file system, if we are convinced that they have a suitable save-conflict-strategy.
+
+Below, we refer to these solutions as *save-conflict-strategy*.
+
+Examples where extra care is needed:
+* the forms for entering metadata
+* using the 3d-viewers to make annotations
+
+Note on the **COPY** strategy: the system remembers the moments of checkout and of save for each edit action. When the user triggers a save action, it will be checked if there has been other save actions after the checkout action. If so, the save action will be applied to a copy with the name of the user attached to it, instead of overwriting a previously saved version.
+This prevents people from unknowingly overwriting each other's updates.
+
+# Scenarios
+## A user logs in, a new user registers
+By means of CLARIAH authentication. 
+After log in, users will see a list of their workspaces with the kind of access they have to them.
+From this list they can enter a workspace.
+
+## Entering a workspace
+This will bring users to the main page of the workspace, from where they can see all accessible data in the workspace.
+
+## Requesting a fresh workspace
+Users may point to an existing edition and ask to load it into the workspace in order to work on a new version of that edition.
+If no such edition is given, a bare workspace will be created, ready for working on a brand new edition.
+
+Additionally:
+* a form is presented to fill out and/or update essential metadata (Dublin Core). The response will be saved to a file in the workspace.
+* the requesting user is given the *admin* role over the work space.
+
+## An admin manages workspace users
+The system maintains a list of users the workspace and their roles. Admins may change the roles, and add/delete users to/from the workspace.
+
+Users are added by means of an email address. An invitation will be send to that email address. Any authenticated user with that email address has access to the workspace. If the recipient is not a registered user, (s)he can register with that email address, after which (s)he has access to the workspace.
+
+*save-conflict-strategy*: **LOCK**
+
+## An editor updates metadata
+This can be the mandatory Dublin Core metadata or metadata according to any other registered schema. 
+
+*save-conflict-strategy*: **LOCK**
+
+## An editor adds a 3D model
+ There will be guidelines and tools to help the editors to upload 3D data of good quality and to produce derivatives that are optimised to show in 3D viewers.
+ Models of original quality and derived models can be uploaded to dedicated folders.
+ 
+*save-conflict-strategy*: **PASSIVE**
+
+## An editor adds rich text and media
+The texts should be written in `.md` files from where media files can be referenced.
+Texts and media should be placed in a prescribed folder organisation.
+It should be clear which Markdown syntax is supported and which parts are not supported.
+
+Editors can trigger a preview of the formatted texts. The system will run a Markdown formatter and put the results in a generated read-only directory.
+
+There are two destinations for these texts:
+* on the interface of the Pure3D website: (short) descriptions, usage instructions, colofons;
+* articles that are referenced by annotations created in the 3D viewers
+ 
+*save-conflict-strategy*: **COPY**
+
+## An editor works with annotations using a 3D viewer
+The system presents an embedded 3D viewer (e.g. the Smithsonian Voyager) and lets the editor add/modify/delete annotations.
+
+*save-conflict-strategy*: **COPY**
+
+## An editor resolves a save conflict
+The system presents the versions involved in a save conflict, showing which users saved what at what time, and lets the editor choose between the versions. If none of the versions is right, the editor can supply a new version.
+
+## An admin publishes a workspace
+ When an admin deems the edition-in-the-works to be publishable, (s)he can publish the workspace. 
+* The system will generate formatted pages from the markdown and media for the last time.
+* The workspace contents is copied to the AIP storage and put in place there. It will become the first version of a new edition or the next version of an existing edition.
+* A persistent identifier will be registered for the edition version
+* The list of all versions of the edition will be updated
+
+## An admin clears a workspace
+When an admin clears a workspace, all data in it gets removed and all users of it loose access to it.
+We could consider to give admins a grace period of 30 days during which their workspace remains accessible (read-only) for all of its users, and during which admins can reverse this action.
+
+# Workspace structure
 
 Here is the file and folder layout of a workspace
-* folder `meta`: with json files containing metadata. These files can be created/updated by filling out forms, or they can be directly manufactured by the edition writers, or both.
-	* file `dc.json`: the file with Dublin Core metadata
-	* a `license.txt` file, containing the text of a license
-	* a `license.json` file, containing attributes of the license, e.g. its url, whether it is open, and something that codes the permissions that Pure3D has to show it to users for viewing/downloading
-	* `.json` files corresponding with other supported metadata schemes
-* folder `description`: contains the introductory texts of the edition, as a set of markdown files. These markdown files may link to each other and to files in the `media` folder below. There will be some overlap between the content of these files and the more formal content of the metadata files.
-	* `intro.md`: short introduction to the edition
-	* `about.md`: more details about the edition, colofon like
-	* `description.md`: a longer narrative that describes the edition
-	* `usage.md`: ways in which readers can use the edition
-* folder `3d`: with the 3D data files.
-	* subfolder `original` with original resolution files of a single 3D model; probably a single `.obj` or `.gltf` file possibly augmented with `.mtl` files etc.
-	* subfolder `derivatives` with a subfolder for each supported viewer, e.g. `voyager`. And for each viewer subdirectories named `low`, `high`, `medium` with a derivative of that quality of the original.
-* folder `candy` with a few screenshots that give a candid view on the 3D data, to be used in iconic representations of the edition in several places of the Pure3D interface.
-* folder `fallback` with screenshots and plain texts of how key parts of the edition look in the viewer. This is meant as a fallback for the very long-term when most of the software that supports editions have become obsolete beyond repair.
-* folder `media`: with text/image/video material that can be referenced in articles and annotation bodies. May contain subfolders, the organisation is up to the edition writers.
-* folder `articles`: where articles, created within the Voyager, are saved.  This folder is under edit control of the system, although the editors can read its files.
-* folder `annotations`: where annotations, created within the Voyager, are stored. This folder is under edit control of the system, although the editors can read its files.
+
+`meta` ==all metadata==
+* `dc.json`  ==Dublin Core==
+* `license.txt` ==text of license==
+* `license.json` ==properties of license==
+* *xxx*`.json` ==metadata according to schema *xxx*==
+
+`3d` ==all 3d data==
+* `original` ==source data as is; as many models as needed, arbitrary names for models, arbitrary names for data files==
+  * *modelA* - *x*`.gltf`
+  * *modelB* - *y*`.gltf`
+  
+* `derived` ==viewer-optimized data processed from original data; model names must match those in `original`, arbitrary names for data files; fixed names for viewers==
+  * `high` ==high quality optimization==
+    * `voyager`
+      * *modelA* - *x1*`.gltf`
+      * *modelB* - *y1*`.gltf`
+    * `virtualinteriors`
+      * *modelA* - *x2*`.gltf`
+      * *modelB* - *y2*`.gltf`
+  * `medium`==medium quality optimization==
+    * `voyager`
+      * *modelA* - *x3*`.gltf`
+      * *modelB* - *y3*`.gltf`
+    * `virtualinteriors`
+      * *modelA* - *x4*`.gltf`
+      * *modelB* - *y4*`.gltf`
+  * `low`==low quality optimization==
+    * `voyager`
+      * *modelA* - *x5*`.gltf`
+      * *modelB* - *y5*`.gltf`
+    * `virtualinteriors`
+      * *modelA* - *x6*`.gltf`
+      * *modelB* - *y6*`.gltf`
+  
+* `fallback` ==impression of the data for when supporting software no longer works, arbitrary collection of images, movies, pdf documents, plain text documents==
+  * *screenshot*`.png`
+  * *movie*`.mp4`
+  * *doc*`.pdf`
+  * *explanation*`.txt`
+  
+`candy` ==a bunch of salient screenshots that can be used as icons to represent the edition==
+* *logo*`.png`
+* *icon*`.png`
+  
+`media` ==supporting images, movies, sounds, etc. to be referenced by texts below; any number of files with arbitrary names==
+* *sound*`.mp3`
+* *movie*`.mp4`
+* *image*`.png`
+
+`texts` ==markdown-formatted texts for various purposes==
+* `intro.md` ==short introduction to the edition==
+* `about.md` ==more details about the edition, colofon like==
+* `description.md` ==a longer narrative that describes the edition==
+* `usage.md` ==ways in which readers can use the edition==
+* `articles` ==texts that can be called up within the 3d viewers; arbitrary number with arbitrary names==
+  * *a1*`.md`
+  * *a2*`.md`
+  * *an*`.md`
+  
+`rendered` ==rendered markdown texts==
+* `intro.html`
+* `about.html`
+* `description.html`
+* `usage.html`
+* `articles` ==rendered articles==
+  * *a1*`.html`
+  * *a2*`.html`
+  * *an*`.html`
+
+`annotations` ==annotations as saved from the 3d-viewers; files, formats and names dependent on the viewer, may contain unresolved save conflicts==
+* *x*`.json`
+* *y*`.json`
+* *y*`-conflict.json`
