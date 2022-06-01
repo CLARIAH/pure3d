@@ -9,6 +9,7 @@ archiving](https://www2.archivists.org/groups/standards-committee/open-archival-
 SIP => AIP => DIP, or: Submission => Archiving => Dissemination. The IP stands
 for Information Package.
 ![flipover|400](attachments/flipover.jpeg)
+
 ## Editions
 
 A 3D-edition is a 3D model enriched with annotations, articles, tours, overlays
@@ -33,9 +34,9 @@ A 3D-edition has to be written. How is that done? Currently, there are several
 content and link it to the 3D models. Examples are the Smithsonian Voyager and
 Virtual Interiors.  However, it is by no means straightforward how edition
 writers should set up such a viewer, and communicate their results to an
-archive. It is here where Pure3D should step in and offer a standardised
-workflow, that also allows for collaborative editing.  The concept we need here
-is a (personal) workspace, where writers can upload a 3D model and related
+archive. It is here where Pure3D steps in and offers a standardised
+workflow that also allows for collaborative editing.  The concept we need here
+is an edition-bound workspace, where writers can upload a 3D model and related
 materials, and then view the model in a 3D viewer of choice, and make
 annotations. When they save their work, the workspace captures the annotations
 that have been made in the viewer, and stores them alongside the 3D model.  The
@@ -47,7 +48,7 @@ single dataset to the archive.
 ## Implementation note
 
 We intend to build very simple systems for SIP, AIP and DIP initially. These will serve to discover and design all interactions we need between these systems when the users of the infrastructure are doing their work.
-Later we might replace these simple systems by full fledge components built by dedicated open source communities, such as the ones behind [Packrat]([Packrat](https://github.com/Smithsonian/dpo-packrat) and [Archivematica](https://www.archivematica.org/en/).
+Later we might replace these simple systems by full-fledged components built by dedicated open source communities, such as the ones behind [Packrat]([Packrat](https://github.com/Smithsonian/dpo-packrat) and [Archivematica](https://www.archivematica.org/en/).
 
 # [AIP](AIP.md)
 
@@ -59,8 +60,8 @@ be archived in standard ways, providing standard services. Here is a short
 overview:
 
 * fixity: ensure that the bits of a dataset do not become damaged
-* metadata and searching: make the contents of the archive searchable by metadata
-* obsolescence: put mechanisms in place that warn when essential software tools are at the end of their lifetime
+* metadata and searching: make the contents of the archive searchable by metadata and full-text
+* obsolescence: put mechanisms in place that warn when essential software tools are at the end of their lifetime, especially the 3D viewers that have been used for editing
 * harvesting: let other archives harvest metadata
 * PIDs: provide persistent identifiers for datasets
 
