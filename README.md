@@ -11,6 +11,9 @@ When finished, it will run on infrastructure of the [KNAW/Humanities Cluster](ht
 
 [DANS](https://dans.knaw.nl/nl/) is overseeing that Pure3D supports the [FAIR principles](https://www.go-fair.org/fair-principles/).
 
+# Documentation
+Technical documentation is in the [docs](https://github.com/CLARIAH/pure3d/blob/main/docs/index.md)
+
 # Team
 At the University of Maastricht (see also [here](https://pure3d.eu/index.php/about/team/)):
 
