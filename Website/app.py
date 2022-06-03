@@ -15,7 +15,7 @@ def redirect_url():
 
 def select_edition():
     data=[]
-    for root, dirs, files in os.walk(r"C:\Users\P70080737\Desktop\Shahana\Pure3D\Website\editions"):
+    for root, dirs, files in os.walk(r".\editions"):
         for file in files:
             if file == 'name.txt':
                 filename = os.path.join(root, file) 
