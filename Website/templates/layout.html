@@ -1,0 +1,52 @@
+<html>
+	<head>
+		<title>Pure3D</title>
+		<!-- href="/static/assets/style.css"-->
+		<link rel="stylesheet" type="text/css"  href="{{ url_for('static',filename='assets/style.css')}}">
+
+	</head>
+<body>
+ 	<header>
+		<div class = "logo">
+				<a href="/"><img src="{{ url_for('static',filename='media/Pure3D_logo.PNG')}}" alt="The Pure3D logo"></a>
+		</div>	
+	</header>
+
+	<nav>
+		<br>
+		<div class="warpper">
+			<a href = "\home"><input class="radio" id="home" name="group" type="home" checked></a>
+			<a href = "\about"><input class="radio" id="about" name="group" type="about"></a>
+			<input class="radio" id="login" name="group" type="login">
+			<input class="radio" id="contact" name="group" type="contact">
+			<input class="radio" id="advanced-search" name="group" type="advanced-search">
+			<input class="radio" id="surprise-me" name="group" type="surprise-me">
+		  
+		<div class="tabs">
+				<label class="tab" id="home-tab" for="home">Home</label>
+				<label class="tab" id="about-tab" for="about">About</label>
+				<label class="tab" id="login-tab" for="login">Login</label>
+				<label class="tab" id="contact-tab" for="contact">Contact</label>
+				<label class="tab" id="advanced-search-tab" for="advanced-search">Advanced Search</label>
+				<label class="tab" id="surprise-me" for="surprise-me">Surprise Me</label>
+		</div>
+
+		<br>	
+		<div class="search-bar">
+			<input type="search" name="search" placeholder="search item">
+			<input type="submit" value="Search">
+		</div>
+		  
+	</nav>	
+
+	<main>
+		<div class="content">
+			{% block content %} {% endblock %}
+		</div>
+	</main>
+
+	<footer>
+		
+			
+	</footer>
+</html>

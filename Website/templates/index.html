@@ -1,0 +1,32 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class ="basic-info">
+            <p>Three-dimensional models and reconstructions have been used in the last thirty years across 
+            many fields in the humanities and social sciences to bridge time and space; to become immersed 
+            in the past through virtual worlds; to explore physical artefacts from multiple angles; 
+            to allow interactive close-ups and see features not visible with the naked eye; 
+            and to analyse sociocultural phenomena and simulate the experience and perception of objects and spaces. 
+            Despite this plethora of research, 3D digitisation initiatives by cultural institutions, 
+            and a growing number of higher education institutions teaching 3D skills, methods, and theories, 
+            no stable infrastructure exists to support this form of knowledge production. 
+            PURE3D will fill this gap through four key deliverables:</p>
+            <ol> 
+                <li>the development of an accessible infrastructure for viewing interactive 3D models (from single objects to virtual worlds) within the context of a scholarly publication format (3D Scholarly Editions);</li> 
+                <li>a preservation repository to deposit raw files, which, due to their size, format, lack of standards etc., are typically inaccessible to researchers beyond the original creators;</li> 
+                <li>a conceptual and methodological framework for valorising and evaluating 3D scholarship; and,</li> 
+                <li>a centre of excellence for researchers embarking on 3D scholarship.</li>
+            </ol>
+        </div>  
+
+            <div class="edition-icons">
+                <h1><emp>Scholarly Editions</emp></h1>
+                {% for e in editions %}
+                    <a href = "\<n>">{{ e }} </a> <br>
+                {% endfor %}
+                    
+            </div>
+    </div>
+
+{% endblock %}
