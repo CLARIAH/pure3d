@@ -107,6 +107,7 @@ The system presents the versions involved in a save conflict, showing which user
 * The workspace contents is copied to the AIP storage and put in place there. It will become the first version of a new edition or the next version of an existing edition.
 * A persistent identifier will be registered for the edition version
 * The list of all versions of the edition will be updated
+* The system will offer to update the list of contributors in the Dublin Core metadata based on the list of all admins, editors and readers that have been involved with the workspace.
 
 ## An admin clears a workspace
 When an admin clears a workspace, all data in it gets removed and all users of it loose access to it.
