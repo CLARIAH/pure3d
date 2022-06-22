@@ -6,8 +6,7 @@ A few quotes from the [dpo-voyager repo](https://github.com/Smithsonian/dpo-voya
 
 From `/docker-compose.yml`:
 
-> # The server provides unsecured read access to dist/ and
-> # read/write access through WebDAV to files/
+> The server provides unsecured read access to dist/ and read/write access through WebDAV to files/
 
 From `/docs/content/introduction/hosting/_index.md`:
 
