@@ -18,7 +18,7 @@ activity of commenting and annotating works of interest. So in this context,
 editing a 3D model is adding annotations and articles and tours, and link the
 additions to existing geometry in the 3D model. It is not: modifying the
 geometry and objects that are in the 3D data. The 3D data will not be touched,
-except for sanitizing operations, such as changing the resolution, and other
+except for sanitising operations, such as changing the resolution, and other
 overall transformations that are needed to make the 3D data viewable in current
 3D viewers.  The result of editing is a 3D-edition, which can be submitted to
 the Pure3D infrastructure, where it becomes archived for the long term, and
@@ -39,16 +39,14 @@ workflow that also allows for collaborative editing.  The concept we need here
 is an edition-bound workspace, where writers can upload a 3D model and related
 materials, and then view the model in a 3D viewer of choice, and make
 annotations. When they save their work, the workspace captures the annotations
-that have been made in the viewer, and stores them alongside the 3D model.  The
-workspace should contain tools to perform sanity checks on the 3D models, and
-possibly corrective actions too.  When the edition is finished, a publish
+that have been made in the viewer, and stores them alongside the 3D model.  The workspace should contain tools to perform sanity checks on the 3D models, and possibly corrective actions too.  When the edition is finished, a publish
 action submits the 3D model, the annotations and the related materials as a
 single dataset to the archive.
 
 ## Implementation note
 
 We intend to build very simple systems for SIP, AIP and DIP initially. These will serve to discover and design all interactions we need between these systems when the users of the infrastructure are doing their work.
-Later we might replace these simple systems by full-fledged components built by dedicated open source communities, such as the ones behind [Packrat]([Packrat](https://github.com/Smithsonian/dpo-packrat) and [Archivematica](https://www.archivematica.org/en/).
+Later we might replace these simple systems by full-fledged components built by dedicated open source communities, such as the ones behind [Packrat]([Packrat](https://github.com/Smithsonian/dpo-packrat) and [Archivematica](https://www.archivematica.org/en/) and [Dataverse](https://dataverse.org).
 
 # [AIP](AIP.md)
 
@@ -74,7 +72,7 @@ We intend to use a vanilla repository solution. The challenge will be to put the
 *This is about the consumers of data, those that read/study a digital edition.*
 
 Users must be able to search/browse the archived editions and their contents, and read those editions. They must be able to view the 3D data in a 3D-viewer, with all the annotations and related materials accessible. More specifications can be found here: 
-![wireframe pdf](attachments/PURE3DWireframe.pdf)
+![wireframe pdf](attachments/PURE3DWireframe.pdf).
 
 ## Implementation note
 We intend to write a dedicated web interface for the dissemination part, based on Flask. Possibly index the annotations and related materials in a separate MongoDB database, in order to provide searching on the contents of datasets. 

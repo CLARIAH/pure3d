@@ -5,12 +5,12 @@ The AIPs are stored and harvestable, they get a PID.
 
 # Ingredients
 * A securely backed up filesystem with a proper data layout, something like the
-[Oxford Common File Layout](https://ocfl.io/1.0/spec/).
-* A MongoDB database for storing metadata and annotations
-* An index system for the full text contents of articles, annotations, and metadata.
+[Oxford Common File Layout](https://ocfl.io/1.0/spec/). Or an instance of Dataverse, provided by DANS.
+* A MongoDB database for storing metadata and annotations. 
+* An index system for the full text contents of articles, annotations, and metadata. 
 
 Later we might replace this by more or less off-the-shelf archive software, such as
-[Archivematica](https://www.archivematica.org/en/) or [Packrat](https://github.com/Smithsonian/dpo-packrat).
+[Archivematica](https://www.archivematica.org/en/) or [Packrat](https://github.com/Smithsonian/dpo-packrat) or [DataVerse](https://dataverse.org) (using an instance provided by DANS).
 
 # Description
 A repository has to do many things that have to do with archive management.

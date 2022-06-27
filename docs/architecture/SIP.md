@@ -13,7 +13,7 @@ The ingest system is an online file system that gives authenticated users the fo
 
 # Workspaces and user roles
 Work on editions happens in an online *workspace*, offered by the Pure3D infrastructure.
-A workspace is an online folders with a predefined structure, see below. 
+A workspace is an online folder with a predefined structure, see below. 
 Some folders are under direct control of the editors, other folders contain generated/derived materials.
 
 Authenticated users can ask to set up such a workspace, of which they become a user in the role of *admin*. 
@@ -34,7 +34,7 @@ Admin tasks are:
 When multiple users have write access to the same resources, save conflicts may occur. Unhandled save conflicts may lead to data loss. There are several strategies to handle save conflicts.
 * **LOCK** prevent simultaneous write access by a locking system
 * **COPY** make multiple copies in case of conflict and merge them later
-* **PASSIVE** we leave it to the underlying systems, e.g. MongoDB or the file system, if we are convinced that they have a suitable save-conflict-strategy.
+* **PASSIVE** we leave it to the underlying systems, e.g. MongoDB or the (WebDav) file system, if we are convinced that they have a suitable save-conflict-strategy.
 
 Below, we refer to these solutions as *save-conflict-strategy*.
 

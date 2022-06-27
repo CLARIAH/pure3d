@@ -10,13 +10,15 @@ There are several forms of dissemination that Pure3D will support:
 This is almost the opposite of submission. The AIP is exported as-is into a zipfile for downloading by the end user. Probably it is wise to give the user some options:
 * get the original 3D data (high) resolution, big files)
 * get viewer-optimized derivatives in the desired quality (low-high-medium)
+
+**N.B.** It remains to be seen whether the download function will be realized within the archive software (e.g. Dataverse) or whehter it will be a part of the dedicated dissemination app.
 ## Viewing in place
 The Pure3D dissemination page has tabs for `home`, `about`, `contact`, `login`, `search`, `surprise me`.
 The `home` page shows an introductory text about Pure3D on the left, and a list of available editions on the right.
 The `search` page shows faceted and full-text search widgets, with facets coming from the metadata, the kind of files, the quality of files, the license
 Once the user has selected an edition, either by searching or by browsing, serve that edition in the browser in one of the following ways:
-* (default): in the most recent version of the viewer in which the edition has been created, in medium quality
-* (fall-back): in the viewer version in which the edition has been created
+* (default): in the most recent version of the same viewer in which the edition has been created, in medium quality (this could be a newer version than the one in which the edition has been created)
+* (fall-back): in the same viewer and exactly the same version in which the edition has been created
 * (optional): choose another viewer altogether, and accept that you might not see articles and notes
 * (optional): choose another quality (low, high)
 

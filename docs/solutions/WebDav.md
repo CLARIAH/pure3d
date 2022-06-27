@@ -29,3 +29,7 @@ I suspect a problem that we need to solve. It is this:
 
 So we have to hook in the post-processing between the WebDav PUT request and the response that the WebDav server library generates.
 In other words: we need a place in the middle, between the incoming WebDav requests and the WebDav server and between the outgoing WebDav responses and the http server.
+
+## Packrat
+The backend for Voyager that is used by the Smithsonian itself is
+[Packrat](https://github.com/smithsonian/dpo-packrat). It is interesting to see how Packrat communicates with the Voyager. That happens in [server/http/routes](https://github.com/Smithsonian/dpo-packrat/blob/master/server/http/routes/WebDAVServer.ts).
