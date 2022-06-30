@@ -1,4 +1,5 @@
 The Smithsonian Voyager client in the browser expects a WebDav server at the other end.
+
 It uses WebDav to get the 3D models in, and to send the user-created annotations back.
 The Voyager software only includes a demo webdav server, within the Node.js ecosystem.
 
