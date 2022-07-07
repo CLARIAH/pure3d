@@ -1,6 +1,21 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-<h1>This is where the edition will appear</h1>
+    <h1>This is where the edition will appear</h1>
+    <br>
+		<div class="warpper">
+			<input class="radio" id="about" name="group" type="about">
+            <input class="radio" id="project-background" name="group" type="project-background">
+			<input class="radio" id="sources" name="group" type="sources">
+            <input class="radio" id="acknowledgments" name="group" type="acknowledgements">
+			<input class="radio" id="contact" name="group" type="contact">
+		  
+		<div class="tabs">
+				<label class="tab" id="about-tab" for="about">About</label>
+				<label class="tab" id="pb-tab" for="project-background">Project Background</label>
+				<label class="tab" id="sources-tab" for="contact">Sources</label>
+				<label class="tab" id="advanced-search-tab" for="advanced-search">A</label>
+				<label class="tab" id="surprise-me" for="surprise-me">Surprise Me</label>
+		</div>
 
 {% endblock %}
