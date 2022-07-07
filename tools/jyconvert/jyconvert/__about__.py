@@ -1,27 +1,26 @@
+# SPDX-FileCopyrightText: 2022-present sohinimallick16 <sohini.mallick@maastrichtuniversity.nl>
+#
+# SPDX-License-Identifier: MIT
+__version__ = '0.0.3'
+
 """
 # Convert JSON to YAML and back
-
 """
 
 import sys
 import json
-import yaml
+import yaml 
 
 
 HELP = """
 USAGE
-
 jyconvert --help
 jyconvert infile
 jyconvert -o outfile infile
-
 EFFECT
-
 If --help is present, prints this text and exits.
-
 If infile has extension .json it will converted to yaml format;
 if it has extension .yaml, it will be converted to json format.
-
 If -o outfile is specified, the resulting file will be saved there,
 otherwise the resulting file will be saved in the same directory as infile
 with the appropriate extension.
@@ -30,7 +29,6 @@ with the appropriate extension.
 
 def toYaml(fileIn, fileOut):
     """Converts a json file to a yaml file.
-
     Parameters
     ----------
     fileIn: str
@@ -40,7 +38,6 @@ def toYaml(fileIn, fileOut):
         If the directory for this file does not exist,
         it will be created.
         If this file already exists, it will be overwritten.
-
     Returns
     -------
     int
@@ -50,6 +47,12 @@ def toYaml(fileIn, fileOut):
     good = True
     try:
         # here comes the conversion code
+        fileIn = sys.argv[1]
+        fileOut = sys.argv[2]
+
+        with open(fileIn, 'r') as json_in, open(fileOut, "w") as yaml_out:
+            json_convert = json.load(json_in)
+            yaml.dump(json_convert,yaml_out,sort_keys=False)
         pass
     except Exception as e:
         print(str(e))
@@ -59,7 +62,6 @@ def toYaml(fileIn, fileOut):
 
 def toJson(fileIn, fileOut):
     """Converts a yaml file to a json file.
-
     Parameters
     ----------
     fileIn: str
@@ -69,7 +71,6 @@ def toJson(fileIn, fileOut):
         If the directory for this file does not exist,
         it will be created.
         If this file already exists, it will be overwritten.
-
     Returns
     -------
     int
@@ -79,6 +80,12 @@ def toJson(fileIn, fileOut):
     good = True
     try:
         # here comes the conversion code
+        fileIn = sys.argv[1]
+        fileOut = sys.argv[2]
+
+        with open(fileIn, 'r') as yaml_in, open(fileOut, "w") as json_out:
+            yaml_convert = yaml.safe_load(yaml_in)
+            json.dump(yaml_convert,json_out,sort_keys=False)            
         pass
     except Exception as e:
         print(str(e))
@@ -151,5 +158,3 @@ def main():
     return -1
 
 
-if __name__ == "__main__":
-    main()
