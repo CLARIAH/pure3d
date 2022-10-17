@@ -7,6 +7,10 @@ This repository contains software and documentation for Pure3D, an infrastructur
 
 The work is the product of the [Pure3D project](https://pure3d.eu). 
 
+However, the contents of `/src/pure3d/static/voyager` consists of released versions of the
+[Smithsonian Voyager](https://github.com/Smithsonian/dpo-voyager), written by
+[Jamie Cope](https://github.com/gjcope) et al.
+
 When finished, it will run on infrastructure of the [KNAW/Humanities Cluster](https://huc.knaw.nl), conforming to [CLARIAH](https://github.com/CLARIAH/clariah-plus) specifications.
 
 [DANS](https://dans.knaw.nl/nl/) is overseeing that Pure3D supports the [FAIR principles](https://www.go-fair.org/fair-principles/).

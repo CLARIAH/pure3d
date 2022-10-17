@@ -72,6 +72,20 @@ class Settings:
         with open(secretFileLoc) as fh:
             config.secret_key = fh.read()
 
+        config.testMode = os.environ["flasktest"] == "test"
+        """With test mode enabled.
+
+        This means that there is a row of test users on the interface,
+        and that you can log in as one of these users with a single click,
+        without any kind of authentication.
+        """
+
+        config.debugMode = os.environ["flaskdebug"] == "--debug"
+        """With debug mode enabled.
+
+        This means that the unminified, development versions of the javascript libraries
+        of the 3D viewers are loaded, instead of the production versions.
+        """
         self.good = True
 
     def getConfig(self):

@@ -18,7 +18,7 @@
     --action-border:                   hsla(210, 100%,  50%, 0.5);
     --action-disabled-back:            hsla(210,   0%,  90%, 1  );
     --action-active-fore:              hsla(210, 100%,  40%, 1  );
-    --action-active-back:              hsla(060,  80%,  90%, 0.8);
+    --action-active-back:              hsla(060,  80%,  70%, 0.9);
     --action-active-border:            hsla(060, 100%,  40%, 1.0);
 
     --assessment-quoted-fore:          hsla(180,  35%,  10%, 1  );
@@ -162,6 +162,8 @@
     --status-error-back:               hsla(  0, 100%,  80%, 1  );
     --status-error-border:             hsla(  0, 100%,  80%, 1  );
 
+    --viewer-back:                     hsla(  0,   0%,  95%, 1  );
+    --version-back:                    hsla(  0,   0%,  90%, 1  );
 
     /* SIZES */
 

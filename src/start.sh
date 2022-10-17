@@ -81,7 +81,7 @@ while [ ! -z "$1" ]; do
         flasktest=""
         shift
     elif [[ "$1" == "test" ]]; then
-        flaskdebug=" --debug"
+        flaskdebug="--debug"
         flasktest="test"
         shift
     elif [[ "$1" == "--browse" ]]; then
@@ -118,7 +118,7 @@ export flaskport
 export repodir
 
 if [[ "$browse" == "v" ]]; then
-    flask$flaskdebug run --host $flaskhost --port $flaskport &
+    flask $flaskdebug run --host $flaskhost --port $flaskport &
     pid=$!
     sleep 1
     python3 "$repodir/scripts/browser.py" http://$flaskhost:$flaskport
@@ -126,5 +126,5 @@ if [[ "$browse" == "v" ]]; then
     echo "flask runs as process $pid"
     wait "$pid"
 else
-    flask$flaskdebug run --host $flaskhost --port $flaskport
+    flask $flaskdebug run --host $flaskhost --port $flaskport
 fi

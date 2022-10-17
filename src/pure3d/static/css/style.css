@@ -61,3 +61,51 @@
   text-align: right;
 }
 
+.scene {
+  font-size: large;
+  font-weight: bold;
+  width: 40%;
+}
+.viewerbuttons {
+  width: 55%;
+}
+
+.vw {
+  display: flex;
+  flex-flow: row wrap;
+  border-radius: 0.5em;
+  border: 0.2em solid var(--viewer-back);
+  padding: 0.3em 0.2em;
+  margin: 0.3em 2em;
+}
+.vwl {
+  font-size: small;
+}
+
+.vv {
+  display: flex;
+  flex-flow: row wrap;
+  border-radius: 0.3em;
+  border: 0.1em solid var(--version-back);
+  padding: 0.2em 0.1em;
+  margin: 0.2em 1em;
+}
+.vvl {
+  font-size: small;
+  font-family: monospace;
+}
+
+.vwb {
+  border-radius: 0.3em;
+  padding: 0.2em 0.1em;
+  margin: 0.2em 0.1em;
+  font-size: large;
+  font-weight: bold;
+}
+
+.scenerow {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  align-content: flex-start;
+}
