@@ -26,6 +26,7 @@ class Pages:
         editionId=None,
         sceneName=None,
         viewerVersion=None,
+        action="read",
         left=(),
         right=(),
         title=None,
@@ -36,6 +37,7 @@ class Pages:
         Projects = self.Projects
         ProjectError = self.ProjectError
         Auth = self.Auth
+        action = Auth.checkModifiable(projectId, editionId, action)
 
         back = ""
 
@@ -50,15 +52,30 @@ class Pages:
                             <a
                                 class="button"
                                 href="{projectUrl}"
-                            >back to project home</a>
+                            >back to editions</a>
                         </p>
                         """
                 )
+                if sceneName is not None:
+                    (editionPath, editionUrl, exists) = Projects.getLocation(
+                        projectId, editionId, None, None, None, api=True
+                    )
+                    back += dedent(
+                        f"""
+                            <p>
+                                <a
+                                    class="button"
+                                    href="{editionUrl}"
+                                >back to scenes</a>
+                            </p>
+                            """
+                    )
             projectData = Projects.getInfo(
                 projectId,
                 editionId,
                 sceneName,
                 viewerVersion,
+                action,
                 *left,
                 *right,
                 missingOk=True,

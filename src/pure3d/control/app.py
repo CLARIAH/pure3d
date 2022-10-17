@@ -22,8 +22,9 @@ app.secret_key = Config.secret_key
 M = Messages(app)
 Users = Users(Config)
 Projects = Projects(Config, Viewers, M)
-Auth = Auth(M, Users, Projects)
+Auth = Auth(Config, M, Users, Projects)
 Projects.addAuth(Auth)
+Viewers.addAuth(Auth)
 Pages = Pages(Config, M, Projects, ProjectError, Auth)
 
 
@@ -76,6 +77,8 @@ def projects():
 
 @app.route("/projects/<int:projectId>")
 def projectPage(projectId):
+    title = """<h2>Editions in this project</h2>"""
+
     return Pages.base(
         "projects",
         projectId=projectId,
@@ -86,20 +89,25 @@ def projectPage(projectId):
             "about",
             "description",
         ),
+        title=title,
     )
 
 
 @app.route("/projects/<int:projectId>/editions/<int:editionId>")
 def editionPage(projectId, editionId):
+    title = """<h2>Scenes in this edition</h2>"""
+
     return Pages.base(
         "projects",
         projectId=projectId,
         editionId=editionId,
         left=("list",),
         right=(
+            "title",
             "about",
             "sources",
         ),
+        title=title,
     )
 
 
@@ -137,11 +145,28 @@ def sceneViewer(projectId, editionId, sceneName, viewerVersion):
 
 
 @app.route(
-    "/viewer/<string:viewerVersion>/<int:projectId>/<int:editionId>/<string:sceneName>"
+    "/projects/<int:projectId>/editions/<int:editionId>/<string:sceneName>/<string:viewerVersion>/<string:action>"
 )
-def voyager(viewerVersion, projectId, editionId, sceneName):
-    extDev = ".min"
+def sceneWorker(projectId, editionId, sceneName, viewerVersion, action):
+    return Pages.base(
+        "projects",
+        projectId=projectId,
+        editionId=editionId,
+        sceneName=sceneName,
+        viewerVersion=viewerVersion,
+        action=action,
+        left=("list",),
+        right=(
+            "about",
+            "sources",
+        ),
+    )
 
+
+@app.route(
+    "/viewer/<string:viewerVersion>/<string:action>/<int:projectId>/<int:editionId>/<string:sceneName>"
+)
+def voyager(viewerVersion, action, projectId, editionId, sceneName):
     try:
         (rootPath, rootUrl, rootExists) = Projects.getLocation(
             projectId,
@@ -162,15 +187,12 @@ def voyager(viewerVersion, projectId, editionId, sceneName):
         abort(404)
 
     viewerCode = Viewers.genHtml(
-        viewerVersion, extDev, f"{rootUrl}/", f"{sceneName}.json"
+        viewerVersion, action, projectId, editionId, f"{rootUrl}/", f"{sceneName}.json"
     )
 
     return render_template(
         "voyager.html",
         viewerCode=viewerCode,
-        ext=extDev,
-        root=rootUrl + "/",
-        scene=f"{sceneName}.json",
     )
 
 

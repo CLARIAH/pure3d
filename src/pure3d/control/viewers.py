@@ -24,6 +24,9 @@ class Viewers:
 
         self.makeLinkPrefixes()
 
+    def addAuth(self, Auth):
+        self.Auth = Auth
+
     def makeLinkPrefixes(self):
         viewers = self.viewers
 
@@ -34,10 +37,18 @@ class Viewers:
 
         self.prefixes = prefixes
 
-    def genHtml(self, viewerVersion, ext, root, scene):
+    def genHtml(self, viewerVersion, action, projectId, editionId, root, scene):
+        Config = self.Config
+        Auth = self.Auth
+        debugMode = Config.debugMode
+        ext = "dev" if debugMode else "min"
+
         (viewer, version) = viewerVersion.split("-", 1)
 
+        action = Auth.checkModifiable(projectId, editionId, action)
+
         if viewer == "voyager":
+            element = "explorer" if action == "read" else "story"
             return dedent(
                 f"""
                 <head>
@@ -49,19 +60,19 @@ class Viewers:
                 />
                 <link
                   rel="stylesheet"
-                  href="/static/{viewer}/{version}/css/voyager-explorer{ext}.css"
+                  href="/static/{viewer}/{version}/css/voyager-{element}.{ext}.css"
                 />
                 <script
                   defer
-                  src="/static/{viewer}/{version}/js/voyager-explorer{ext}.js">
+                  src="/static/{viewer}/{version}/js/voyager-{element}.{ext}.js">
                 </script>
                 </head>
                 <body>
-                <voyager-explorer
+                <voyager-{element}
                   root="{root}"
                   document="{scene}"
                   resourceroot="/static/{viewer}/{version}"
-                > </voyager-explorer>
+                > </voyager-{element}>
                 </body>
                 """
             )
