@@ -113,6 +113,7 @@ class Projects:
         editionId,
         sceneName,
         viewerVersion,
+        action,
         *components,
         missingOk=False,
     ):
@@ -151,7 +152,7 @@ class Projects:
                             content = markdown(before + content)
                 elif component == "list":
                     content = self.getList(
-                        projectId, editionId, sceneName, viewerVersion
+                        projectId, editionId, sceneName, viewerVersion, action
                     )
                 else:
                     content = None
@@ -163,7 +164,7 @@ class Projects:
 
         return componentData
 
-    def getList(self, projectId, editionId, sceneName, viewerVersion):
+    def getList(self, projectId, editionId, sceneName, viewerVersion, action):
         """Get a list of items.
 
         If projectId is None: projects
@@ -175,11 +176,11 @@ class Projects:
             if projectId is None
             else self.getEditions(projectId)
             if editionId is None
-            else self.getScenes(projectId, editionId, sceneName, viewerVersion)
+            else self.getScenes(projectId, editionId, sceneName, viewerVersion, action)
         )
 
     def getProjects(self):
-        AUTH = self.Auth
+        Auth = self.Auth
         wrapped = []
 
         try:
@@ -198,13 +199,15 @@ class Projects:
                         name = entry.name
                         if name.isdigit():
                             theId = int(name)
-                            permitted = AUTH.authorise(theId, None, "read")
+                            permitted = Auth.authorise(theId, None, "read")
                             if permitted:
                                 theItems.append(int(name))
 
             for theItem in sorted(theItems):
                 projectSel = theItem
-                data = self.getInfo(projectSel, None, None, None, "me", "title", "icon")
+                data = self.getInfo(
+                    projectSel, None, None, None, None, "me", "title", "icon"
+                )
                 url = data["me"][1]
                 icon = data["icon"][1]
                 title = data["title"][2]
@@ -219,7 +222,7 @@ class Projects:
         return "\n".join(wrapped)
 
     def getEditions(self, projectId):
-        AUTH = self.Auth
+        Auth = self.Auth
         wrapped = []
 
         try:
@@ -238,13 +241,13 @@ class Projects:
                         name = entry.name
                         if name.isdigit():
                             theId = int(name)
-                            permitted = AUTH.authorise(projectId, theId, "read")
+                            permitted = Auth.authorise(projectId, theId, "read")
                             if permitted:
                                 theItems.append(int(name))
 
             for theItem in sorted(theItems):
                 data = self.getInfo(
-                    projectId, theItem, None, None, "me", "title", "icon"
+                    projectId, theItem, None, None, None, "me", "title", "icon"
                 )
                 url = data["me"][1]
                 icon = data["icon"][1]
@@ -259,14 +262,18 @@ class Projects:
 
         return "\n".join(wrapped)
 
-    def getScenes(self, projectId, editionId, sceneName, viewerVersion):
-        AUTH = self.Auth
+    def getScenes(self, projectId, editionId, sceneName, viewerVersion, action):
+        Auth = self.Auth
         Viewers = self.Viewers
         wrapped = []
 
-        permitted = AUTH.authorise(projectId, editionId, "read")
+        permitted = Auth.authorise(projectId, editionId, "read")
         if not permitted:
             return []
+        action = Auth.checkModifiable(projectId, editionId, action)
+        actions = ["read"]
+        if Auth.isModifiable(projectId, editionId):
+            actions.append("update")
 
         if viewerVersion is None:
             viewerVersion = Viewers.prefixes[-1]
@@ -283,105 +290,87 @@ class Projects:
             )
             theItems = listFiles(basePath, ".json")
 
+            frame = ""
+            rows = []
+
             for (i, theItem) in enumerate(sorted(theItems)):
-                data = self.getInfo(
-                    projectId, editionId, theItem, None, "me"
-                )
+                data = self.getInfo(projectId, editionId, theItem, None, None, "me")
                 url = data["me"][1]
                 specifier = f"{projectId}/{editionId}/{theItem}"
                 title = theItem
-                isActive = (sceneName is None and i == 0) or (
+                sceneActive = (sceneName is None and i == 0) or (
                     sceneName is not None and title == sceneName
                 )
 
-                buttonRow = []
-                frame = ""
+                buttonRow = {}
 
                 for vv in Viewers.prefixes:
-                    vActive = "active" if isActive and vv == viewerVersion else ""
-                    elem = "a"
-                    attStr = ""
+                    (vw, vs) = vv.split("-", 1)
 
-                    if vActive:
-                        frame = dedent(
+                    for ac in actions:
+                        buttonActive = (
+                            "active"
+                            if sceneActive and vv == viewerVersion and action == ac
+                            else ""
+                        )
+                        elem = "a"
+                        attStr = ""
+
+                        if buttonActive:
+                            frame = dedent(
+                                f"""
+                                <div class="model">
+                                    <iframe
+                                        class="previewer"
+                                        src="/viewer/{viewerVersion}/{ac}/{specifier}"/>
+                                    </iframe>
+                                    <h3>{title}</h3>
+                                </div>
+                                """
+                            )
+                            elem = "span"
+                        else:
+                            attStr = f""" href="{url}/{vv}/{ac}" """
+
+                        buttonRow.setdefault(vw, {}).setdefault(vs, []).append(
                             f"""
-                            <div class="model">
-                                <iframe
-                                    class="previewer"
-                                    src="/viewer/{viewerVersion}/{specifier}"/>
-                                </iframe>
-                                <span class="active">{title}</span>
-                            </div>
+                            <{elem}
+                                class="button {buttonActive} vwb"
+                                {attStr}
+                            >{ac}</{elem}>
                             """
                         )
-                        elem = "span"
-                    else:
-                        attStr = f""" href="{url}/{vv}" """
 
-                    buttonRow.append(
-                        f"""
-                        <{elem}
-                            class="button {vActive}"
-                            {attStr}
-                        >{vv}</{elem}>
-                        """
+                buttons = []
+                for vw in sorted(buttonRow):
+                    viewerActive = vw == viewer
+                    active = "active" if sceneActive and viewerActive else ""
+                    buttons.append(
+                        f"""<span class="vw"><span class="vwl {active}">{vw}</span>"""
                     )
+                    for vs in sorted(buttonRow[vw]):
+                        versionActive = vs == version
+                        active = (
+                            "active"
+                            if sceneActive and viewerActive and versionActive
+                            else ""
+                        )
+                        buttons.append(
+                            f"""<span class="vv"><span class="vvl {active}">{vs}</span>"""
+                        )
+                        for widget in buttonRow[vw][vs]:
+                            buttons.append(widget)
+                        buttons.append("""</span> """)
+                    buttons.append("""</span> """)
 
-                buttonRow = "\n".join(buttonRow)
-                caption = f"""<p>{title} {buttonRow}</p>\n"""
-                wrapped.append(f"""{frame} {caption}""")
+                active = "active" if sceneActive else ""
+                buttons = "\n".join(buttons)
+                caption = f"""<div class="scenerow"><span class="scene {active}">{title}</span> <span class="viewerbuttons">{buttons}</span></div>\n"""
+                rows.append(caption)
+            wrapped.append(frame)
+            wrapped.extend(rows)
 
         except ProjectError:
             pass
-
-        return "\n".join(wrapped)
-
-    def wrapItemLinks(self, linkItems, sceneName, viewerVersion):
-        Viewers = self.Viewers
-        wrapped = []
-
-        for (i, (kind, url, icon, title)) in enumerate(linkItems):
-            if kind:
-                wrapped.append(
-                    f"""<a href="{url}"><img class="previewicon" src="{icon}">"""
-                    f"""<br>{title}</a><hr><br>\n"""
-                )
-            else:
-                isActive = (sceneName is None and i == 0) or (
-                    sceneName is not None and title == sceneName
-                )
-                if isActive:
-                    buttonRow = []
-
-                    for vv in Viewers.prefixes:
-                        vActive = ""
-                        if vv == viewerVersion:
-                            (viewer, version) = viewerVersion.split("-", 1)
-                            wrapped.append(
-                                dedent(
-                                    f"""
-                                    <div class="model">
-                                        <iframe
-                                            class="previewer"
-                                            src="/viewer/{viewerVersion}/{icon}"/>
-                                        </iframe>
-                                        <span class="active">{title}</span>
-                                    </div>
-                                    """
-                                )
-                            )
-                            vActive = "active"
-
-                        buttonRow.append(
-                            f"""
-                            <a
-                                class="button {vActive}"
-                                href="{url}/{vv}"
-                            >{viewerVersion}</a>
-                            """
-                        )
-                    wrapped.append("\n".join(buttonRow))
-                else:
-                    wrapped.append(f"""<p>{title}<a href="{url}"></a></p>\n""")
 
         return "\n".join(wrapped)

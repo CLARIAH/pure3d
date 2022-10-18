@@ -1,19 +1,14 @@
-import os
-
 from flask import request, session
-
-from helpers.messages import error
-
-TEST_MODE = os.environ["flasktest"] == "test"
 
 
 class Auth:
-    def __init__(self, Messages, Users, Projects):
+    def __init__(self, Config, Messages, Users, Projects):
+        self.Config = Config
         self.Messages = Messages
         self.Users = Users
         self.Projects = Projects
         self.authData = Users.getPermissions()
-        userData = Users.getTestUsers() if TEST_MODE else {}
+        userData = Users.getTestUsers() if Config.testMode else {}
         self.testUserIds = userData.get("testUserIds", set())
         self.userNameById = userData.get("userNameById", {})
         self.userRoleById = userData.get("userRoleById", {})
@@ -44,9 +39,10 @@ class Auth:
         return result
 
     def checkLogin(self):
+        Config = self.Config
         M = self.Messages
         self.clearUser()
-        if TEST_MODE:
+        if Config.testMode:
             userId = request.args.get("userid", None)
             result = self.getUser(userId)
             if result:
@@ -59,7 +55,9 @@ class Auth:
         return False
 
     def wrapTestUsers(self):
-        if not TEST_MODE:
+        Config = self.Config
+
+        if not Config.testMode:
             return ""
 
         user = self.user
@@ -148,7 +146,13 @@ class Auth:
             projectRules[userRole] if userRole in projectRules else projectRules[None]
         ).get(action, False)
         permission = condition if type(condition) is bool else projectRole in condition
-        error(
-            f"A {userRole} {userId} {self.userNameById.get(userId, None)} project {projectId} project role {projectRole} condition {condition} ==> {permission}"
-        )
         return permission
+
+    def isModifiable(self, projectId, editionId):
+        return self.authorise(projectId, editionId, "update")
+
+    def checkModifiable(self, projectId, editionId, action):
+        if action != "read":
+            if not self.isModifiable(projectId, editionId):
+                action = "read"
+        return action
