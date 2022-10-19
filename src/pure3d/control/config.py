@@ -1,29 +1,37 @@
 import os
 import sys
+from textwrap import dedent
 
-from helpers.files import readYaml, readPath
-from helpers.messages import error
-from helpers.generic import AttrDict
+from control.helpers.files import readYaml, readPath
+from control.helpers.generic import AttrDict
 
 
 VERSION_FILE = "version.txt"
 
 
-class Settings:
-    def __init__(self):
+class Config:
+    def __init__(self, Messages):
+        self.Messages = Messages
         self.good = False
         self.config = AttrDict()
         self.checkEnv()
         if not self.good:
-            error("Aborting ...")
+            Messages.error(logmsg="Check environment ...")
             sys.exit(1)
 
     def checkEnv(self):
+        Messages = self.Messages
+
         repoDir = os.environ.get("repodir", None)
         if repoDir is None:
-            error("Environment variable `repodir` not defined")
-            error("Don't know where I must be running")
-            return
+            Messages.error(
+                logmsg=dedent(
+                    """
+                    Environment variable `repodir` not defined
+                    Don't know where I must be running
+                    """
+                )
+            )
 
         config = self.config
         config.repoDir = repoDir
@@ -35,39 +43,43 @@ class Settings:
         versionPath = f"{repoDir}/src/{VERSION_FILE}"
         versionInfo = readPath(versionPath)
         if not versionInfo:
-            error(f"Cannot find version info in {versionPath}")
-            return
+            Messages.error(logmsg=f"Cannot find version info in {versionPath}")
 
         config.versionInfo = versionInfo
 
         settings = readYaml(f"{yamlDir}/settings.yaml")
+
         if settings is None:
-            error("Cannot read settings.yaml in {yamlDir}")
-            return
+            Messages.error(logmsg="Cannot read settings.yaml in {yamlDir}")
+
         for (k, v) in settings.items():
             config[k] = v
 
         secretFileLoc = os.environ.get("SECRET_FILE", None)
+
         if secretFileLoc is None:
-            error("Environment variable `SECRET_FILE` not defined")
-            return
+            Messages.error(logmsg="Environment variable `SECRET_FILE` not defined")
 
         if not os.path.exists(secretFileLoc):
-            error(f"Missing secret file for sessions: {secretFileLoc}")
-            error("Create that file with contents a random string like this:")
-            error("fjOL901Mc3XZy8dcbBnOxNwZsOIBlul")
-            error("But do not choose this one.")
-            error("Use your password manager to create a random one.")
+            Messages.error(
+                logmsg=dedent(
+                    f"""
+                    Missing secret file for sessions: {secretFileLoc}
+                    Create that file with contents a random string like this:
+                    fjOL901Mc3XZy8dcbBnOxNwZsOIBlul")
+                    But do not choose this one.")
+                    Use your password manager to create a random one.
+                    """
+                )
+            )
 
         dataDir = os.environ.get("DATA_DIR", None)
         if dataDir is None:
-            error("Environment variable `DATA_DIR` not defined")
-            return
+            Messages.error(logmsg="Environment variable `DATA_DIR` not defined")
 
         config.dataDir = dataDir
         if not os.path.exists(dataDir):
-            error(f"Data directory does not exist: {dataDir}")
-            return
+            Messages.error(logmsg=f"Data directory does not exist: {dataDir}")
 
         with open(secretFileLoc) as fh:
             config.secret_key = fh.read()

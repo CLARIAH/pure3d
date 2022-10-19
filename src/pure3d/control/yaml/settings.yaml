@@ -10,3 +10,5 @@ heading: Pure 3D website
 viewers:
   voyager: true
   aton: false
+
+database: pure3d

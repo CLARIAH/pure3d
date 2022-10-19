@@ -57,15 +57,6 @@ DATA_DIR
     an example is in this repo under /data.
     It is recommended that the data dir is not anywhere
     inside the clone of this repository.
-MONGO_DATA
-    Path to the directory where mongodb stores its data.
-    It is recommended that the data dir is not anywhere
-    inside the clone of this repository.
-    A good location is in "mongodb" inside DATA_DIR.
-MONGO_IP
-    IP address that mongodb should bind to
-MONGO_PORT
-    Port where mongodb is listening.
 "
 
 ########################################################################
@@ -75,12 +66,11 @@ MONGO_PORT
 #
 SECRET_FILE_DEFAULT="/opt/web-apps/pure3d.secret"
 DATA_DIR_DEFAULT="/var/data/pure3d"
-MONGO_IP_DEFAULT="0.0.0.1"
-MONGO_PORT_DEFAULT="27017"
-MONGO_DATA_DEFAULT="/var/data/pure3d/mongodb"
 #
 # end of default values
 ########################################################################
+
+srcdir="${0%/*}"
 
 flaskdebug=""
 flasktest=""
@@ -89,6 +79,17 @@ flaskhost="0.0.0.0"
 flaskport="8000"
 browse="x"
 commandonly=""
+
+# set several variables to default values if not supplied
+# by the environment 
+if [[ -z ${SECRET_FILE+x} ]]; then
+    SECRET_FILE="$SECRET_FILE_DEFAULT"
+    export SECRET_FILE
+fi
+if [[ -z ${DATA_DIR+x} ]]; then
+    DATA_DIR="$DATA_DIR_DEFAULT"
+    export DATA_DIR
+fi
 
 while [ ! -z "$1" ]; do
     if [[ "$1" == "--help" ]]; then
@@ -119,28 +120,6 @@ while [ ! -z "$1" ]; do
     fi
 done
 
-# set several variables to default values if not supplied
-# by the environment 
-if [[ -z ${SECRET_FILE+x} ]]; then
-    SECRET_FILE="$SECRET_FILE_DEFAULT"
-    export SECRET_FILE
-fi
-if [[ -z ${DATA_DIR+x} ]]; then
-    DATA_DIR="$DATA_DIR_DEFAULT"
-    export DATA_DIR
-fi
-if [[ -z ${MONGO_IP+x} ]]; then
-    MONGO_IP="$MONGO_IP_DEFAULT"
-    export MONGO_IP
-fi
-if [[ -z ${MONGO_PORT+x} ]]; then
-    MONGO_PORT="$MONGO_PORT_DEFAULT"
-    export MONGO_PORT
-fi
-if [[ -z ${MONGO_DATA+x} ]]; then
-    MONGO_DATA="$MONGO_DATA_DEFAULT"
-    export MONGO_DATA
-fi
 
 function mongostart {
     if [[ `ps aux | grep -v grep | grep mongod` ]]; then
@@ -157,9 +136,13 @@ function mongostart {
             fork=""
             logargs=""
             verbose="-v"
-            echo "mongod "$verbose" --bind_ip "$MONGO_IP" --ipv6 --port "$MONGO_PORT" "$logargs"--dbpath "$MONGO_DATA"$fork"
+            echo "mongod $verbose -f $srcdir/mongod.conf $fork"
         fi
-        mongod "$verbose" --bind_ip "$MONGO_IP" --ipv6 --port "$MONGO_PORT" "$logargs" --dbpath "$MONGO_DATA"$fork
+        mongodata="$DATA_DIR/mongodb"
+        if [[ ! -e "$mongodata" ]]; then
+            mkdir -p "$mongodata"
+        fi
+        mongod $verbose -f $srcdir/mongod.conf $fork
     fi
 }
 
@@ -173,7 +156,6 @@ function mongostop {
     fi
 }
 
-
 if [[ "$commandonly" != "" ]]; then
     if [[ "$commandonly" == "mongostart" ]]; then
         mongostart
@@ -184,21 +166,21 @@ if [[ "$commandonly" != "" ]]; then
     exit
 fi
 
-srcdir="${0%/*}"
 cd "$srcdir/.."
 repodir="`pwd`"
-cd "src/pure3d/control"
 printf "Working in repo $repodir\n"
-
+srcdir="$repodir/src"
+cd "$srcdir"
 
 export flasktest
 export flaskdebug
 export flaskport
 export repodir
 
-mongostart
-
 if [[ "$browse" == "v" ]]; then
+    mongostart
+    export FLASK_APP=index
+    cd "$srcdir/pure3d/"
     flask $flaskdebug run --host $flaskhost --port $flaskport &
     pid=$!
     sleep 1
@@ -208,5 +190,6 @@ if [[ "$browse" == "v" ]]; then
     wait "$pid"
     mongostop
 else
+    cd "$srcdir/pure3d/"
     flask $flaskdebug run --host $flaskhost --port $flaskport
 fi

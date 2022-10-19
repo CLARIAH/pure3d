@@ -3,8 +3,8 @@ import json
 from textwrap import dedent
 from markdown import markdown
 
-from helpers.files import readYaml, readPath, listFiles
-from helpers.generic import AttrDict
+from control.helpers.files import readYaml, readPath, listFiles
+from control.helpers.generic import AttrDict
 
 
 COMPONENT = dict(
@@ -179,6 +179,57 @@ class Projects:
             else self.getScenes(projectId, editionId, sceneName, viewerVersion, action)
         )
 
+    def getAllContent(self):
+        Messages = self.Messages
+
+        projects = []
+        editions = []
+        scenes = []
+
+        try:
+            (basePath, baseUrl, exists) = self.getLocation(
+                None,
+                None,
+                None,
+                PROJECTS,
+                None,
+                api=True,
+            )
+            with os.scandir(basePath) as pd:
+                for entry in pd:
+                    if entry.is_dir():
+                        project = entry.name
+                        projects.append(project)
+
+                        (projectPath, baseUrl, exists) = self.getLocation(
+                            project,
+                            None,
+                            None,
+                            EDITIONS,
+                            None,
+                            api=True,
+                        )
+                        with os.scandir(projectPath) as ed:
+                            for entry in ed:
+                                if entry.is_dir():
+                                    edition = entry.name
+                                    editions.append((edition, project))
+
+                                    (editionPath, baseUrl, exists) = self.getLocation(
+                                        project,
+                                        edition,
+                                        None,
+                                        None,
+                                        None,
+                                        api=True,
+                                    )
+                                    for scene in listFiles(editionPath, ".json"):
+                                        scenes.append((scene, edition, project))
+
+        except ProjectError as e:
+            Messages.error(logmsg=f"Reading data files: {e}")
+        return (projects, editions, scenes)
+
     def getProjects(self):
         Auth = self.Auth
         wrapped = []
@@ -346,7 +397,11 @@ class Projects:
                     viewerActive = vw == viewer
                     active = "active" if sceneActive and viewerActive else ""
                     buttons.append(
-                        f"""<span class="vw"><span class="vwl {active}">{vw}</span>"""
+                        dedent(
+                            f"""<span class="vw"><span class="vwl {active}">{vw}</span>
+                                <span class="vwv">
+                            """
+                        )
                     )
                     for vs in sorted(buttonRow[vw]):
                         versionActive = vs == version
@@ -361,7 +416,7 @@ class Projects:
                         for widget in buttonRow[vw][vs]:
                             buttons.append(widget)
                         buttons.append("""</span> """)
-                    buttons.append("""</span> """)
+                    buttons.append("""</span></span> """)
 
                 active = "active" if sceneActive else ""
                 buttons = "\n".join(buttons)

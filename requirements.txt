@@ -3,3 +3,4 @@ Flask-OIDC
 markdown
 pyyaml
 gunicorn
+pymongo

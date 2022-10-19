@@ -1,13 +1,14 @@
-from helpers.files import readYaml
-from helpers.messages import error
+from control.helpers.files import readYaml
 
 
 class Users:
-    def __init__(self, Config):
+    def __init__(self, Config, Messages):
         self.Config = Config
+        self.Messages = Messages
 
     def getTestUsers(self):
         Config = self.Config
+        Messages = self.Messages
         yamlDir = Config.yamlDir
 
         testUsers = readYaml(f"{yamlDir}/testusers.yaml")
@@ -19,14 +20,18 @@ class Users:
             userId = info["id"]
             if userId in testUserIds:
                 prevName = userNameById[userId]
-                error(f"WARNING: duplicate test user {userId} = {name}, {prevName}")
+                Messages.warning(
+                    msg=f"duplicate test user {userId} = {name}, {prevName}"
+                )
                 continue
             testUserIds.add(userId)
             userNameById[userId] = name
             userRoleById[userId] = info["role"]
 
         return dict(
-            testUserIds=testUserIds, userNameById=userNameById, userRoleById=userRoleById
+            testUserIds=testUserIds,
+            userNameById=userNameById,
+            userRoleById=userRoleById,
         )
 
     def getPermissions(self):

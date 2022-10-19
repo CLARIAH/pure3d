@@ -1,5 +1,5 @@
 import json
-from helpers.files import readPath
+from control.helpers.files import readPath
 
 
 def dcReaderJSON(dcPath, dcField):
