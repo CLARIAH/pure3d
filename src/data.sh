@@ -34,5 +34,5 @@ cd $datasource
 for d in *
 do
     echo "$d"
-    cp -f -r "$d" "$dataroot/$d"
+    sudo cp -f -r "$d" "$dataroot/$d"
 done
