@@ -13,3 +13,5 @@ viewers:
   aton: false
 
 database: pure3d
+mongoHost: mongodb
+mongoPort: 27017

@@ -12,6 +12,8 @@ services:
     environment:
       SECRET_FILE: ${SECRET_FILE}
       DATA_DIR: ${DATA_DIR}
+      mongouser: ${mongouser}
+      mongopassword: ${mongopassword}
     entrypoint: ./start.sh test
     depends_on:
       - mongodb
@@ -27,7 +29,7 @@ services:
     volumes:
       - "mongodb-volume:/data/db"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_ROOT_USERNAME: ${mongouser}
+      MONGO_INITDB_ROOT_PASSWORD: ${mongopassword}
     ports:
       - "37017:27017"
