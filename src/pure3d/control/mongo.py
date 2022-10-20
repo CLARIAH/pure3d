@@ -10,13 +10,16 @@ class Mongo:
         self.database = Config.database
 
     def connect(self):
+        Config = self.Config
+        Messages = self.Messages
         client = self.client
         mongo = self.mongo
         database = self.database
 
         if mongo is None:
             try:
-                client = MongoClient()
+                Messages.info(logmsg=f"{Config.mongoHost=} {Config.mongoPort=}")
+                client = MongoClient(Config.mongoHost, Config.mongoPort)
                 mongo = client[database]
             except Exception as e:
                 self.Messages.error(

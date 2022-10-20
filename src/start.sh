@@ -185,7 +185,8 @@ export repodir
 export FLASK_APP=index
 
 if [[ "$runslocally" == "v" ]]; then
-    mongostart
+    :
+    # mongostart
 fi
 if [[ "$browse" == "v" ]]; then
     cd "$srcdir/pure3d/"
@@ -202,5 +203,6 @@ else
     flask $flaskdebug run --host $flaskhost --port $flaskport
 fi
 if [[ "$runslocally" == "v" ]]; then
-    mongostop
+    :
+    # mongostop
 fi
