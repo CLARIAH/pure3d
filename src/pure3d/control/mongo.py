@@ -19,7 +19,7 @@ class Mongo:
         if mongo is None:
             try:
                 Messages.info(logmsg=f"{Config.mongoHost=} {Config.mongoPort=}")
-                client = MongoClient(Config.mongoHost, Config.mongoPort)
+                client = MongoClient(Config.mongoHost, Config.mongoPort, username=Config.mongoUser, password=Config.mongoPassword)
                 mongo = client[database]
             except Exception as e:
                 self.Messages.error(

@@ -98,6 +98,10 @@ class Config:
         This means that the unminified, development versions of the javascript libraries
         of the 3D viewers are loaded, instead of the production versions.
         """
+
+        config.mongoUser = os.environ["mongouser"]
+        config.mongoPassword = os.environ["mongopassword"]
+
         self.good = True
 
     def getConfig(self):
