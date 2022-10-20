@@ -36,7 +36,7 @@ class DispatcherMiddleware:
                 break
 
         if app is None:
-            app = self.app.wsgi_app
+            app = self.app
         else:
             environ["PATH_INFO"] = f"/auth{url}"
             with self.app.request_context(environ) as ctx:
@@ -46,6 +46,6 @@ class DispatcherMiddleware:
             print(f"Dispatcher: {authorized=}")
             if not authorized:
                 environ["PATH_INFO"] = f"/no{url}"
-                app = self.app.wsgi_app
+                app = self.app
 
         return app(environ, start_response)

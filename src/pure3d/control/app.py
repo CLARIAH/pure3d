@@ -2,8 +2,8 @@ import os
 
 from flask import Flask, render_template, redirect, make_response, abort
 
-from control.webdavapp import app as webdavapp
-from control.dispatcher import DispatcherMiddleware
+# from control.webdavapp import app as webdavapp
+# from control.dispatcher import DispatcherMiddleware
 from control.messages import Messages
 from control.config import Config
 from control.mongo import Mongo
@@ -231,12 +231,14 @@ def appFactory():
         Messages.info(logmsg=f"Unauthorized webdav access {path=}")
         abort(404)
 
+    """
     app.wsgi_app = DispatcherMiddleware(
         app,
         {
             "/webdav/": webdavapp,
         },
     )
+    """
     return app
 
 
