@@ -217,8 +217,8 @@ def appFactory():
 
         return make_response(textData)
 
-    @app.route("/webdav/<path:path>")
-    def webdav(path):
+    @app.route("/auth/webdav/<path:path>")
+    def authwebdav(path):
         authenticated = Auth.authenticate()
         if authenticated:
             Messages.info(logmsg=f"User = {Auth.user} {path=}")
