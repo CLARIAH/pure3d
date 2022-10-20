@@ -50,6 +50,7 @@ class Projects:
         item,
         extension,
         api=False,
+        action=None,
         missingOk=False,
     ):
         """Look up the location of a resource.
@@ -66,6 +67,7 @@ class Projects:
         Config = self.Config
         dataDir = Config.dataDir
         dataUrl = Config.dataUrl
+        webdavUrl = Config.webdavUrl
 
         location = ""
         if projectId:
@@ -88,10 +90,11 @@ class Projects:
             locationPath = f"{locationPath}.json"
 
         path = f"{dataDir}/{locationPath}"
+        rootPrefix = dataUrl if action is None or action == "read" else webdavUrl
         url = (
             (("" if location.startswith("/") else "/") + location)
             if api
-            else f"/{dataUrl}/{location}"
+            else f"/{rootPrefix}/{location}"
         )
 
         exists = None

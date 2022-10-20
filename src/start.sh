@@ -7,7 +7,7 @@ Usage
 
 Run it from the /scripts directory in the repo.
 
-./pure3d.sh test
+./pure3d.sh [test|prod|local]
 ./pure3d.sh
     Test mode
 
@@ -16,7 +16,7 @@ Run it from the /scripts directory in the repo.
 
 Options:
 
---browser
+--browse
     Start a browsing session after starting the app.
 
 --mongostart
@@ -78,6 +78,7 @@ flaskhost="0.0.0.0"
 # flaskhost="127.0.0.1"
 flaskport="8000"
 browse="x"
+runslocally="v"
 commandonly=""
 
 # set several variables to default values if not supplied
@@ -99,13 +100,18 @@ while [ ! -z "$1" ]; do
     if [[ "$1" == "prod" ]]; then
         flaskdebug=""
         flasktest=""
+        runslocally="x"
         shift
     elif [[ "$1" == "test" ]]; then
         flaskdebug="--debug"
         flasktest="test"
         shift
+    elif [[ "$1" == "local" ]]; then
+        runslocally="v"
+        shift
     elif [[ "$1" == "--browse" ]]; then
         browse="v"
+        runslocally="v"
         shift
     elif [[ "$1" == "--mongostart" ]]; then
         commandonly="mongostart"
@@ -176,10 +182,12 @@ export flasktest
 export flaskdebug
 export flaskport
 export repodir
+export FLASK_APP=index
 
-if [[ "$browse" == "v" ]]; then
+if [[ "$runslocally" == "v" ]]; then
     mongostart
-    export FLASK_APP=index
+fi
+if [[ "$browse" == "v" ]]; then
     cd "$srcdir/pure3d/"
     flask $flaskdebug run --host $flaskhost --port $flaskport &
     pid=$!
@@ -192,4 +200,7 @@ if [[ "$browse" == "v" ]]; then
 else
     cd "$srcdir/pure3d/"
     flask $flaskdebug run --host $flaskhost --port $flaskport
+fi
+if [[ "$runslocally" == "v" ]]; then
+    mongostop
 fi

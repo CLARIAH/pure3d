@@ -45,7 +45,7 @@ class Messages:
         if msg is not None:
             self._addMessage("info", msg)
         if logmsg is not None:
-            sys.stdout.write(logmsg)
+            sys.stdout.write(f"{logmsg}\n")
             sys.stdout.flush()
 
     def generateMessages(self):

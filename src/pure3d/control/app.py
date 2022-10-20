@@ -1,7 +1,9 @@
 import os
 
-from flask import Flask, render_template, redirect, make_response
+from flask import Flask, render_template, redirect, make_response, abort
 
+from control.webdavapp import app as webdavapp
+from control.dispatcher import DispatcherMiddleware
 from control.messages import Messages
 from control.config import Config
 from control.mongo import Mongo
@@ -32,7 +34,7 @@ EditSessions = EditSessions(Mongo)
 
 
 def prepare():
-    Sync.sync(allowRemove=False)
+    Sync.sync(allowRemove=not Config.testMode)
 
 
 def appFactory():
@@ -172,6 +174,7 @@ def appFactory():
                 None,
                 None,
                 None,
+                action=action,
             )
             (scenePath, sceneUrl, sceneExists) = Projects.getLocation(
                 projectId,
@@ -214,7 +217,33 @@ def appFactory():
 
         return make_response(textData)
 
+    @app.route("/webdav/<path:path>")
+    def webdav(path):
+        authenticated = Auth.authenticate()
+        if authenticated:
+            Messages.info(logmsg=f"User = {Auth.user} {path=}")
+        else:
+            Messages.info(logmsg=f"Unauthenticated {path=}")
+        return False
+
+    @app.route("/no/webdav/<path:path>")
+    def nowebdav(path):
+        Messages.info(logmsg=f"Unauthorized webdav access {path=}")
+        abort(404)
+
+    app.wsgi_app = DispatcherMiddleware(
+        app,
+        {
+            "/webdav/": webdavapp,
+        },
+    )
     return app
+
+
+def decide(env):
+    for (k, v) in env.items():
+        Messages.plain(logmsg=f"{k} = {v}")
+    return False
 
 
 prepare()
