@@ -6,7 +6,7 @@ if t.TYPE_CHECKING:
     from _typeshed.wsgi import WSGIEnvironment
 
 
-class DispatcherMiddleware:
+class DispatchWebdav:
     """Leave the url intact after dispatching.
 
     This is like DispatcherMiddleware,
@@ -18,34 +18,37 @@ class DispatcherMiddleware:
     def __init__(
         self,
         app: "WSGIApplication",
-        mounts: t.Optional[t.Dict[str, "WSGIApplication"]] = None,
+        webdavPrefix: str,
+        webdavApp: "WSGIApplication",
     ) -> None:
         self.app = app
-        self.mounts = mounts or {}
+        self.webdavPrefix = webdavPrefix
+        self.webdavApp = webdavApp
 
     def __call__(
         self, environ: "WSGIEnvironment", start_response: "StartResponse"
     ) -> t.Iterable[bytes]:
+        app = self.app
+        webdavPrefix = self.webdavPrefix
+        webdavApp = self.webdavApp
+
         url = environ.get("PATH_INFO", "")
+        aimedAtWebdav = url.startswith(webdavPrefix)
 
-        app = None
+        theApp = app
 
-        for mount in self.mounts:
-            if url.startswith(mount):
-                app = self.mounts[mount]
-                break
-
-        if app is None:
-            app = self.app
-        else:
+        if aimedAtWebdav:
             environ["PATH_INFO"] = f"/auth{url}"
-            with self.app.request_context(environ) as ctx:
+            with app.request_context(environ) as ctx:
                 ctx.push()
-                authorized = self.app.dispatch_request()
+                authorized = app.dispatch_request()
                 ctx.pop()
             print(f"Dispatcher: {authorized=}")
-            if not authorized:
+            if authorized:
+                environ["PATH_INFO"] = url
+                theApp = webdavApp
+            else:
                 environ["PATH_INFO"] = f"/no{url}"
-                app = self.app
 
-        return app(environ, start_response)
+        print(f"{theApp=}")
+        return theApp(environ, start_response)
