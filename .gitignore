@@ -69,3 +69,6 @@ exp_*
 # Environments
 .venv
 venv/
+
+# IDE related
+.idea
