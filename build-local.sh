@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
 source .env
-echo "building docker images ...."
+echo "building pure3dapp docker images from local folder; tagging as docker pure3dapp:${dockertag}...."
 docker build --no-cache -f Dockerfile.local -t pure3dapp:${dockertag} \
-  --build-arg gitlocation=${gitlocation} \
-  --build-arg gitbranch=${gitbranch} \
   --build-arg SECRET_FILE=${SECRET_FILE} \
   --build-arg DATA_DIR=${DATA_DIR} \
   --build-arg mysecret=${mysecret} \

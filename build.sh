@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 source .env
-echo "building docker images ...."
+echo "building pure3dapp docker images from ${gitlocation}:${gitbranch}; tagging as docker pure3dapp:${dockertag}...."
 docker build --no-cache -t pure3dapp:${dockertag} \
   --build-arg gitlocation=${gitlocation} \
   --build-arg gitbranch=${gitbranch} \
