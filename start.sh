@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ssh pure3d.dev 'sudo rm -fr /tmp/app && sudo git clone -b containerize https://github.com/CLARIAH/pure3d.git /tmp/app'
+ssh pure3d.dev 'if [ -d /tmp/app ];then cd /tmp/app; source .env; sudo git checkout ${gitbranch}; sudo git pull; else sudo git clone -b ${gitbranch} ${gitlocation} /tmp/app; cd /tmp/app; fi'
 scp .env pure3d.dev:/tmp
 if [ "$1" == "restart-only" ];then
   ssh pure3d.dev 'sudo mv /tmp/.env /tmp/app/.env && cd /tmp/app && sudo ./restart.sh'
