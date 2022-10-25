@@ -2,7 +2,7 @@
 
 source .env
 echo "building pure3dapp docker images from local folder; tagging as docker pure3dapp:${dockertag}...."
-docker build --no-cache -f Dockerfile.local -t pure3dapp:${dockertag} \
+docker build -f Dockerfile.local -t pure3dapp:${dockertag} \
   --build-arg SECRET_FILE=${SECRET_FILE} \
   --build-arg DATA_DIR=${DATA_DIR} \
   --build-arg mysecret=${mysecret} \
