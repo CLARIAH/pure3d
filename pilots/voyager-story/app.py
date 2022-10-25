@@ -1,7 +1,7 @@
 import os
 from dispatcher import DispatcherMiddleware
 from flask import Flask, render_template
-from webdavapp import app as webdavapp
+from webdavapp import getWebdavApp
 
 
 BASE = os.path.dirname(os.path.dirname(__file__))
@@ -17,7 +17,9 @@ app = Flask(__name__, static_folder=f"{BASE}/static")
 
 @app.route("/")
 def index():
-    return render_template("index.html", status=STATUS, scene=SCENE, height=HEIGHT, width=WIDTH)
+    return render_template(
+        "index.html", status=STATUS, scene=SCENE, height=HEIGHT, width=WIDTH
+    )
 
 
 @app.route("/voyager/<string:scene>")
@@ -32,6 +34,9 @@ def voyager(scene):
     )
 
 
-app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
-    '/data/': webdavapp,
-})
+app.wsgi_app = DispatcherMiddleware(
+    app.wsgi_app,
+    {
+        "/data/": getWebdavApp(),
+    },
+)

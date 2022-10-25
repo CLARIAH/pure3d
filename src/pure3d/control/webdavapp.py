@@ -9,7 +9,24 @@ from control.messages import Messages
 Config = Config(Messages).getConfig()
 
 BASE = os.path.dirname(os.path.dirname(__file__))
-DATA_DIR = f"{BASE}/data/3d"
+
+WEBDAV_METHODS = dict(
+    HEAD="read",
+    GET="read",
+    PUT="update",
+    POST="update",
+    OPTIONS="read",
+    TRACE="read",
+    DELETE="update",
+    PROPFIND="read",
+    PROPPATCH="update",
+    MKCOL="update",
+    COPY="update",
+    MOVE="update",
+    LOCK="update",
+    UNLOCK="update",
+)
+
 
 config = {
     "provider_mapping": {
@@ -22,4 +39,6 @@ config = {
     "verbose": 1,
 }
 
-app = WsgiDAVApp(config)
+
+def getWebdavApp():
+    return WsgiDAVApp(config)

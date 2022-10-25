@@ -52,11 +52,15 @@ class Viewers:
             return dedent(
                 f"""
                 <head>
-                <link href="/static/dist/fonts/fonts.css" rel="stylesheet"/>
+                <meta charset="utf-8">
+                <link
+                  href="/static/{viewer}/{version}/fonts/fonts.css"
+                  rel="stylesheet"
+                />
                 <link
                   rel="shortcut icon"
                   type="image/png"
-                  href="/static/dist/favicon.png"
+                  href="/static/{viewer}/{version}/favicon.png"
                 />
                 <link
                   rel="stylesheet"

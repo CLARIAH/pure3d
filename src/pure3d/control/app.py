@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, render_template, redirect, make_response, abort
+from flask import Flask, render_template, redirect, make_response, abort, request
 
 from control.messages import Messages
 from control.config import Config
@@ -12,6 +12,7 @@ from control.pages import Pages
 from control.sync import Sync
 from control.editsessions import EditSessions
 from control.authorise import Auth
+from control.webdavapp import WEBDAV_METHODS
 
 Config = Config(Messages).getConfig()
 Messages = Messages(Config)
@@ -78,7 +79,7 @@ def appFactory():
 
         return Pages.base("projects", left=("list",), title=title)
 
-    @app.route("/projects/<int:projectId>")
+    @app.route("/projects/<string:projectId>")
     def projectPage(projectId):
         title = """<h2>Editions in this project</h2>"""
 
@@ -95,7 +96,7 @@ def appFactory():
             title=title,
         )
 
-    @app.route("/projects/<int:projectId>/editions/<int:editionId>")
+    @app.route("/projects/<string:projectId>/editions/<string:editionId>")
     def editionPage(projectId, editionId):
         title = """<h2>Scenes in this edition</h2>"""
 
@@ -112,7 +113,9 @@ def appFactory():
             title=title,
         )
 
-    @app.route("/projects/<int:projectId>/editions/<int:editionId>/<string:sceneName>")
+    @app.route(
+        "/projects/<string:projectId>/editions/<string:editionId>/<string:sceneName>"
+    )
     def scenePage(projectId, editionId, sceneName):
         return Pages.base(
             "projects",
@@ -127,7 +130,7 @@ def appFactory():
         )
 
     @app.route(
-        "/projects/<int:projectId>/editions/<int:editionId>/<string:sceneName>/<string:viewerVersion>"
+        "/projects/<string:projectId>/editions/<string:editionId>/<string:sceneName>/<string:viewerVersion>"
     )
     def sceneViewer(projectId, editionId, sceneName, viewerVersion):
         return Pages.base(
@@ -144,7 +147,7 @@ def appFactory():
         )
 
     @app.route(
-        "/projects/<int:projectId>/editions/<int:editionId>/<string:sceneName>/<string:viewerVersion>/<string:action>"
+        "/projects/<string:projectId>/editions/<string:editionId>/<string:sceneName>/<string:viewerVersion>/<string:action>"
     )
     def sceneWorker(projectId, editionId, sceneName, viewerVersion, action):
         return Pages.base(
@@ -162,7 +165,7 @@ def appFactory():
         )
 
     @app.route(
-        "/viewer/<string:viewerVersion>/<string:action>/<int:projectId>/<int:editionId>/<string:sceneName>"
+        "/viewer/<string:viewerVersion>/<string:action>/<string:projectId>/<string:editionId>/<string:sceneName>"
     )
     def voyager(viewerVersion, action, projectId, editionId, sceneName):
         try:
@@ -215,15 +218,25 @@ def appFactory():
 
         return make_response(textData)
 
-    @app.route("/auth/webdav/<path:path>")
-    def authwebdav(path):
-        authenticated = Auth.authenticate()
-        if authenticated:
-            Messages.info(logmsg=f"User = {Auth.user} {path=}")
-            return True
-        else:
-            Messages.info(logmsg=f"Unauthenticated {path=}")
-            return False
+    @app.route(
+        "/auth/webdav/projects/<string:projectId>/editions/<string:editionId>/",
+        defaults=dict(path=""), methods=tuple(WEBDAV_METHODS),
+    )
+    @app.route(
+        "/auth/webdav/projects/<string:projectId>/editions/<string:editionId>/<path:path>",
+        methods=tuple(WEBDAV_METHODS),
+    )
+    def authwebdav(projectId, editionId, path):
+        permitted = Auth.authorise(projectId, editionId, WEBDAV_METHODS[request.method])
+        Messages.debug(
+            logmsg=f"WEBDAV auth: {permitted=} {Auth.user=} {projectId=} {editionId=} {path=}"
+        )
+        return permitted
+
+    @app.route("/auth/webdav/<path:path>", methods=tuple(WEBDAV_METHODS))
+    def webdavinvalid(path):
+        Messages.info(logmsg=f"Invalid webdav access {path=}")
+        return False
 
     @app.route("/no/webdav/<path:path>")
     def nowebdav(path):

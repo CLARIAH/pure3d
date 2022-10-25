@@ -1,6 +1,7 @@
 flask
 Flask-OIDC
 wsgidav
+lxml
 markdown
 pyyaml
 gunicorn

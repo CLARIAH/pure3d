@@ -250,12 +250,10 @@ class Projects:
             with os.scandir(basePath) as ed:
                 for entry in ed:
                     if entry.is_dir():
-                        name = entry.name
-                        if name.isdigit():
-                            theId = int(name)
-                            permitted = Auth.authorise(theId, None, "read")
-                            if permitted:
-                                theItems.append(int(name))
+                        theId = entry.name
+                        permitted = Auth.authorise(theId, None, "read")
+                        if permitted:
+                            theItems.append(theId)
 
             for theItem in sorted(theItems):
                 projectSel = theItem
@@ -292,12 +290,10 @@ class Projects:
             with os.scandir(basePath) as ed:
                 for entry in ed:
                     if entry.is_dir():
-                        name = entry.name
-                        if name.isdigit():
-                            theId = int(name)
-                            permitted = Auth.authorise(projectId, theId, "read")
-                            if permitted:
-                                theItems.append(int(name))
+                        theId = entry.name
+                        permitted = Auth.authorise(projectId, theId, "read")
+                        if permitted:
+                            theItems.append(theId)
 
             for theItem in sorted(theItems):
                 data = self.getInfo(

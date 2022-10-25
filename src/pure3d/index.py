@@ -1,7 +1,7 @@
 from control.app import appFactory
-from control.webdavapp import app as webdavapp
-from control.dispatcher import DispatchWebdav
+from control.webdavapp import getWebdavApp
+from control.dispatcher import dispatchWebdav
 
 
 app = appFactory()
-app.wsgi_app = DispatchWebdav(appFactory(), "/webdav/", webdavapp)
+app.wsgi_app = dispatchWebdav(appFactory(), "/webdav/", getWebdavApp())
