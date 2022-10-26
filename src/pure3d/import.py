@@ -17,10 +17,38 @@ Mongo = Mongo(Config, Messages)
 
 
 def importFsContent():
+    viewerDir = Config.viewerDir
     dataDir = Config.dataDir
 
-    for table in ("texts", "projects", "editions", "scenes", "users", "projectusers"):
+    for table in (
+        "texts",
+        "projects",
+        "editions",
+        "scenes",
+        "users",
+        "projectusers",
+        "viewers",
+    ):
         Mongo.checkCollection(table, reset=True)
+
+    with os.scandir(viewerDir) as vd:
+        for entry in vd:
+            if entry.is_dir():
+                viewerName = entry.name
+                viewerPath = f"{viewerDir}/{viewerName}"
+                versions = []
+
+                with os.scandir(viewerPath) as sd:
+                    for entry in sd:
+                        if entry.is_dir():
+                            version = entry.name
+                            versions.append(version)
+
+                viewerInfo = dict(
+                    name=viewerName,
+                    versions=versions,
+                )
+                Mongo.execute("viewers", "insert_one", viewerInfo)
 
     textPath = f"{dataDir}/{PROJECTS}"
     textFiles = listFiles(textPath, ".md")
@@ -28,6 +56,7 @@ def importFsContent():
     for textFile in textFiles:
         text = readPath(f"{textPath}/{textFile}.md")
         textInfo = dict(
+            name=textFile,
             text=text,
         )
         result = Mongo.execute("texts", "insert_one", textInfo)

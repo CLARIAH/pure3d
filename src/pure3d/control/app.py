@@ -15,19 +15,18 @@ from control.webdavapp import WEBDAV_METHODS
 
 Config = Config(Messages(None)).getConfig()
 Messages = Messages(Config)
-Viewers = Viewers(Config)
-
-# create and configure app
-
-
 Mongo = Mongo(Config, Messages)
+Viewers = Viewers(Mongo)
 Users = Users(Config, Messages)
-Projects = Projects(Config, Viewers, Messages)
+Projects = Projects(Config, Viewers, Messages, Mongo)
 Auth = Auth(Config, Messages, Users, Projects)
 Projects.addAuth(Auth)
 Viewers.addAuth(Auth)
 Pages = Pages(Config, Messages, Projects, ProjectError, Auth)
 EditSessions = EditSessions(Mongo)
+
+
+# create and configure app
 
 
 def appFactory():
@@ -43,16 +42,15 @@ def appFactory():
     @app.route("/")
     @app.route("/home")
     def home():
-        return Pages.base("home", left=("home",))
+        return Pages.home()
 
     @app.route("/about")
     def about():
-        return Pages.base("about", left=("home",), right=("about",))
+        return Pages.about()
 
     @app.route("/surpriseme")
     def surpriseme():
-        content = "<h2>You will be surprised!</h2>"
-        return Pages.base("surpriseme", left=("home",), content=content)
+        return Pages.surprise()
 
     @app.route("/login")
     def login():

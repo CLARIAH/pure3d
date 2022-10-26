@@ -21,7 +21,6 @@ COMPONENT = dict(
 )
 
 
-
 class ProjectError(Exception):
     def __init__(self, message):
         self.message = message
@@ -29,16 +28,28 @@ class ProjectError(Exception):
 
 
 class Projects:
-    def __init__(self, Config, Viewers, Messages):
+    def __init__(self, Config, Viewers, Messages, Mongo):
         self.Config = Config
         self.Viewers = Viewers
         self.Messages = Messages
+        self.Mongo = Mongo
 
         yamlDir = Config.yamlDir
         self.projectStatus = readYaml(f"{yamlDir}/projectstatus.yaml")
 
     def addAuth(self, Auth):
         self.Auth = Auth
+
+    def getText(self, name):
+        Mongo = self.Mongo
+
+        data = Mongo.execute(
+            "texts", "find_one", dict(name=name), dict(_id=False, text=True)
+        )
+        return markdown(data.get("text", ""))
+
+    def getSurprise(self):
+        return "<h2>You will be surprised!</h2>"
 
     def getLocation(
         self,
@@ -70,7 +81,7 @@ class Projects:
         location = ""
         if projectId:
             sep = "/" if location else ""
-            location += f"{sep}{PROJECTS}/{projectId}"
+            location += f"{sep}projects/{projectId}"
         if editionId:
             sep = "/" if location else ""
             location += f"{sep}editions/{editionId}"
@@ -189,7 +200,7 @@ class Projects:
                 None,
                 None,
                 None,
-                PROJECTS,
+                "projects",
                 None,
                 api=True,
             )
@@ -229,7 +240,7 @@ class Projects:
                 projectId,
                 None,
                 None,
-                EDITIONS,
+                "editions",
                 None,
                 api=True,
             )

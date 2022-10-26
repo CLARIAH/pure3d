@@ -15,9 +15,12 @@ class Config:
         self.good = False
         self.config = AttrDict()
         self.checkEnv()
+
         if not self.good:
             Messages.error(logmsg="Check environment ...")
             sys.exit(1)
+
+        self.getPermissionDefs()
 
     def checkEnv(self):
         Messages = self.Messages
@@ -39,6 +42,8 @@ class Config:
         config.yamlDir = yamlDir
         staticDir = f"{repoDir}/src/pure3d/static"
         config.staticDir = staticDir
+        viewerDir = f"{staticDir}/viewers"
+        config.viewerDir = viewerDir
 
         versionPath = f"{repoDir}/src/{VERSION_FILE}"
         versionInfo = readPath(versionPath)
@@ -51,14 +56,27 @@ class Config:
 
         if settings is None:
             Messages.error(logmsg="Cannot read settings.yaml in {yamlDir}")
+            return
 
         for (k, v) in settings.items():
             config[k] = v
+
+        authData = readYaml(f"{yamlDir}/authorise.yaml")
+        if authData is None:
+            Messages.error(logmsg="Cannot read authorise.yaml in {yamlDir}")
+            return
+
+        auth = AttrDict()
+        config["auth"] = auth
+
+        for (k, v) in authData.items():
+            auth[k] = v
 
         secretFileLoc = os.environ.get("SECRET_FILE", None)
 
         if secretFileLoc is None:
             Messages.error(logmsg="Environment variable `SECRET_FILE` not defined")
+            return
 
         if not os.path.exists(secretFileLoc):
             Messages.error(
@@ -72,14 +90,17 @@ class Config:
                     """
                 )
             )
+            return
 
         dataDir = os.environ.get("DATA_DIR", None)
         if dataDir is None:
             Messages.error(logmsg="Environment variable `DATA_DIR` not defined")
+            return
 
         config.dataDir = dataDir.rstrip("/")
         if not os.path.exists(dataDir):
             Messages.error(logmsg=f"Data directory does not exist: {dataDir}")
+            return
 
         with open(secretFileLoc) as fh:
             config.secret_key = fh.read()

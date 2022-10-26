@@ -1,26 +1,15 @@
-import os
 from textwrap import dedent
 
 
 class Viewers:
-    def __init__(self, Config):
-        self.Config = Config
+    def __init__(self, Mongo):
+        self.Mongo = Mongo
 
-        staticDir = Config.staticDir
-
-        viewers = {
-            v: []
-            for (v, enabled) in Config.viewers.items()
-            if enabled and os.path.isdir(f"{staticDir}/{v}")
-        }
+        viewers = {}
         self.viewers = viewers
 
-        for v in viewers:
-            viewerDir = f"{staticDir}/{v}"
-            with os.scandir(viewerDir) as vh:
-                for entry in vh:
-                    if entry.is_dir():
-                        viewers[v].append(entry.name)
+        for v in Mongo.execute("viewers", "find"):
+            viewers[v["name"]] = v["versions"]
 
         self.makeLinkPrefixes()
 
@@ -47,6 +36,8 @@ class Viewers:
 
         action = Auth.checkModifiable(projectId, editionId, action)
 
+        viewerStatic = f"/static/viewers/{viewer}/{version}"
+
         if viewer == "voyager":
             element = "explorer" if action == "read" else "story"
             return dedent(
@@ -54,28 +45,28 @@ class Viewers:
                 <head>
                 <meta charset="utf-8">
                 <link
-                  href="/static/{viewer}/{version}/fonts/fonts.css"
+                  href="{viewerStatic}/fonts/fonts.css"
                   rel="stylesheet"
                 />
                 <link
                   rel="shortcut icon"
                   type="image/png"
-                  href="/static/{viewer}/{version}/favicon.png"
+                  href="{viewerStatic}/favicon.png"
                 />
                 <link
                   rel="stylesheet"
-                  href="/static/{viewer}/{version}/css/voyager-{element}.{ext}.css"
+                  href="{viewerStatic}/css/voyager-{element}.{ext}.css"
                 />
                 <script
                   defer
-                  src="/static/{viewer}/{version}/js/voyager-{element}.{ext}.js">
+                  src="{viewerStatic}/js/voyager-{element}.{ext}.js">
                 </script>
                 </head>
                 <body>
                 <voyager-{element}
                   root="{root}"
                   document="{scene}"
-                  resourceroot="/static/{viewer}/{version}"
+                  resourceroot="{viewerStatic}"
                 > </voyager-{element}>
                 </body>
                 """

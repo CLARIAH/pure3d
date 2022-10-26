@@ -34,13 +34,6 @@ class Users:
             userRoleById=userRoleById,
         )
 
-    def getPermissions(self):
-        Config = self.Config
-        yamlDir = Config.yamlDir
-
-        authData = readYaml(f"{yamlDir}/authorise.yaml")
-        return authData
-
     def getUserProject(self):
         Config = self.Config
         yamlDir = Config.yamlDir

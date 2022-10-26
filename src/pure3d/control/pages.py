@@ -1,6 +1,5 @@
 from textwrap import dedent
 from flask import render_template
-
 TABS = (
     ("home", "Home", True),
     ("about", "About", True),
@@ -19,100 +18,52 @@ class Pages:
         self.ProjectError = ProjectError
         self.Auth = Auth
 
-    def home():
-        pass
+    def home(self):
+        Projects = self.Projects
+        intro = Projects.getText("intro")
+        return self.base(left=(intro,))
+
+    def about(self):
+        Projects = self.Projects
+        intro = Projects.getText("intro")
+        surpriseMe = Projects.getSurprise()
+        return self.base(left=(intro,), right=(surpriseMe,))
+
+    def surprise(self):
+        Projects = self.Projects
+        intro = Projects.getText("intro")
+        about = Projects.getText("about")
+        return self.base(left=(intro,), right=(about,))
+
+    def backLink(projectId):
+        projectUrl = f"/projects/{projectId}"
+        return f"""<p><a class="button" href="{projectUrl}">back to editions</a></p>"""
 
     def base(
         self,
         url,
         projectId=None,
         editionId=None,
-        sceneName=None,
-        viewerVersion=None,
         action="read",
         left=(),
         right=(),
-        title=None,
-        content=None,
+        back="",
+        title="",
+        content="",
     ):
         Config = self.Config
         Messages = self.Messages
-        Projects = self.Projects
-        ProjectError = self.ProjectError
         Auth = self.Auth
         action = Auth.checkModifiable(projectId, editionId, action)
 
-        back = ""
-
-        try:
-            if projectId is not None and editionId is not None:
-                (projectPath, projectUrl, exists) = Projects.getLocation(
-                    projectId, None, None, None, None, api=True
-                )
-                back = dedent(
-                    f"""
-                        <p>
-                            <a
-                                class="button"
-                                href="{projectUrl}"
-                            >back to editions</a>
-                        </p>
-                        """
-                )
-                if sceneName is not None:
-                    (editionPath, editionUrl, exists) = Projects.getLocation(
-                        projectId, editionId, None, None, None, api=True
-                    )
-                    back += dedent(
-                        f"""
-                            <p>
-                                <a
-                                    class="button"
-                                    href="{editionUrl}"
-                                >back to scenes</a>
-                            </p>
-                            """
-                    )
-            projectData = Projects.getInfo(
-                projectId,
-                editionId,
-                sceneName,
-                viewerVersion,
-                action,
-                *left,
-                *right,
-                missingOk=True,
-            )
-        except ProjectError as e:
-            Messages.error(msg="Building the page", logmsg=f"Page error: {e}")
-
         navigation = self.navigation(url)
-        material = dict(left=[], right=[])
-
-        for (comps, side) in ((left, "left"), (right, "right")):
-            sideMaterial = material[side]
-            for comp in comps:
-                sideMaterial.append(
-                    dedent(
-                        f"""
-                <div class="comp-{comp}">
-                    {projectData[comp][2]}
-                </div>
-                """
-                    )
-                )
-
-            material[side] = "\n".join(sideMaterial)
-
-        title = title or ""
-        content = content or ""
 
         return render_template(
             "index.html",
             versionInfo=Config.versionInfo,
             navigation=navigation,
-            materialLeft=back + title + material["left"],
-            materialRight=material["right"] + content,
+            materialLeft=back + title + "\n".join(left),
+            materialRight="\n".join(right) + content,
             messages=Messages.generateMessages(),
             testUsers=Auth.wrapTestUsers(),
         )

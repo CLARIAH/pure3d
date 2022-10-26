@@ -7,7 +7,6 @@ class Auth:
         self.Messages = Messages
         self.Users = Users
         self.Projects = Projects
-        self.authData = Users.getPermissions()
         # userData = Users.getTestUsers() if Config.testMode else {}
         userData = {}
         self.testUserIds = userData.get("testUserIds", set())
@@ -127,10 +126,10 @@ class Auth:
         session.pop("userid", None)
 
     def authorise(self, projectId, editionId, action):
+        Config = self.Config
         PROJECTS = self.Projects
         user = self.user
         userId = user.get("id", None)
-        authData = self.authData
         userRoleById = self.userRoleById
         projectStatus = PROJECTS.projectStatus
         userProjects = self.userProjects
@@ -145,7 +144,7 @@ class Auth:
             "published" if projectStatus.get(projectId, False) else "unpublished"
         )
 
-        projectRules = authData["projectrules"][projectPub]
+        projectRules = Config.auth.projectrules[projectPub]
         condition = (
             projectRules[userRole] if userRole in projectRules else projectRules[None]
         ).get(action, False)
