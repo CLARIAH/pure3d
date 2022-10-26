@@ -5,9 +5,10 @@ from control.helpers.generic import htmlEsc
 
 
 class Messages:
-    def __init__(self, Config):
+    def __init__(self, Config, flask=True):
         self.Config = Config
         self.messages = []
+        self.flask = flask
 
     def clearMessages(self):
         self.messages.clear()
@@ -25,7 +26,8 @@ class Messages:
         if logmsg is not None:
             sys.stderr.write(f"ERROR: {logmsg}\n")
             sys.stderr.flush()
-            abort(404)
+            if self.flask:
+                abort(404)
 
     def warning(self, msg=None, logmsg=None):
         if msg is not None:
@@ -61,6 +63,10 @@ class Messages:
     def _addMessage(self, tp, msg):
         Config = self.Config
 
-        debugMode = Config.debugMode
-        if tp != "debug" or debugMode:
-            self.messages.append((tp, msg))
+        if Config is None:
+            sys.stderr.write(f"{tp}: {msg}\n")
+            sys.stderr.flush()
+        else:
+            debugMode = Config.debugMode
+            if tp != "debug" or debugMode:
+                self.messages.append((tp, msg))

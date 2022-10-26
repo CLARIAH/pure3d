@@ -8,13 +8,15 @@ class Auth:
         self.Users = Users
         self.Projects = Projects
         self.authData = Users.getPermissions()
-        userData = Users.getTestUsers() if Config.testMode else {}
+        # userData = Users.getTestUsers() if Config.testMode else {}
+        userData = {}
         self.testUserIds = userData.get("testUserIds", set())
         self.userNameById = userData.get("userNameById", {})
         self.userRoleById = userData.get("userRoleById", {})
-        userProjectData = Users.getUserProject()
-        self.userProjects = userProjectData["userProjects"]
-        self.projectUsers = userProjectData["projectUsers"]
+        # userProjectData = Users.getUserProject()
+        userProjectData = {}
+        self.userProjects = userProjectData.get("userProjects", {})
+        self.projectUsers = userProjectData.get("projectUsers", {})
         self.user = {}
 
     def clearUser(self):

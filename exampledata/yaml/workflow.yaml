@@ -1,0 +1,35 @@
+users:
+  susan:
+    role: admin
+  costas:
+    role: admin
+  kelly:
+    role: user
+  daniel:
+    role: guest
+  clan1:
+    role: user
+  clan2:
+    role: user
+  clan3:
+    role: user
+  mine1:
+    role: user
+  mine2:
+    role: user
+  mine3:
+    role: user
+
+projectUsers:
+  "1":
+    clan1: creator
+    clan2: editor
+    clan3: reader
+  "2":
+    mine1: creator
+    mine2: editor
+    mine3: reader
+
+projectStatus:
+  "1": false
+  "2": true

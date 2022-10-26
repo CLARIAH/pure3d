@@ -77,7 +77,7 @@ class Config:
         if dataDir is None:
             Messages.error(logmsg="Environment variable `DATA_DIR` not defined")
 
-        config.dataDir = dataDir
+        config.dataDir = dataDir.rstrip("/")
         if not os.path.exists(dataDir):
             Messages.error(logmsg=f"Data directory does not exist: {dataDir}")
 

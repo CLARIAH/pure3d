@@ -19,6 +19,9 @@ class Pages:
         self.ProjectError = ProjectError
         self.Auth = Auth
 
+    def home():
+        pass
+
     def base(
         self,
         url,

@@ -18,7 +18,7 @@ class Mongo:
 
         if mongo is None:
             try:
-                Messages.info(logmsg=f"{Config.mongoHost=} {Config.mongoPort=}")
+                Messages.debug(logmsg=f"{Config.mongoHost=} {Config.mongoPort=}")
                 client = MongoClient(Config.mongoHost, Config.mongoPort, username=Config.mongoUser, password=Config.mongoPassword)
                 mongo = client[database]
             except Exception as e:
@@ -37,23 +37,29 @@ class Mongo:
             self.client = None
             self.mongo = None
 
-    def checkCollection(self, table):
+    def checkCollection(self, table, reset=False):
         Messages = self.Messages
 
         self.connect()
         client = self.client
         mongo = self.mongo
 
-        if mongo[table] is not None:
-            return
-
-        try:
-            client.create_collection(table)
-        except Exception as e:
-            Messages.error(
-                msg="Database action",
-                logmsg=f"Cannot create collection: `{table}`: {e}",
-            )
+        if mongo[table] is None:
+            try:
+                client.create_collection(table)
+            except Exception as e:
+                Messages.error(
+                    msg="Database action",
+                    logmsg=f"Cannot create collection: `{table}`: {e}",
+                )
+        if reset:
+            try:
+                self.execute(table, "delete_many", {})
+            except Exception as e:
+                Messages.error(
+                    msg="Database action",
+                    logmsg=f"Cannot clear collection: `{table}`: {e}",
+                )
 
     def execute(self, table, command, *args, **kwargs):
         Messages = self.Messages
@@ -70,9 +76,10 @@ class Mongo:
         try:
             result = method(*args, **kwargs)
         except Exception as e:
-            Messages(
+            Messages.error(
                 msg="Database action",
                 logmsg=f"Executing Mongo command db.{table}.{command}: {e}",
             )
+            result = None
 
         return result

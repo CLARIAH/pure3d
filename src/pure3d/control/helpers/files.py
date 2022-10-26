@@ -1,5 +1,10 @@
+import json
 import os
 import yaml
+import re
+
+
+IMAGE_RE = re.compile(r"""^.*\.(png|jpg|jpeg)$""", re.I)
 
 
 def readPath(filePath, mode="r"):
@@ -15,6 +20,18 @@ def readFile(fileDir, fileName, mode="r"):
     if not os.path.isfile(filePath):
         return f"No file {fileName} in {fileDir}"
     return open(filePath, mode)
+
+
+def readJson(path):
+    if not os.path.isfile(path):
+        return None
+
+    data = readPath(path)
+
+    if data:
+        return json.loads(data)
+
+    return None
 
 
 def readYaml(path):
@@ -41,5 +58,20 @@ def listFiles(path, ext):
             name = entry.name
             if name.endswith(ext) and entry.is_file():
                 files.append(name[0:-nExt])
+
+    return files
+
+
+def listImages(path):
+    if not os.path.isdir(path):
+        return []
+
+    files = []
+
+    with os.scandir(path) as dh:
+        for entry in dh:
+            name = entry.name
+            if IMAGE_RE.match(name) and entry.is_file():
+                files.append(name)
 
     return files

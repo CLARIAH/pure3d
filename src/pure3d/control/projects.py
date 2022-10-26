@@ -20,8 +20,6 @@ COMPONENT = dict(
     list=(None, None, None, None),
 )
 
-PROJECTS = "projects"
-EDITIONS = "editions"
 
 
 class ProjectError(Exception):
@@ -181,57 +179,6 @@ class Projects:
             if editionId is None
             else self.getScenes(projectId, editionId, sceneName, viewerVersion, action)
         )
-
-    def getAllContent(self):
-        Messages = self.Messages
-
-        projects = []
-        editions = []
-        scenes = []
-
-        try:
-            (basePath, baseUrl, exists) = self.getLocation(
-                None,
-                None,
-                None,
-                PROJECTS,
-                None,
-                api=True,
-            )
-            with os.scandir(basePath) as pd:
-                for entry in pd:
-                    if entry.is_dir():
-                        project = entry.name
-                        projects.append(project)
-
-                        (projectPath, baseUrl, exists) = self.getLocation(
-                            project,
-                            None,
-                            None,
-                            EDITIONS,
-                            None,
-                            api=True,
-                        )
-                        with os.scandir(projectPath) as ed:
-                            for entry in ed:
-                                if entry.is_dir():
-                                    edition = entry.name
-                                    editions.append((edition, project))
-
-                                    (editionPath, baseUrl, exists) = self.getLocation(
-                                        project,
-                                        edition,
-                                        None,
-                                        None,
-                                        None,
-                                        api=True,
-                                    )
-                                    for scene in listFiles(editionPath, ".json"):
-                                        scenes.append((scene, edition, project))
-
-        except ProjectError as e:
-            Messages.error(logmsg=f"Reading data files: {e}")
-        return (projects, editions, scenes)
 
     def getProjects(self):
         Auth = self.Auth

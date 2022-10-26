@@ -9,12 +9,11 @@ from control.viewers import Viewers
 from control.projects import Projects, ProjectError
 from control.users import Users
 from control.pages import Pages
-from control.sync import Sync
 from control.editsessions import EditSessions
 from control.authorise import Auth
 from control.webdavapp import WEBDAV_METHODS
 
-Config = Config(Messages).getConfig()
+Config = Config(Messages(None)).getConfig()
 Messages = Messages(Config)
 Viewers = Viewers(Config)
 
@@ -28,12 +27,7 @@ Auth = Auth(Config, Messages, Users, Projects)
 Projects.addAuth(Auth)
 Viewers.addAuth(Auth)
 Pages = Pages(Config, Messages, Projects, ProjectError, Auth)
-Sync = Sync(Messages, Mongo, Projects)
 EditSessions = EditSessions(Mongo)
-
-
-def prepare():
-    Sync.sync(allowRemove=not Config.testMode)
 
 
 def appFactory():
@@ -250,6 +244,3 @@ def decide(env):
     for (k, v) in env.items():
         Messages.plain(logmsg=f"{k} = {v}")
     return False
-
-
-prepare()
