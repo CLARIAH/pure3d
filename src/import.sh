@@ -1,6 +1,7 @@
 #!/bin/bash
 
 HELP="
+Restores example data to data directory
 Resets mongodb data and imports data from file system into mongodb.
 
 Usage
@@ -41,10 +42,19 @@ done
 
 cd ..
 repodir="`pwd`"
+
+echo "Removing old data ..."
+rm -rf data
+
+echo "Copying fresh example data ..."
+cp -r exampledata data
+
 cd src
 
 export repodir
 export flasktest
 export flaskdebug
 
+echo "Filling mongodb collections ..."
 python3 pure3d/import.py
+echo "Done"

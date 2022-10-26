@@ -53,6 +53,11 @@ done
 
 cd ..
 repodir="`pwd`"
+
+if [[ ! -d "data" ]]; then
+    mkdir data
+fi
+
 cd src/pure3d
 
 export flasktest

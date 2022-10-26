@@ -1,24 +1,14 @@
 users:
-  susan:
-    role: admin
-  costas:
-    role: admin
-  kelly:
-    role: user
-  daniel:
-    role: guest
-  clan1:
-    role: user
-  clan2:
-    role: user
-  clan3:
-    role: user
-  mine1:
-    role: user
-  mine2:
-    role: user
-  mine3:
-    role: user
+  susan: admin
+  costas: admin
+  kelly: user
+  daniel: guest
+  clan1: user
+  clan2: user
+  clan3: user
+  mine1: user
+  mine2: user
+  mine3: user
 
 projectUsers:
   "1":

@@ -4,8 +4,7 @@ from control.messages import Messages
 from control.config import Config
 from control.mongo import Mongo
 
-# from control.helpers.files import readYaml, readPath, listFiles
-from control.helpers.files import listFiles, listImages, readPath, readJson
+from control.helpers.files import listFiles, listImages, readPath, readJson, readYaml
 
 
 TEXTS = "texts"
@@ -20,7 +19,7 @@ Mongo = Mongo(Config, Messages)
 def importFsContent():
     dataDir = Config.dataDir
 
-    for table in ("texts", "projects", "editions", "scenes"):
+    for table in ("texts", "projects", "editions", "scenes", "users", "projectusers"):
         Mongo.checkCollection(table, reset=True)
 
     textPath = f"{dataDir}/{PROJECTS}"
@@ -36,12 +35,13 @@ def importFsContent():
         textId
 
     projectsPath = f"{dataDir}/{PROJECTS}"
+    projectIdByName = {}
 
     with os.scandir(projectsPath) as pd:
         for entry in pd:
             if entry.is_dir():
-                project = entry.name
-                projectPath = f"{projectsPath}/{project}"
+                projectName = entry.name
+                projectPath = f"{projectsPath}/{projectName}"
 
                 meta = {}
                 metaPath = f"{projectPath}/meta"
@@ -64,7 +64,7 @@ def importFsContent():
                     candy[image] = True
 
                 projectInfo = dict(
-                    fileName=project,
+                    fileName=projectName,
                     meta=meta,
                     texts=texts,
                     candy=candy,
@@ -72,14 +72,15 @@ def importFsContent():
 
                 result = Mongo.execute("projects", "insert_one", projectInfo)
                 projectId = result.inserted_id if result is not None else None
+                projectIdByName[projectName] = projectId
 
                 editionsPath = f"{projectPath}/{EDITIONS}"
 
                 with os.scandir(editionsPath) as ed:
                     for entry in ed:
                         if entry.is_dir():
-                            edition = entry.name
-                            editionPath = f"{editionsPath}/{edition}"
+                            editionName = entry.name
+                            editionPath = f"{editionsPath}/{editionName}"
 
                             meta = {}
                             metaPath = f"{editionPath}/meta"
@@ -110,7 +111,7 @@ def importFsContent():
                                     candy[image] = True
 
                             editionInfo = dict(
-                                fileName=edition,
+                                fileName=editionName,
                                 projectId=projectId,
                                 meta=meta,
                                 texts=texts,
@@ -137,6 +138,40 @@ def importFsContent():
                                     result.inserted_id if result is not None else None
                                 )
                                 sceneId
+
+    workflowPath = f"{dataDir}/yaml/workflow.yaml"
+    workflow = readYaml(workflowPath)
+    users = workflow["users"]
+    projectUsers = workflow["projectUsers"]
+    projectStatus = workflow["projectStatus"]
+
+    userIdByName = {}
+
+    for (userName, role) in users.items():
+        userInfo = dict(
+            name=userName,
+            role=role,
+        )
+        result = Mongo.execute("users", "insert_one", userInfo)
+        userId = result.inserted_id if result is not None else None
+        userIdByName[userName] = userId
+
+    for (projectName, isPublished) in projectStatus.items():
+        Mongo.execute(
+            "projects",
+            "update_one",
+            dict(_id=projectIdByName[projectName]),
+            {"$set": dict(isPublished=isPublished)},
+        )
+
+    for (projectName, projectUsrs) in projectUsers.items():
+        for (userName, role) in projectUsrs.items():
+            xInfo = dict(
+                userId=userIdByName[userName],
+                projectId=projectIdByName[projectName],
+                role=role,
+            )
+            Mongo.execute("projectusers", "insert_one", xInfo)
 
 
 if __name__ == "__main__":
