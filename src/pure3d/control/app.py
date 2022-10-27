@@ -6,7 +6,7 @@ from control.messages import Messages
 from control.config import Config
 from control.mongo import Mongo
 from control.viewers import Viewers
-from control.projects import Projects, ProjectError
+from control.content import Content, ContentError
 from control.users import Users
 from control.pages import Pages
 from control.editsessions import EditSessions
@@ -18,11 +18,11 @@ Messages = Messages(Config)
 Mongo = Mongo(Config, Messages)
 Viewers = Viewers(Mongo)
 Users = Users(Config, Messages)
-Projects = Projects(Config, Viewers, Messages, Mongo)
-Auth = Auth(Config, Messages, Users, Projects)
-Projects.addAuth(Auth)
+Content = Content(Config, Viewers, Messages, Mongo)
+Auth = Auth(Config, Messages, Users, Content)
+Content.addAuth(Auth)
 Viewers.addAuth(Auth)
-Pages = Pages(Config, Messages, Projects, ProjectError, Auth)
+Pages = Pages(Config, Messages, Content, ContentError, Auth)
 EditSessions = EditSessions(Mongo)
 
 
@@ -39,19 +39,6 @@ def appFactory():
 
     # app url routes start here
 
-    @app.route("/")
-    @app.route("/home")
-    def home():
-        return Pages.home()
-
-    @app.route("/about")
-    def about():
-        return Pages.about()
-
-    @app.route("/surpriseme")
-    def surpriseme():
-        return Pages.surprise()
-
     @app.route("/login")
     def login():
         if Auth.authenticate(login=True):
@@ -65,61 +52,34 @@ def appFactory():
         Auth.deauthenticate()
         return redirectResult("/", True)
 
+    @app.route("/")
+    @app.route("/home")
+    def home():
+        return Pages.home()
+
+    @app.route("/about")
+    def about():
+        return Pages.about()
+
+    @app.route("/surpriseme")
+    def surpriseme():
+        return Pages.surprise()
+
     @app.route("/projects")
     def projects():
-        title = """<h2>Scholarly projects</h2>"""
-
-        return Pages.base("projects", left=("list",), title=title)
+        return Pages.projects()
 
     @app.route("/projects/<string:projectId>")
     def projectPage(projectId):
-        title = """<h2>Editions in this project</h2>"""
+        return Pages.projectPage(projectId)
 
-        return Pages.base(
-            "projects",
-            projectId=projectId,
-            left=("list",),
-            right=(
-                "title",
-                "home",
-                "about",
-                "description",
-            ),
-            title=title,
-        )
+    @app.route("/editions/<string:editionId>")
+    def editionPage(editionId):
+        return Pages.editionPage(editionId)
 
-    @app.route("/projects/<string:projectId>/editions/<string:editionId>")
-    def editionPage(projectId, editionId):
-        title = """<h2>Scenes in this edition</h2>"""
-
-        return Pages.base(
-            "projects",
-            projectId=projectId,
-            editionId=editionId,
-            left=("list",),
-            right=(
-                "title",
-                "about",
-                "sources",
-            ),
-            title=title,
-        )
-
-    @app.route(
-        "/projects/<string:projectId>/editions/<string:editionId>/<string:sceneName>"
-    )
-    def scenePage(projectId, editionId, sceneName):
-        return Pages.base(
-            "projects",
-            projectId=projectId,
-            editionId=editionId,
-            sceneName=sceneName,
-            left=("list",),
-            right=(
-                "about",
-                "sources",
-            ),
-        )
+    @app.route("/scenes/<string:sceneId>")
+    def scenePage(sceneId):
+        return Pages.scenePage(sceneId)
 
     @app.route(
         "/projects/<string:projectId>/editions/<string:editionId>/<string:sceneName>/<string:viewerVersion>"
@@ -161,7 +121,7 @@ def appFactory():
     )
     def voyager(viewerVersion, action, projectId, editionId, sceneName):
         try:
-            (rootPath, rootUrl, rootExists) = Projects.getLocation(
+            (rootPath, rootUrl, rootExists) = Content.getLocation(
                 projectId,
                 editionId,
                 None,
@@ -169,14 +129,14 @@ def appFactory():
                 None,
                 action=action,
             )
-            (scenePath, sceneUrl, sceneExists) = Projects.getLocation(
+            (scenePath, sceneUrl, sceneExists) = Content.getLocation(
                 projectId,
                 editionId,
                 sceneName,
                 None,
                 None,
             )
-        except ProjectError as e:
+        except ContentError as e:
             msg = f"Voyager viewer: {e}"
             Messages.error(msg=msg, logmsg=msg)
 
@@ -212,14 +172,17 @@ def appFactory():
 
     @app.route(
         "/auth/webdav/projects/<string:projectId>/editions/<string:editionId>/",
-        defaults=dict(path=""), methods=tuple(WEBDAV_METHODS),
+        defaults=dict(path=""),
+        methods=tuple(WEBDAV_METHODS),
     )
     @app.route(
         "/auth/webdav/projects/<string:projectId>/editions/<string:editionId>/<path:path>",
         methods=tuple(WEBDAV_METHODS),
     )
     def authwebdav(projectId, editionId, path):
-        permitted = Auth.authorise(projectId, editionId, WEBDAV_METHODS[request.method])
+        permitted = Auth.authorise(
+            WEBDAV_METHODS[request.method], projectId=projectId, editionId=editionId
+        )
         Messages.debug(
             logmsg=f"WEBDAV auth: {permitted=} {Auth.user=} {projectId=} {editionId=} {path=}"
         )

@@ -121,3 +121,16 @@
   justify-content: flex-start;
   align-content: flex-start;
 }
+
+div.caption {
+  display: flex;
+  flex-flow: column nowrap;
+  border-radius: 0.8em;
+  border-style: solid;
+  border-width: 0.2em;
+  border-color: var(--caption-border);
+}
+
+div.caption {
+  border-color: var(--caption-border-active);
+}

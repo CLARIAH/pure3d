@@ -1,22 +1,24 @@
 from flask import request, session
 
+from control.helpers.generic import AttrDict
+
 
 class Auth:
-    def __init__(self, Config, Messages, Users, Projects):
+    def __init__(self, Config, Messages, Mongo, Users, Content):
         self.Config = Config
         self.Messages = Messages
+        self.Mongo = Mongo
         self.Users = Users
-        self.Projects = Projects
-        # userData = Users.getTestUsers() if Config.testMode else {}
-        userData = {}
+        self.Content = Content
+        userData = Users.getTestUsers() if Config.testMode else AttrDict
         self.testUserIds = userData.get("testUserIds", set())
-        self.userNameById = userData.get("userNameById", {})
-        self.userRoleById = userData.get("userRoleById", {})
+        self.userNameById = userData.get("userNameById", AttrDict())
+        self.userRoleById = userData.get("userRoleById", AttrDict())
         # userProjectData = Users.getUserProject()
         userProjectData = {}
-        self.userProjects = userProjectData.get("userProjects", {})
-        self.projectUsers = userProjectData.get("projectUsers", {})
-        self.user = {}
+        self.userProjects = userProjectData.get("userProjects", AttrDict())
+        self.projectUsers = userProjectData.get("projectUsers", AttrDict())
+        self.user = AttrDict()
 
     def clearUser(self):
         user = self.user
@@ -31,11 +33,11 @@ class Auth:
         user.clear()
         result = userId in userNameById
         if result:
-            user["id"] = userId
-            user["name"] = userNameById[userId]
-            user["role"] = userRoleById[userId]
+            user.id = userId
+            user.name = userNameById[userId]
+            user.role = userRoleById[userId]
             Messages.debug(
-                msg=f"Existing user {userId} = {user['role']}: {user['name']}"
+                msg=f"Existing user {userId} = {user.role}: {user.name}"
             )
         else:
             Messages.debug(msg=f"Unknown user {userId}")
@@ -95,7 +97,7 @@ class Auth:
         if login:
             session.pop("userid", None)
             if self.checkLogin():
-                session["userid"] = user["id"]
+                session["userid"] = user.id
                 return True
             return False
 
@@ -125,13 +127,13 @@ class Auth:
 
         session.pop("userid", None)
 
-    def authorise(self, projectId, editionId, action):
+    def authorise(self, action, projectId=None, editionId=None):
         Config = self.Config
-        PROJECTS = self.Projects
+        Content = self.Content
         user = self.user
         userId = user.get("id", None)
         userRoleById = self.userRoleById
-        projectStatus = PROJECTS.projectStatus
+        projectStatus = Content.projectStatus
         userProjects = self.userProjects
 
         userRole = userRoleById.get(userId, None)
@@ -152,7 +154,7 @@ class Auth:
         return permission
 
     def isModifiable(self, projectId, editionId):
-        return self.authorise(projectId, editionId, "update")
+        return self.authorise("update", projectId=projectId, editionId=editionId)
 
     def checkModifiable(self, projectId, editionId, action):
         if action != "read":

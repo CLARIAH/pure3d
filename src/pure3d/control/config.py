@@ -67,7 +67,7 @@ class Config:
             return
 
         auth = AttrDict()
-        config["auth"] = auth
+        config.auth = auth
 
         for (k, v) in authData.items():
             auth[k] = v

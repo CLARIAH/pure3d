@@ -5,11 +5,14 @@ from control.config import Config
 from control.mongo import Mongo
 
 from control.helpers.files import listFiles, listImages, readPath, readJson, readYaml
+from control.helpers.generic import AttrDict
 
 
 TEXTS = "texts"
 PROJECTS = "projects"
 EDITIONS = "editions"
+
+VIEWER_DEFAULT = "voyager"
 
 Config = Config(Messages(None, flask=False)).getConfig()
 Messages = Messages(Config, flask=False)
@@ -44,10 +47,12 @@ def importFsContent():
                             version = entry.name
                             versions.append(version)
 
-                viewerInfo = dict(
+                viewerInfo = AttrDict(
                     name=viewerName,
                     versions=versions,
                 )
+                if viewerName == VIEWER_DEFAULT:
+                    viewerInfo.default = True
                 Mongo.execute("viewers", "insert_one", viewerInfo)
 
     textPath = f"{dataDir}/{PROJECTS}"
@@ -79,6 +84,8 @@ def importFsContent():
                 for metaFile in metaFiles:
                     meta[metaFile] = readJson(f"{metaPath}/{metaFile}.json")
 
+                title = meta.get("dc", {}).get("dc.title", projectName)
+
                 texts = {}
                 textPath = f"{projectPath}/texts"
                 textFiles = listFiles(textPath, ".md")
@@ -90,10 +97,11 @@ def importFsContent():
                 candyPath = f"{projectPath}/candy"
 
                 for image in listImages(candyPath):
-                    candy[image] = True
+                    candy[image] = True if image.lower() == "icon.png" else False
 
                 projectInfo = dict(
-                    fileName=projectName,
+                    title=title,
+                    name=projectName,
                     meta=meta,
                     texts=texts,
                     candy=candy,
@@ -115,6 +123,8 @@ def importFsContent():
                             metaPath = f"{editionPath}/meta"
                             metaFiles = listFiles(metaPath, ".json")
 
+                            title = meta.get("dc", {}).get("dc.title", editionName)
+
                             for metaFile in metaFiles:
                                 meta[metaFile] = readJson(f"{metaPath}/{metaFile}.json")
 
@@ -133,14 +143,15 @@ def importFsContent():
                             candyPath = f"{editionPath}/candy"
 
                             for image in listImages(candyPath):
-                                baseName = image.rsplit(".", 1)[0]
+                                (baseName, extension) = image.rsplit(".", 1)
                                 if baseName in sceneSet:
-                                    sceneCandy[baseName][image] = True
+                                    sceneCandy[baseName][image] = extension.lower() == "png"
                                 else:
-                                    candy[image] = True
+                                    candy[image] = True if image.lower() == "icon.png" else False
 
                             editionInfo = dict(
-                                fileName=editionName,
+                                title=title,
+                                name=editionName,
                                 projectId=projectId,
                                 meta=meta,
                                 texts=texts,
@@ -155,7 +166,7 @@ def importFsContent():
 
                             for scene in scenes:
                                 sceneInfo = dict(
-                                    fileName=scene,
+                                    name=scene,
                                     editionId=editionId,
                                     projectId=projectId,
                                     candy=sceneCandy[scene],

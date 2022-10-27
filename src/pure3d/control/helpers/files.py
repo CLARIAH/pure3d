@@ -3,6 +3,8 @@ import os
 import yaml
 import re
 
+from control.helpers.generic import AttrDict
+
 
 IMAGE_RE = re.compile(r"""^.*\.(png|jpg|jpeg)$""", re.I)
 
@@ -39,7 +41,7 @@ def readYaml(path):
         return None
     with open(path) as fh:
         data = yaml.load(fh, Loader=yaml.FullLoader)
-    return data
+    return AttrDict(data)
 
 
 def dirExists(path):
