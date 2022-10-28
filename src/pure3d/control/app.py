@@ -1,6 +1,4 @@
-import os
-
-from flask import Flask, render_template, redirect, make_response, abort, request
+from flask import Flask, redirect, abort, request
 
 from control.messages import Messages
 from control.config import Config
@@ -15,15 +13,20 @@ from control.webdavapp import WEBDAV_METHODS
 
 Config = Config(Messages(None)).getConfig()
 Messages = Messages(Config)
+
 Mongo = Mongo(Config, Messages)
+
 Viewers = Viewers(Mongo)
-Users = Users(Config, Messages)
+
+Users = Users(Config, Messages, Mongo)
 Content = Content(Config, Viewers, Messages, Mongo)
-Auth = Auth(Config, Messages, Users, Content)
+Auth = Auth(Config, Messages, Mongo, Users, Content)
+EditSessions = EditSessions(Mongo)
+
 Content.addAuth(Auth)
 Viewers.addAuth(Auth)
-Pages = Pages(Config, Messages, Content, ContentError, Auth)
-EditSessions = EditSessions(Mongo)
+
+Pages = Pages(Config, Messages, Content, ContentError, Viewers, Auth, Users)
 
 
 # create and configure app
@@ -70,121 +73,71 @@ def appFactory():
         return Pages.projects()
 
     @app.route("/projects/<string:projectId>")
-    def projectPage(projectId):
-        return Pages.projectPage(projectId)
+    def project(projectId):
+        return Pages.project(projectId)
 
     @app.route("/editions/<string:editionId>")
-    def editionPage(editionId):
-        return Pages.editionPage(editionId)
-
-    @app.route("/scenes/<string:sceneId>")
-    def scenePage(sceneId):
-        return Pages.scenePage(sceneId)
+    def edition(editionId):
+        return Pages.edition(editionId)
 
     @app.route(
-        "/projects/<string:projectId>/editions/<string:editionId>/<string:sceneName>/<string:viewerVersion>"
+        "/scenes/<string:sceneId>",
+        defaults=dict(viewer="", version="", action=""),
     )
-    def sceneViewer(projectId, editionId, sceneName, viewerVersion):
-        return Pages.base(
-            "projects",
-            projectId=projectId,
-            editionId=editionId,
-            sceneName=sceneName,
-            viewerVersion=viewerVersion,
-            left=("list",),
-            right=(
-                "about",
-                "sources",
-            ),
-        )
-
     @app.route(
-        "/projects/<string:projectId>/editions/<string:editionId>/<string:sceneName>/<string:viewerVersion>/<string:action>"
+        "/scenes/<string:sceneId>/<string:viewer>",
+        defaults=dict(version="", action=""),
     )
-    def sceneWorker(projectId, editionId, sceneName, viewerVersion, action):
-        return Pages.base(
-            "projects",
-            projectId=projectId,
-            editionId=editionId,
-            sceneName=sceneName,
-            viewerVersion=viewerVersion,
-            action=action,
-            left=("list",),
-            right=(
-                "about",
-                "sources",
-            ),
-        )
-
     @app.route(
-        "/viewer/<string:viewerVersion>/<string:action>/<string:projectId>/<string:editionId>/<string:sceneName>"
+        "/scenes/<string:sceneId>/<string:viewer>/<string:version>",
+        defaults=dict(action=""),
     )
-    def voyager(viewerVersion, action, projectId, editionId, sceneName):
-        try:
-            (rootPath, rootUrl, rootExists) = Content.getLocation(
-                projectId,
-                editionId,
-                None,
-                None,
-                None,
-                action=action,
-            )
-            (scenePath, sceneUrl, sceneExists) = Content.getLocation(
-                projectId,
-                editionId,
-                sceneName,
-                None,
-                None,
-            )
-        except ContentError as e:
-            msg = f"Voyager viewer: {e}"
-            Messages.error(msg=msg, logmsg=msg)
-
-        viewerCode = Viewers.genHtml(
-            viewerVersion,
-            action,
-            projectId,
-            editionId,
-            f"{rootUrl}/",
-            f"{sceneName}.json",
-        )
-
-        return render_template(
-            "voyager.html",
-            viewerCode=viewerCode,
-        )
-
-    @app.route("/data/<path:path>")
-    def data(path):
-        dataDir = Config.dataDir
-
-        dataPath = f"{dataDir}/{path}"
-        if not os.path.isfile(dataPath):
-            Messages.error(
-                msg="Accessing a file",
-                logmsg=f"File does notexist: {dataPath}",
-            )
-
-        with open(dataPath, "rb") as fh:
-            textData = fh.read()
-
-        return make_response(textData)
+    @app.route(
+        "/scenes/<string:sceneId>/<string:viewer>/<string:version>/<string:action>",
+    )
+    def scene(sceneId, viewer, version, action):
+        return Pages.scene(sceneId, viewer, version, action)
 
     @app.route(
-        "/auth/webdav/projects/<string:projectId>/editions/<string:editionId>/",
+        "/viewer/<string:viewer>/<string:version>/<string:action>/<string:sceneId>"
+    )
+    def viewerFrame(sceneId, viewer, version, action):
+        return Pages.viewerFrame(sceneId, viewer, version, action)
+
+    @app.route("/data/texts/<string:fileName>")
+    def dataTexts(fileName):
+        return Pages.dataTexts(fileName)
+
+    @app.route(
+        "/data/projects/<string:projectName>/editions/<string:editionName>/",
+        defaults=dict(path=""),
+    )
+    @app.route(
+        "/data/projects/<string:projectName>/editions/<string:editionName>/<path:path>",
+    )
+    def dataProjects(projectName, editionName, path):
+        return Pages.dataProjects(projectName, editionName, path)
+
+    @app.route(
+        "/auth/webdav/projects/<string:projectName>/editions/<string:editionName>/",
         defaults=dict(path=""),
         methods=tuple(WEBDAV_METHODS),
     )
     @app.route(
-        "/auth/webdav/projects/<string:projectId>/editions/<string:editionId>/<path:path>",
+        "/auth/webdav/projects/<string:projectName>/editions/<string:editionName>/"
+        "<path:path>",
         methods=tuple(WEBDAV_METHODS),
     )
-    def authwebdav(projectId, editionId, path):
+    def authwebdav(projectName, editionName, path):
         permitted = Auth.authorise(
-            WEBDAV_METHODS[request.method], projectId=projectId, editionId=editionId
+            WEBDAV_METHODS[request.method],
+            project=projectName,
+            edition=editionName,
+            byName=True,
         )
         Messages.debug(
-            logmsg=f"WEBDAV auth: {permitted=} {Auth.user=} {projectId=} {editionId=} {path=}"
+            logmsg=f"WEBDAV auth: {permitted=} {Auth.user=}"
+            f" {projectName=} {editionName=} {path=}"
         )
         return permitted
 
@@ -199,9 +152,3 @@ def appFactory():
         abort(404)
 
     return app
-
-
-def decide(env):
-    for (k, v) in env.items():
-        Messages.plain(logmsg=f"{k} = {v}")
-    return False

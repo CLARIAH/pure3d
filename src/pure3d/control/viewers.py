@@ -14,8 +14,8 @@ class Viewers:
         for v in Mongo.execute("viewers", "find"):
             v = AttrDict(v)
             viewer = v.name
-            viewers[viewer] = v.versions
-            if v.get("default", None):
+            viewers[viewer] = AttrDict(versions=v.versions, config=AttrDict(v.config))
+            if v.default:
                 self.default = viewer
 
         self.makeLinkPrefixes()
@@ -27,7 +27,7 @@ class Viewers:
         viewers = self.viewers
         if viewer not in viewers:
             viewer = self.default
-        versions = viewers[viewer]
+        versions = viewers[viewer].versions
         if version not in versions:
             version = versions[-1]
         return (viewer, version)
@@ -54,7 +54,9 @@ class Viewers:
             for version in viewers[viewer].versions:
                 isVersionActive = version == versionActive
                 vsActive = (
-                    "active" if isSceneActive and isViewerActive and isVersionActive else ""
+                    "active"
+                    if isSceneActive and isViewerActive and isVersionActive
+                    else ""
                 )
                 buttons.append(
                     f"""<span class="vv"><span class="vvl {vsActive}">{version}</span>"""
@@ -97,20 +99,18 @@ class Viewers:
                 buttons.append("""</span> """)
             buttons.append("""</span></span> """)
 
-        return (frame, buttons)
+        return (frame, "\n".join(buttons))
 
-    def genHtml(self, viewer, version, action, projectId, editionId, root, scene):
+    def genHtml(self, urlBase, sceneName, viewer, version, action, root):
         Config = self.Config
-        Auth = self.Auth
         debugMode = Config.debugMode
         ext = "dev" if debugMode else "min"
 
-        action = Auth.checkModifiable(projectId, editionId, action)
-
         viewerStatic = f"/static/viewers/{viewer}/{version}"
+        viewerRoot = self.getRoot(urlBase, action, viewer)
 
         if viewer == "voyager":
-            element = "explorer" if action == "read" else "story"
+            element = "explorer" if action == "view" else "story"
             return dedent(
                 f"""
                 <head>
@@ -135,10 +135,33 @@ class Viewers:
                 </head>
                 <body>
                 <voyager-{element}
-                  root="{root}"
-                  document="{scene}"
+                  root="{viewerRoot}"
+                  document="{sceneName}"
                   resourceroot="{viewerStatic}"
                 > </voyager-{element}>
                 </body>
                 """
             )
+        else:
+            return dedent(
+                f"""
+                <head>
+                <meta charset="utf-8">
+                </head>
+                <body>
+                <p>Unsupported viewer: {viewer}</p>
+                </body>
+                """
+            )
+
+    def getRoot(self, urlBase, action, viewer):
+        viewers = self.viewers
+
+        if viewer not in viewers:
+            return None
+
+        config = viewers[viewer].config
+
+        prefix = config.edit if action == "edit" else config.view
+
+        return f"{prefix}/{urlBase}"

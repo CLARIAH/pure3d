@@ -1,6 +1,6 @@
+import os
 from markdown import markdown
 
-from control.helpers.files import readYaml
 from control.helpers.generic import AttrDict
 
 
@@ -18,21 +18,12 @@ COMPONENT = dict(
 )
 
 
-class ContentError(Exception):
-    def __init__(self, message):
-        self.message = message
-        super().__init__(self.message)
-
-
 class Content:
     def __init__(self, Config, Viewers, Messages, Mongo):
         self.Config = Config
         self.Viewers = Viewers
         self.Messages = Messages
         self.Mongo = Mongo
-
-        yamlDir = Config.yamlDir
-        self.projectStatus = readYaml(f"{yamlDir}/projectstatus.yaml")
 
     def addAuth(self, Auth):
         self.Auth = Auth
@@ -55,7 +46,7 @@ class Content:
         record = Mongo.execute(
             table, "find_one", dict(name=name, **condition), dict(_id=False, text=True)
         )
-        return markdown(record.get("text", ""))
+        return markdown(record.text or "")
 
     def getSurprise(self):
         return "<h2>You will be surprised!</h2>"
@@ -71,7 +62,7 @@ class Content:
         ):
             row = AttrDict(row)
             projectId = row._id
-            permitted = Auth.authorise("read", projectId=projectId)
+            permitted = Auth.authorise("view", project=projectId)
             if not permitted:
                 continue
 
@@ -90,7 +81,7 @@ class Content:
         Mongo = self.Mongo
         Auth = self.Auth
 
-        projectInfo = self.getRecord("projects", projectId)
+        projectInfo = Mongo.getRecord("projects", _id=projectId)
         projectName = projectInfo.name
 
         wrapped = []
@@ -103,7 +94,7 @@ class Content:
         ):
             row = AttrDict(row)
             editionId = row._id
-            permitted = Auth.authorise("read", projectId=projectId, editionId=editionId)
+            permitted = Auth.authorise("view", project=projectId, edition=editionId)
             if not permitted:
                 continue
 
@@ -123,29 +114,29 @@ class Content:
         projectId,
         editionId,
         activeId=None,
-        viewer=None,
-        version=None,
-        action="read",
+        viewer="",
+        version="",
+        action="view",
     ):
         Mongo = self.Mongo
         Auth = self.Auth
         Viewers = self.Viewers
 
-        projectInfo = self.getRecord("projects", projectId)
+        projectInfo = Mongo.getRecord("projects", _id=projectId)
         projectName = projectInfo.name
-        editionInfo = self.getRecord("projects", projectId)
+        editionInfo = Mongo.getRecord("editions", _id=editionId)
         editionName = editionInfo.name
 
         wrapped = []
 
-        permitted = Auth.authorise("read", projectId=projectId, editionId=editionId)
+        permitted = Auth.authorise("view", project=projectId, edition=editionId)
         if not permitted:
             return []
 
         action = Auth.checkModifiable(projectId, editionId, action)
-        actions = ["read"]
+        actions = ["view"]
         if Auth.isModifiable(projectId, editionId):
-            actions.append("update")
+            actions.append("edit")
 
         (viewer, version) = Viewers.check(viewer, version)
 
@@ -167,10 +158,6 @@ class Content:
                 sceneId, actions, isSceneActive, viewer, version, action
             )
 
-            frame = ""
-
-            buttons = "\n".join(buttons)
-
             sceneUrl = f"/scenes/{sceneId}"
             iconUrlBase = f"/data/projects/{projectName}/editions/{editionName}/candy"
             caption = self.getCaption(
@@ -185,22 +172,6 @@ class Content:
             wrapped.append(caption)
 
         return "\n".join(wrapped)
-
-    def getRecord(self, table, itemId):
-        Mongo = self.Mongo
-        Auth = self.Auth
-
-        record = AttrDict(Mongo.execute(table, "find_one", dict(_id=itemId), {}))
-        projectId = itemId if table == "projects" else record.projectId
-        editionId = (
-            None
-            if table == "projects"
-            else itemId
-            if table == "editions"
-            else record.projectId
-        )
-        permitted = Auth.authorise("read", projectId=projectId, editionId=editionId)
-        return AttrDict(record if permitted else {})
 
     def getCaption(
         self, title, candy, url, iconUrlBase, active=False, buttons="", frame=""
@@ -228,3 +199,45 @@ class Content:
         if candy:
             return list(candy)[0]
         return None
+
+    def getData(self, path, projectName=None, editionName=None):
+        Config = self.Config
+        Messages = self.Messages
+        Auth = self.Auth
+
+        dataDir = Config.dataDir
+
+        urlBase = (
+            "texts"
+            if projectName is None and editionName is None
+            else f"projects/{projectName}"
+            if editionName is None
+            else f"projects/{projectName}/editions/{editionName}"
+        )
+
+        dataPath = f"{dataDir}/{urlBase}/{path}"
+
+        permitted = (
+            True
+            if urlBase == "texts"
+            else Auth.authorise(
+                "view", project=projectName, edition=editionName, byName=True
+            )
+        )
+
+        exists = os.path.isfile(dataPath)
+        if not permitted or not exists:
+            logmsg = f"Issues in accessing {dataPath}: "
+            if not permitted:
+                logmsg = "not allowed. "
+            if not exists:
+                logmsg += "does not exist. "
+            Messages.error(
+                msg="Accessing a file",
+                logmsg=logmsg,
+            )
+
+        with open(dataPath, "rb") as fh:
+            textData = fh.read()
+
+        return textData

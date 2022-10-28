@@ -1,0 +1,3 @@
+voyager:
+  view: "/data"
+  edit: "/webdav"

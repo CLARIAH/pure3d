@@ -1,5 +1,7 @@
 from pymongo import MongoClient
 
+from control.helpers.generic import AttrDict
+
 
 class Mongo:
     def __init__(self, Config, Messages):
@@ -60,6 +62,10 @@ class Mongo:
                     msg="Database action",
                     logmsg=f"Cannot clear collection: `{table}`: {e}",
                 )
+
+    def getRecord(self, table, **criteria):
+        record = AttrDict(Mongo.execute(table, "find_one", criteria, {}))
+        return AttrDict(record)
 
     def execute(self, table, command, *args, **kwargs):
         Messages = self.Messages

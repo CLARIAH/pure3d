@@ -11,20 +11,20 @@ Config = Config(Messages).getConfig()
 BASE = os.path.dirname(os.path.dirname(__file__))
 
 WEBDAV_METHODS = dict(
-    HEAD="read",
-    GET="read",
-    PUT="update",
-    POST="update",
-    OPTIONS="read",
-    TRACE="read",
-    DELETE="update",
-    PROPFIND="read",
-    PROPPATCH="update",
-    MKCOL="update",
-    COPY="update",
-    MOVE="update",
-    LOCK="update",
-    UNLOCK="update",
+    HEAD="view",
+    GET="view",
+    PUT="edit",
+    POST="edit",
+    OPTIONS="view",
+    TRACE="view",
+    DELETE="edit",
+    PROPFIND="view",
+    PROPPATCH="edit",
+    MKCOL="edit",
+    COPY="edit",
+    MOVE="edit",
+    LOCK="edit",
+    UNLOCK="edit",
 )
 
 

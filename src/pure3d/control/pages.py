@@ -1,5 +1,5 @@
 from textwrap import dedent
-from flask import render_template
+from flask import render_template, make_response
 
 TABS = (
     ("home", "Home", True),
@@ -12,12 +12,13 @@ TABS = (
 
 
 class Pages:
-    def __init__(self, Config, Messages, Content, ContentError, Auth):
+    def __init__(self, Config, Messages, Content, Viewers, Auth, Users):
         self.Config = Config
         self.Messages = Messages
         self.Content = Content
-        self.ContentError = ContentError
         self.Auth = Auth
+        self.Users = Users
+        self.Viewers = Viewers
 
     def home(self):
         Content = self.Content
@@ -45,10 +46,13 @@ class Pages:
         Content = self.Content
         title = """<h2>Scholarly projects</h2>"""
         projects = Content.getProjects()
-        left = (title, projects,)
+        left = (
+            title,
+            projects,
+        )
         return self.page(left=left)
 
-    def projectPage(self, projectId):
+    def project(self, projectId):
         Content = self.Content
         projectInfo = Content.getRecord("projects", projectId)
         editions = Content.getEditions(projectId)
@@ -58,9 +62,9 @@ class Pages:
             Content.getText(item, projectId=projectId)
             for item in ("intro", "about", "description")
         )
-        return self.page(left=left, right=right)
+        return self.page(left=left, right=right, projectId=projectId)
 
-    def editionPage(self, editionId):
+    def edition(self, editionId):
         Content = self.Content
         editionInfo = Content.getRecord("editions", editionId)
         projectId = editionInfo.projectId
@@ -69,45 +73,91 @@ class Pages:
         scenes = Content.getScenes(projectId, editionId)
         left = (back, title, scenes)
         right = tuple(
-            Content.getText(item, editionId=editionId)
-            for item in ("about", "sources")
+            Content.getText(item, editionId=editionId) for item in ("about", "sources")
         )
-        return self.page(left=left, right=right)
+        return self.page(
+            left=left, right=right, projectId=projectId, editionId=editionId
+        )
 
-    def scenePage(self, sceneId):
+    def scene(self, sceneId, viewer, version, action):
         Content = self.Content
         sceneInfo = Content.getRecord("scenes", sceneId)
         projectId = sceneInfo.projectId
         editionId = sceneInfo.editionId
         back = self.backLink(projectId)
         title = f"<h3>{sceneInfo.name}</h3>"
-        scenes = Content.getScenes(projectId, editionId, sceneId=sceneId)
+        scenes = Content.getScenes(
+            projectId,
+            editionId,
+            sceneId=sceneId,
+            viewer=viewer,
+            version=version,
+            action=action,
+        )
         left = (back, title, scenes)
         right = tuple(
-            Content.getText(item, editionId=editionId)
-            for item in ("about", "sources")
+            Content.getText(item, editionId=editionId) for item in ("about", "sources")
         )
-        return self.page(left=left, right=right)
+        return self.page(
+            left=left,
+            right=right,
+            projectId=projectId,
+            editionId=editionId,
+            action=action,
+        )
 
-    def backLink(projectId):
-        projectUrl = f"/projects/{projectId}"
-        return f"""<p><a class="button" href="{projectUrl}">back to the project page</a></p>"""
+    def viewerFrame(self, sceneId, viewer, version, action):
+        Content = self.Content
+        Viewers = self.Viewers
+        Auth = self.Auth
+
+        sceneInfo = Content.getRecord("scenes", sceneId)
+        sceneName = sceneInfo.name
+
+        projectId = sceneInfo.projectId
+        projectName = Content.getRecord("projects", projectId).name
+
+        editionId = sceneInfo.editionId
+        editionName = Content.getRecord("editions", editionId).name
+
+        urlBase = f"projects/{projectName}/editions/{editionName}/"
+
+        action = Auth.checkModifiable(projectId, editionId, action)
+
+        viewerCode = Viewers.genHtml(urlBase, sceneName, viewer, version, action)
+        return render_template("viewer.html", viewerCode=viewerCode)
+
+    def dataTexts(self, fileName):
+        Content = self.Content
+
+        data = Content.getData(fileName)
+        return make_response(data)
+
+    def dataProjects(self, projectName, editionName, path):
+        Content = self.Content
+
+        data = Content.getData(path, projectName=projectName, editionName=editionName)
+        return make_response(data)
 
     def page(
         self,
         url,
         projectId=None,
         editionId=None,
-        action="read",
+        action="view",
         left=(),
         right=(),
     ):
         Config = self.Config
         Messages = self.Messages
         Auth = self.Auth
+        Users = self.Users
+
+        userActive = Auth.user._id
         action = Auth.checkModifiable(projectId, editionId, action)
 
         navigation = self.navigation(url)
+        testUsers = "" if Config.testMode else Users.wrapTestUsers(userActive)
 
         return render_template(
             "index.html",
@@ -116,7 +166,7 @@ class Pages:
             materialLeft="\n".join(left),
             materialRight="\n".join(right),
             messages=Messages.generateMessages(),
-            testUsers=Auth.wrapTestUsers(),
+            testUsers=testUsers,
         )
 
     def navigation(self, url):
@@ -153,3 +203,10 @@ class Pages:
         html.append(search)
         html.append("</div>")
         return "\n".join(html)
+
+    def backLink(projectId):
+        projectUrl = f"/projects/{projectId}"
+        cls = """ class="button" """
+        href = f""" href="{projectUrl}" """
+        text = """back to the project page"""
+        return f"""<p><a {cls} {href}>{text}</a></p>"""

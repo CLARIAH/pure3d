@@ -1,47 +1,34 @@
-from control.helpers.files import readYaml
+from control.helpers.generic import AttrDict
 
 
 class Users:
-    def __init__(self, Config, Messages):
+    def __init__(self, Config, Messages, Mongo):
         self.Config = Config
         self.Messages = Messages
+        self.Mongo = Mongo
 
-    def getTestUsers(self):
+    def wrapTestUsers(self, userActive):
         Config = self.Config
-        Messages = self.Messages
-        yamlDir = Config.yamlDir
+        Mongo = self.Mongo
 
-        testUsers = readYaml(f"{yamlDir}/testusers.yaml")
-        userNameById = {}
-        userRoleById = {}
-        testUserIds = set()
+        if not Config.testMode:
+            return ""
 
-        for (name, info) in testUsers.items():
-            userId = info["id"]
-            if userId in testUserIds:
-                prevName = userNameById[userId]
-                Messages.warning(
-                    msg=f"duplicate test user {userId} = {name}, {prevName}"
-                )
-                continue
-            testUserIds.add(userId)
-            userNameById[userId] = name
-            userRoleById[userId] = info["role"]
+        def wrap(title, href, cls, text):
+            return (
+                f'<a title="{title}" href="{href}" class="button small {cls}">'
+                f'{text}</a>'
+            )
 
-        return dict(
-            testUserIds=testUserIds,
-            userNameById=userNameById,
-            userRoleById=userRoleById,
-        )
+        active = "active" if userActive is None else ""
 
-    def getUserProject(self):
-        Config = self.Config
-        yamlDir = Config.yamlDir
+        html = []
+        html.append(wrap("if not logged in", "/logout", active, "logged out"))
 
-        projectUsers = readYaml(f"{yamlDir}/projectusers.yaml")
+        for user in sorted(Mongo.execute("users", "find"), key=lambda r: r["name"]):
+            user = AttrDict(user)
 
-        userProjects = {}
-        for (project, users) in projectUsers.items():
-            for (user, role) in users.items():
-                userProjects.setdefault(user, {})[project] = role
-        return dict(projectUsers=projectUsers, userProjects=userProjects)
+            active = "active" if user._id == userActive else ""
+            html.append(wrap(user.role, f"/login?userid={user._id}", active, user.name))
+
+        return "\n".join(html)

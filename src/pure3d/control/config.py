@@ -72,6 +72,13 @@ class Config:
         for (k, v) in authData.items():
             auth[k] = v
 
+        viewerSettings = readYaml(f"{yamlDir}/viewers.yaml")
+        if viewerSettings is None:
+            Messages.error(logmsg="Cannot read viewers.yaml in {yamlDir}")
+            return
+
+        config.viewers = AttrDict(viewerSettings)
+
         secretFileLoc = os.environ.get("SECRET_FILE", None)
 
         if secretFileLoc is None:

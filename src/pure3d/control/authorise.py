@@ -10,14 +10,6 @@ class Auth:
         self.Mongo = Mongo
         self.Users = Users
         self.Content = Content
-        userData = Users.getTestUsers() if Config.testMode else AttrDict
-        self.testUserIds = userData.get("testUserIds", set())
-        self.userNameById = userData.get("userNameById", AttrDict())
-        self.userRoleById = userData.get("userRoleById", AttrDict())
-        # userProjectData = Users.getUserProject()
-        userProjectData = {}
-        self.userProjects = userProjectData.get("userProjects", AttrDict())
-        self.projectUsers = userProjectData.get("projectUsers", AttrDict())
         self.user = AttrDict()
 
     def clearUser(self):
@@ -26,21 +18,19 @@ class Auth:
 
     def getUser(self, userId):
         Messages = self.Messages
+        Mongo = self.Mongo
         user = self.user
-        userNameById = self.userNameById
-        userRoleById = self.userRoleById
 
         user.clear()
-        result = userId in userNameById
-        if result:
+        record = Mongo.execute("users", "find_one", dict(_id=userId))
+        if record:
             user.id = userId
-            user.name = userNameById[userId]
-            user.role = userRoleById[userId]
-            Messages.debug(
-                msg=f"Existing user {userId} = {user.role}: {user.name}"
-            )
+            user.name = record.name
+            user.role = record.role
+            result = True
         else:
-            Messages.debug(msg=f"Unknown user {userId}")
+            Messages.warning(msg="Unknown user", logmsg=f"Unknown user {userId}")
+            result = False
         return result
 
     def checkLogin(self):
@@ -58,38 +48,6 @@ class Auth:
 
         Messages.warning(msg="User management is only available in test mode")
         return False
-
-    def wrapTestUsers(self):
-        Config = self.Config
-
-        if not Config.testMode:
-            return ""
-
-        user = self.user
-        testUserIds = self.testUserIds
-        userNameById = self.userNameById
-        userRoleById = self.userRoleById
-
-        html = []
-        me = "active" if user.get("id", None) is None else ""
-        html.append(
-            f"""<a
-                    href="/logout"
-                    class="button small {me}"
-                >logged out</a>"""
-        )
-        for uid in sorted(testUserIds, key=lambda u: userNameById[u]):
-            me = "active" if uid == user.get("id", None) else ""
-            uname = userNameById[uid]
-            urole = userRoleById[uid]
-            html.append(
-                f"""<a
-                        title="{urole}"
-                        href="/login?userid={uid}"
-                        class="button small {me}"
-                    >{uname}</a>"""
-            )
-        return "\n".join(html)
 
     def authenticate(self, login=False):
         user = self.user
@@ -119,45 +77,56 @@ class Auth:
         Messages = self.Messages
         userId = session.get("userid", None)
         if userId:
-            self.getUser(userId)
             self.clearUser()
-            Messages.plain(msg=f"LOGOUT successful: user {userId}")
+            Messages.plain(msg="logged out", logmsg=f"LOGOUT successful: user {userId}")
         else:
             Messages.warning(msg="You were not logged in")
 
         session.pop("userid", None)
 
-    def authorise(self, action, projectId=None, editionId=None):
+    def authorise(self, action, project=None, edition=None, byName=False):
         Config = self.Config
-        Content = self.Content
-        user = self.user
-        userId = user.get("id", None)
-        userRoleById = self.userRoleById
-        projectStatus = Content.projectStatus
-        userProjects = self.userProjects
+        Mongo = self.Mongo
 
-        userRole = userRoleById.get(userId, None)
-        projectRole = (
-            None
-            if userRole is None
-            else userProjects.get(userId, {}).get(projectId, None)
-        )
-        projectPub = (
-            "published" if projectStatus.get(projectId, False) else "unpublished"
-        )
+        user = self.user
+
+        if project is not None:
+            projectId = (
+                Mongo.getRecord("projects", name=project).projectId
+                if byName
+                else project
+            )
+        if edition is not None:
+            editionId = (
+                Mongo.getRecord("editions", name=edition).editionId
+                if byName
+                else edition
+            )
+
+        if projectId is None:
+            projectId = Mongo.getRecord("editions", _id=editionId).projectId
+
+        projectRole = Mongo.execute(
+            "projectUsers",
+            "find_one",
+            dict(projectId=projectId, userId=user._id),
+            dict(role=True),
+        ).role
+
+        projectPub = Mongo.getRecord("projects", _id=projectId).isPublished
 
         projectRules = Config.auth.projectrules[projectPub]
         condition = (
-            projectRules[userRole] if userRole in projectRules else projectRules[None]
+            projectRules[user.role] if user.role in projectRules else projectRules[None]
         ).get(action, False)
         permission = condition if type(condition) is bool else projectRole in condition
         return permission
 
     def isModifiable(self, projectId, editionId):
-        return self.authorise("update", projectId=projectId, editionId=editionId)
+        return self.authorise("edit", project=projectId, edition=editionId)
 
     def checkModifiable(self, projectId, editionId, action):
-        if action != "read":
+        if action != "view":
             if not self.isModifiable(projectId, editionId):
-                action = "read"
+                action = "view"
         return action

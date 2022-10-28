@@ -1,3 +1,4 @@
+import sys
 import os
 
 from control.messages import Messages
@@ -19,25 +20,28 @@ Messages = Messages(Config, flask=False)
 Mongo = Mongo(Config, Messages)
 
 
-def importFsContent():
+def importViewers():
+    yamlDir = Config.yamlDir
+    Mongo.checkCollection("viewers", reset=True)
     viewerDir = Config.viewerDir
-    dataDir = Config.dataDir
-
-    for table in (
-        "texts",
-        "projects",
-        "editions",
-        "scenes",
-        "users",
-        "projectusers",
-        "viewers",
-    ):
-        Mongo.checkCollection(table, reset=True)
+    viewerSettings = readYaml(f"{yamlDir}/viewers.yaml")
+    if viewerSettings is None:
+        Messages.error(logmsg=f"No viewer settings file {yamlDir}/viewers.yaml")
+        return
 
     with os.scandir(viewerDir) as vd:
         for entry in vd:
             if entry.is_dir():
                 viewerName = entry.name
+                if viewerName not in viewerSettings:
+                    Messages.warning(
+                        logmsg=(
+                            f"Skipping viewer {viewerName}"
+                            "because not defined in viewers.yaml"
+                        )
+                    )
+                    continue
+                viewerConfig = viewerSettings[viewerName]
                 viewerPath = f"{viewerDir}/{viewerName}"
                 versions = []
 
@@ -50,10 +54,25 @@ def importFsContent():
                 viewerInfo = AttrDict(
                     name=viewerName,
                     versions=versions,
+                    config=viewerConfig,
                 )
                 if viewerName == VIEWER_DEFAULT:
                     viewerInfo.default = True
                 Mongo.execute("viewers", "insert_one", viewerInfo)
+
+
+def importContent():
+    dataDir = Config.dataDir
+
+    for table in (
+        "texts",
+        "projects",
+        "editions",
+        "scenes",
+        "users",
+        "projectUsers",
+    ):
+        Mongo.checkCollection(table, reset=True)
 
     textPath = f"{dataDir}/{PROJECTS}"
     textFiles = listFiles(textPath, ".md")
@@ -145,9 +164,13 @@ def importFsContent():
                             for image in listImages(candyPath):
                                 (baseName, extension) = image.rsplit(".", 1)
                                 if baseName in sceneSet:
-                                    sceneCandy[baseName][image] = extension.lower() == "png"
+                                    sceneCandy[baseName][image] = (
+                                        extension.lower() == "png"
+                                    )
                                 else:
-                                    candy[image] = True if image.lower() == "icon.png" else False
+                                    candy[image] = (
+                                        True if image.lower() == "icon.png" else False
+                                    )
 
                             editionInfo = dict(
                                 title=title,
@@ -211,8 +234,12 @@ def importFsContent():
                 projectId=projectIdByName[projectName],
                 role=role,
             )
-            Mongo.execute("projectusers", "insert_one", xInfo)
+            Mongo.execute("projectUsers", "insert_one", xInfo)
 
 
 if __name__ == "__main__":
-    importFsContent()
+    tasks = set(sys.argv[1:])
+    if "viewers" in tasks:
+        importViewers()
+    if "content" in tasks:
+        importContent()
