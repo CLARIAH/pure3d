@@ -24,7 +24,7 @@ class Pages:
         Content = self.Content
         intro = Content.getText("intro")
         left = (intro,)
-        return self.page(left=left)
+        return self.page("home", left=left)
 
     def about(self):
         Content = self.Content
@@ -32,7 +32,7 @@ class Pages:
         surpriseMe = Content.getSurprise()
         left = (intro,)
         right = (surpriseMe,)
-        return self.page(left=left, right=right)
+        return self.page("about", left=left, right=right)
 
     def surprise(self):
         Content = self.Content
@@ -40,7 +40,7 @@ class Pages:
         about = Content.getText("about")
         left = (intro,)
         right = (about,)
-        return self.page(left=left, right=right)
+        return self.page("surpriseme", left=left, right=right)
 
     def projects(self):
         Content = self.Content
@@ -50,7 +50,7 @@ class Pages:
             title,
             projects,
         )
-        return self.page(left=left)
+        return self.page("projects", left=left)
 
     def project(self, projectId):
         Content = self.Content
@@ -62,7 +62,7 @@ class Pages:
             Content.getText(item, projectId=projectId)
             for item in ("intro", "about", "description")
         )
-        return self.page(left=left, right=right, projectId=projectId)
+        return self.page("projects", left=left, right=right, projectId=projectId)
 
     def edition(self, editionId):
         Content = self.Content
@@ -76,7 +76,7 @@ class Pages:
             Content.getText(item, editionId=editionId) for item in ("about", "sources")
         )
         return self.page(
-            left=left, right=right, projectId=projectId, editionId=editionId
+            "projects", left=left, right=right, projectId=projectId, editionId=editionId
         )
 
     def scene(self, sceneId, viewer, version, action):
@@ -99,6 +99,7 @@ class Pages:
             Content.getText(item, editionId=editionId) for item in ("about", "sources")
         )
         return self.page(
+            "projects",
             left=left,
             right=right,
             projectId=projectId,

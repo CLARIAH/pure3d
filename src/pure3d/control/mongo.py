@@ -36,8 +36,9 @@ class Mongo:
 
         if client:
             client.close()
-            self.client = None
-            self.mongo = None
+
+        self.client = None
+        self.mongo = None
 
     def checkCollection(self, table, reset=False):
         Messages = self.Messages
@@ -64,13 +65,16 @@ class Mongo:
                 )
 
     def getRecord(self, table, **criteria):
-        record = AttrDict(Mongo.execute(table, "find_one", criteria, {}))
-        return AttrDict(record)
+        result = self.execute(table, "find_one", criteria, {})
+        if result is None:
+            result = {}
+        return AttrDict(result)
 
     def execute(self, table, command, *args, **kwargs):
         Messages = self.Messages
-        mongo = self.mongo
+
         self.connect()
+        mongo = self.mongo
 
         method = getattr(mongo[table], command, None)
         result = None

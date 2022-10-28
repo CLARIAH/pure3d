@@ -18,8 +18,6 @@ class Viewers:
             if v.default:
                 self.default = viewer
 
-        self.makeLinkPrefixes()
-
     def addAuth(self, Auth):
         self.Auth = Auth
 

@@ -29,6 +29,7 @@ class Content:
         self.Auth = Auth
 
     def getText(self, name, projectId=None, editionId=None):
+        Messages = self.Messages
         Mongo = self.Mongo
 
         table = "texts"
@@ -43,9 +44,8 @@ class Content:
         else:
             table = "texts"
 
-        record = Mongo.execute(
-            table, "find_one", dict(name=name, **condition), dict(_id=False, text=True)
-        )
+        record = Mongo.getRecord(table, name=name, **condition)
+        Messages.debug(logmsg=f"{name=} {condition=} {record=}")
         return markdown(record.text or "")
 
     def getSurprise(self):

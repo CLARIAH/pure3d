@@ -20,8 +20,6 @@ class Config:
             Messages.error(logmsg="Check environment ...")
             sys.exit(1)
 
-        self.getPermissionDefs()
-
     def checkEnv(self):
         Messages = self.Messages
 

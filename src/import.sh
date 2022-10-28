@@ -47,8 +47,10 @@ while [ ! -z "$1" ]; do
         shift
     elif [[ "$1" == "viewers" ]]; then
         doviewers="v"
+        shift
     elif [[ "$1" == "content" ]]; then
         docontent="v"
+        shift
     else
         echo "unrecognized argument '$1'"
         shift

@@ -4,29 +4,44 @@ from control.messages import Messages
 from control.config import Config
 from control.mongo import Mongo
 from control.viewers import Viewers
-from control.content import Content, ContentError
+from control.content import Content
 from control.users import Users
 from control.pages import Pages
 from control.editsessions import EditSessions
 from control.authorise import Auth
 from control.webdavapp import WEBDAV_METHODS
 
-Config = Config(Messages(None)).getConfig()
-Messages = Messages(Config)
+from control.helpers.generic import AttrDict
 
-Mongo = Mongo(Config, Messages)
+if True:
+    Config = Config(Messages(None)).getConfig()
+    Messages = Messages(Config)
 
-Viewers = Viewers(Mongo)
+    Mongo = Mongo(Config, Messages)
 
-Users = Users(Config, Messages, Mongo)
-Content = Content(Config, Viewers, Messages, Mongo)
-Auth = Auth(Config, Messages, Mongo, Users, Content)
-EditSessions = EditSessions(Mongo)
+    Viewers = Viewers(Mongo)
 
-Content.addAuth(Auth)
-Viewers.addAuth(Auth)
+    Users = Users(Config, Messages, Mongo)
+    Content = Content(Config, Viewers, Messages, Mongo)
+    Auth = Auth(Config, Messages, Mongo, Users, Content)
+    EditSessions = EditSessions(Mongo)
 
-Pages = Pages(Config, Messages, Content, ContentError, Viewers, Auth, Users)
+    Content.addAuth(Auth)
+    Viewers.addAuth(Auth)
+
+    Pages = Pages(Config, Messages, Content, Viewers, Auth, Users)
+else:
+    (Config, Messages, Mongo, Viewers, Users, Content, Auth, EditSessions, Pages) = (
+        AttrDict(dict(secret_key=None)),
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+    )
 
 
 # create and configure app

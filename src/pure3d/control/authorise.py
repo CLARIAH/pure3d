@@ -22,7 +22,7 @@ class Auth:
         user = self.user
 
         user.clear()
-        record = Mongo.execute("users", "find_one", dict(_id=userId))
+        record = Mongo.getRecord("users", _id=userId)
         if record:
             user.id = userId
             user.name = record.name
@@ -106,11 +106,8 @@ class Auth:
         if projectId is None:
             projectId = Mongo.getRecord("editions", _id=editionId).projectId
 
-        projectRole = Mongo.execute(
-            "projectUsers",
-            "find_one",
-            dict(projectId=projectId, userId=user._id),
-            dict(role=True),
+        projectRole = Mongo.getRecord(
+            "projectUsers", projectId=projectId, userId=user._id
         ).role
 
         projectPub = Mongo.getRecord("projects", _id=projectId).isPublished
