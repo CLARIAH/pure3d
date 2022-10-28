@@ -1,4 +1,5 @@
 dataUrl: data
+webdavUrl: webdav
 
 title: >-
   PURE3D - An Infrastructure
@@ -10,3 +11,7 @@ heading: Pure 3D website
 viewers:
   voyager: true
   aton: false
+
+database: pure3d
+mongoHost: mongodb
+mongoPort: 27017

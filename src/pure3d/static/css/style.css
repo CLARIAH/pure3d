@@ -73,6 +73,8 @@
 .vw {
   display: flex;
   flex-flow: row wrap;
+  justify-content: flex-start;
+  align-content: flex-start;
   border-radius: 0.5em;
   border: 0.2em solid var(--viewer-back);
   padding: 0.3em 0.2em;
@@ -80,6 +82,16 @@
 }
 .vwl {
   font-size: small;
+}
+.vw {
+  display: flex;
+  flex-flow: column wrap;
+  justify-content: flex-start;
+  align-content: flex-start;
+  border-radius: 0.5em;
+  border: 0.2em solid var(--viewer-back);
+  padding: 0.3em 0.2em;
+  margin: 0.3em 2em;
 }
 
 .vv {

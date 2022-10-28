@@ -1,5 +1,5 @@
 from textwrap import dedent
-from flask import abort, render_template
+from flask import render_template
 
 TABS = (
     ("home", "Home", True),
@@ -33,7 +33,7 @@ class Pages:
         content=None,
     ):
         Config = self.Config
-        M = self.Messages
+        Messages = self.Messages
         Projects = self.Projects
         ProjectError = self.ProjectError
         Auth = self.Auth
@@ -81,8 +81,7 @@ class Pages:
                 missingOk=True,
             )
         except ProjectError as e:
-            M.error(e)
-            abort(404)
+            Messages.error(msg="Building the page", logmsg=f"Page error: {e}")
 
         navigation = self.navigation(url)
         material = dict(left=[], right=[])
@@ -111,7 +110,7 @@ class Pages:
             navigation=navigation,
             materialLeft=back + title + material["left"],
             materialRight=material["right"] + content,
-            messages=M.generateMessages(),
+            messages=Messages.generateMessages(),
             testUsers=Auth.wrapTestUsers(),
         )
 

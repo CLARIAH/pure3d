@@ -22,7 +22,7 @@ class Auth:
         user.clear()
 
     def getUser(self, userId):
-        M = self.Messages
+        Messages = self.Messages
         user = self.user
         userNameById = self.userNameById
         userRoleById = self.userRoleById
@@ -33,25 +33,27 @@ class Auth:
             user["id"] = userId
             user["name"] = userNameById[userId]
             user["role"] = userRoleById[userId]
-            M.debug(f"Existing user {userId} = {user['role']}: {user['name']}")
+            Messages.debug(
+                msg=f"Existing user {userId} = {user['role']}: {user['name']}"
+            )
         else:
-            M.debug(f"Unknown user {userId}")
+            Messages.debug(msg=f"Unknown user {userId}")
         return result
 
     def checkLogin(self):
         Config = self.Config
-        M = self.Messages
+        Messages = self.Messages
         self.clearUser()
         if Config.testMode:
             userId = request.args.get("userid", None)
             result = self.getUser(userId)
             if result:
-                M.info(f"LOGIN successful: user {userId}")
+                Messages.plain(msg=f"LOGIN successful: user {userId}")
             else:
-                M.warning(f"LOGIN failed: user {userId} does not exist")
+                Messages.warning(msg=f"LOGIN: user {userId} does not exist")
             return result
 
-        M.warning("User management is only available in test mode")
+        Messages.warning(msg="User management is only available in test mode")
         return False
 
     def wrapTestUsers(self):
@@ -111,14 +113,14 @@ class Auth:
         return "id" in user
 
     def deauthenticate(self):
-        M = self.Messages
+        Messages = self.Messages
         userId = session.get("userid", None)
         if userId:
             self.getUser(userId)
             self.clearUser()
-            M.info(f"LOGOUT successful: user {userId}")
+            Messages.plain(msg=f"LOGOUT successful: user {userId}")
         else:
-            M.warning("You were not logged in")
+            Messages.warning(msg="You were not logged in")
 
         session.pop("userid", None)
 

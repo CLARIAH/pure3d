@@ -4,12 +4,30 @@
 # How to build and run the pure3d app
 The app now builds and deploys all on remote server
 
-### to build:
-Push your changes to remote branch, for now, `containerize`. Then run locally the following command. 
+### to build on the server:
+Push your changes to remote branch. Then run locally the following command. 
 ```shell
 ./start.sh
 ```
 The app will be build and deployed on remote server. When ready you can check the URL to see the latest changes. 
+
+### to restart the app on the server:
+Push your changes to remote branch. Then run locally the following command. 
+```shell
+./start.sh restart-only
+```
+
+### to build the app locally on your computer:
+Run locally the following command. 
+```shell
+./build-local.sh
+```
+
+### to build and push your local built image, use `push` parameter on your local build:
+Run locally the following command. 
+```shell
+./build-local.sh push
+```
 
 ### notes
  * please add `pure3d.dev` as host alias to your ssh config, and make sure you can run sudo without password
