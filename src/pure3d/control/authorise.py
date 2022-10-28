@@ -1,5 +1,6 @@
 from flask import request, session
 
+from control.mongo import castObjectId
 from control.helpers.generic import AttrDict
 
 
@@ -22,9 +23,9 @@ class Auth:
         user = self.user
 
         user.clear()
-        record = Mongo.getRecord("users", _id=userId)
+        record = Mongo.getRecord("users", _id=castObjectId(userId))
         if record:
-            user.id = userId
+            user._id = userId
             user.name = record.name
             user.role = record.role
             result = True
@@ -40,8 +41,9 @@ class Auth:
         if Config.testMode:
             userId = request.args.get("userid", None)
             result = self.getUser(userId)
+            userName = self.user.name
             if result:
-                Messages.plain(msg=f"LOGIN successful: user {userId}")
+                Messages.plain(msg=f"LOGIN successful: user {userName}")
             else:
                 Messages.warning(msg=f"LOGIN: user {userId} does not exist")
             return result
@@ -55,7 +57,7 @@ class Auth:
         if login:
             session.pop("userid", None)
             if self.checkLogin():
-                session["userid"] = user.id
+                session["userid"] = user._id
                 return True
             return False
 
@@ -71,7 +73,7 @@ class Auth:
 
     def authenticated(self):
         user = self.user
-        return "id" in user
+        return "_id" in user
 
     def deauthenticate(self):
         Messages = self.Messages
@@ -90,18 +92,23 @@ class Auth:
 
         user = self.user
 
-        if project is not None:
+        if project:
             projectId = (
-                Mongo.getRecord("projects", name=project).projectId
+                Mongo.getRecord("projects", name=project)._id
                 if byName
-                else project
+                else project or None
             )
-        if edition is not None:
+        else:
+            projectId = None
+
+        if edition:
             editionId = (
-                Mongo.getRecord("editions", name=edition).editionId
+                Mongo.getRecord("editions", name=edition)._id
                 if byName
-                else edition
+                else edition or None
             )
+        else:
+            editionId = None
 
         if projectId is None:
             projectId = Mongo.getRecord("editions", _id=editionId).projectId
@@ -109,10 +116,13 @@ class Auth:
         projectRole = Mongo.getRecord(
             "projectUsers", projectId=projectId, userId=user._id
         ).role
+        projectPub = (
+            "published"
+            if Mongo.getRecord("projects", _id=projectId).isPublished
+            else "unpublished"
+        )
 
-        projectPub = Mongo.getRecord("projects", _id=projectId).isPublished
-
-        projectRules = Config.auth.projectrules[projectPub]
+        projectRules = Config.auth.projectRules[projectPub]
         condition = (
             projectRules[user.role] if user.role in projectRules else projectRules[None]
         ).get(action, False)

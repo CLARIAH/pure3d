@@ -29,7 +29,6 @@ class Content:
         self.Auth = Auth
 
     def getText(self, name, projectId=None, editionId=None):
-        Messages = self.Messages
         Mongo = self.Mongo
 
         table = "texts"
@@ -45,7 +44,6 @@ class Content:
             table = "texts"
 
         record = Mongo.getRecord(table, name=name, **condition)
-        Messages.debug(logmsg=f"{name=} {condition=} {record=}")
         return markdown(record.text or "")
 
     def getSurprise(self):
@@ -58,7 +56,7 @@ class Content:
         wrapped = []
 
         for row in Mongo.execute(
-            "projects", "find", {}, dict(title=True, name=True, projectId=True)
+            "projects", "find", {}, dict(title=True, name=True, candy=True)
         ):
             row = AttrDict(row)
             projectId = row._id
@@ -90,7 +88,7 @@ class Content:
             "editions",
             "find",
             dict(projectId=projectId),
-            dict(title=True, name=True),
+            dict(title=True, name=True, candy=True),
         ):
             row = AttrDict(row)
             editionId = row._id
@@ -200,7 +198,7 @@ class Content:
             return list(candy)[0]
         return None
 
-    def getData(self, path, projectName=None, editionName=None):
+    def getData(self, path, projectName="", editionName=""):
         Config = self.Config
         Messages = self.Messages
         Auth = self.Auth
@@ -209,9 +207,9 @@ class Content:
 
         urlBase = (
             "texts"
-            if projectName is None and editionName is None
+            if projectName == "" and editionName == ""
             else f"projects/{projectName}"
-            if editionName is None
+            if editionName == ""
             else f"projects/{projectName}/editions/{editionName}"
         )
 
@@ -241,3 +239,6 @@ class Content:
             textData = fh.read()
 
         return textData
+
+    def getRecord(self, *args, **kwargs):
+        return self.Mongo.getRecord(*args, **kwargs)

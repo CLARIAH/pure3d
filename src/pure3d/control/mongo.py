@@ -1,6 +1,28 @@
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 
 from control.helpers.generic import AttrDict
+
+
+def castObjectId(value):
+    """Try to cast the value as an ObjectId.
+    Paramaters
+    ----------
+    value:string
+        The value to cast, normally a string representation of a BSON object id.
+
+    Returns
+    -------
+    objectId | None
+        The corresponding BSON object id if the input is a valid representation of
+        such an id, otherwise `None`.
+    """
+
+    try:
+        oValue = ObjectId(value)
+    except Exception:
+        oValue = None
+    return oValue
 
 
 class Mongo:
@@ -13,14 +35,12 @@ class Mongo:
 
     def connect(self):
         Config = self.Config
-        Messages = self.Messages
         client = self.client
         mongo = self.mongo
         database = self.database
 
         if mongo is None:
             try:
-                Messages.debug(logmsg=f"{Config.mongoHost=} {Config.mongoPort=}")
                 client = MongoClient(Config.mongoHost, Config.mongoPort, username=Config.mongoUser, password=Config.mongoPassword)
                 mongo = client[database]
             except Exception as e:

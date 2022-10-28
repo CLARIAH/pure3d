@@ -124,6 +124,14 @@ def appFactory():
         return Pages.dataTexts(fileName)
 
     @app.route(
+        "/data/projects/<string:projectName>/",
+        defaults=dict(editionName="", path=""),
+    )
+    @app.route(
+        "/data/projects/<string:projectName>/<path:path>",
+        defaults=dict(editionName=""),
+    )
+    @app.route(
         "/data/projects/<string:projectName>/editions/<string:editionName>/",
         defaults=dict(path=""),
     )
@@ -150,7 +158,7 @@ def appFactory():
             edition=editionName,
             byName=True,
         )
-        Messages.debug(
+        Messages.info(
             logmsg=f"WEBDAV auth: {permitted=} {Auth.user=}"
             f" {projectName=} {editionName=} {path=}"
         )

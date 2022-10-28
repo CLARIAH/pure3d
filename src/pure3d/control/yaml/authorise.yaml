@@ -21,7 +21,7 @@ actions:
 #  a list of project specific roles
 #  that are permitted to do the action
 #
-projectrules:
+projectRules:
   published:
     null:
       create: false
