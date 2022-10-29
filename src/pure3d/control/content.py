@@ -112,7 +112,7 @@ class Content:
         self,
         projectId,
         editionId,
-        activeId=None,
+        sceneId=None,
         viewer="",
         version="",
         action="view",
@@ -148,23 +148,20 @@ class Content:
             dict(name=True, projectName=True, projectId=True),
         ):
             row = AttrDict(row)
-            sceneId = row._id
-            title = row.name
-            candy = row.candy
 
-            isSceneActive = sceneId == activeId
+            isSceneActive = row._id == sceneId
             (frame, buttons) = Viewers.getButtons(
-                sceneId, actions, isSceneActive, viewer, version, action
+                row._id, actions, isSceneActive, viewer, version, action
             )
 
-            sceneUrl = f"/scenes/{sceneId}"
+            sceneUrl = f"/scenes/{row._id}"
             iconUrlBase = f"/data/projects/{projectName}/editions/{editionName}/candy"
             caption = self.getCaption(
-                title,
-                candy,
+                row.name,
+                row.candy,
                 sceneUrl,
                 iconUrlBase,
-                active=activeId is None or isSceneActive,
+                active=sceneId is None or isSceneActive,
                 frame=frame,
                 buttons=buttons,
             )
@@ -192,11 +189,11 @@ class Content:
         return caption
 
     def getIcon(self, candy):
+        if candy is None:
+            return None
         first = [image for (image, isIcon) in candy.items() if isIcon]
         if first:
             return first[0]
-        if candy:
-            return list(candy)[0]
         return None
 
     def getData(self, path, projectName="", editionName=""):

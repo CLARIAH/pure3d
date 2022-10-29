@@ -4,7 +4,8 @@ from control.helpers.generic import AttrDict
 
 
 class Viewers:
-    def __init__(self, Mongo):
+    def __init__(self, Config, Mongo):
+        self.Config = Config
         self.Mongo = Mongo
 
         viewers = AttrDict()
@@ -99,7 +100,7 @@ class Viewers:
 
         return (frame, "\n".join(buttons))
 
-    def genHtml(self, urlBase, sceneName, viewer, version, action, root):
+    def genHtml(self, urlBase, sceneName, viewer, version, action):
         Config = self.Config
         debugMode = Config.debugMode
         ext = "dev" if debugMode else "min"

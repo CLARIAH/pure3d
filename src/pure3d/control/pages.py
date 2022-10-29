@@ -210,7 +210,7 @@ class Pages:
         html.append("</div>")
         return "\n".join(html)
 
-    def backLink(projectId):
+    def backLink(self, projectId):
         projectUrl = f"/projects/{projectId}"
         cls = """ class="button" """
         href = f""" href="{projectUrl}" """

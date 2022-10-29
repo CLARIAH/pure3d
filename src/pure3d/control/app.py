@@ -19,7 +19,7 @@ if True:
 
     Mongo = Mongo(Config, Messages)
 
-    Viewers = Viewers(Mongo)
+    Viewers = Viewers(Config, Mongo)
 
     Users = Users(Config, Messages, Mongo)
     Content = Content(Config, Viewers, Messages, Mongo)
