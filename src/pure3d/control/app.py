@@ -29,7 +29,7 @@ if True:
     Content.addAuth(Auth)
     Viewers.addAuth(Auth)
 
-    Pages = Pages(Config, Messages, Content, Viewers, Auth, Users)
+    Pages = Pages(Config, Viewers, Messages, Content, Auth, Users)
 else:
     (Config, Messages, Mongo, Viewers, Users, Content, Auth, EditSessions, Pages) = (
         AttrDict(dict(secret_key=None)),

@@ -13,13 +13,40 @@ TABS = (
 
 
 class Pages:
-    def __init__(self, Config, Messages, Content, Viewers, Auth, Users):
+    def __init__(self, Config, Viewers, Messages, Content, Auth, Users):
+        """Making responses that can be displayed as web pages.
+
+        This class has methods that correspond to routes in the app,
+        for which they get the data (using `control.content.Content`),
+        which gets then wrapped in HTML.
+
+        It is instantiated by a singleton object.
+
+        Parameters
+        ----------
+        Config: object
+            Singleton instance of `control.config.Config`.
+        Viewers: object
+            Singleton instance of `control.viewers.Viewers`.
+        Messages: object
+            Singleton instance of `control.messages.Messages`.
+        Mongo: object
+            Singleton instance of `control.mongo.Mongo`.
+        Users: object
+            Singleton instance of `control.users.Users`.
+        Content: object
+            Singleton instance of `control.content.Content`.
+        Auth: object
+            Singleton instance of `control.authorise.Auth`.
+        Users: object
+            Singleton instance of `control.users.Users`.
+        """
         self.Config = Config
+        self.Viewers = Viewers
         self.Messages = Messages
         self.Content = Content
         self.Auth = Auth
         self.Users = Users
-        self.Viewers = Viewers
 
     def home(self):
         Content = self.Content

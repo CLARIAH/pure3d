@@ -5,6 +5,20 @@ from control.helpers.generic import AttrDict
 
 class Viewers:
     def __init__(self, Config, Mongo):
+        """Knowledge of the installed 3D viewers.
+
+        This class knows which (versions of) viewers are installed,
+        and has the methods to invoke them.
+
+        It is instantiated by a singleton object.
+
+        Parameters
+        ----------
+        Config: object
+            Singleton instance of `control.config.Config`.
+        Mongo: object
+            Singleton instance of `control.mongo.Mongo`.
+        """
         self.Config = Config
         self.Mongo = Mongo
 

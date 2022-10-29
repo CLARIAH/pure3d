@@ -6,6 +6,27 @@ from control.helpers.generic import AttrDict
 
 class Auth:
     def __init__(self, Config, Messages, Mongo, Users, Content):
+        """All about authorised data access.
+
+        This class knows users and content,
+        and decides whether the current user is authorised to perform certain
+        actions on content in question.
+
+        It is instantiated by a singleton object.
+
+        Parameters
+        ----------
+        Config: object
+            Singleton instance of `control.config.Config`.
+        Messages: object
+            Singleton instance of `control.messages.Messages`.
+        Mongo: object
+            Singleton instance of `control.mongo.Mongo`.
+        Users: object
+            Singleton instance of `control.users.Users`.
+        Content: object
+            Singleton instance of `control.content.Content`.
+        """
         self.Config = Config
         self.Messages = Messages
         self.Mongo = Mongo

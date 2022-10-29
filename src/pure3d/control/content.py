@@ -20,6 +20,25 @@ COMPONENT = dict(
 
 class Content:
     def __init__(self, Config, Viewers, Messages, Mongo):
+        """Retrieving content from database and file system.
+
+        This class has methods to retrieve various pieces of content
+        from the data sources, and hand it over to the `control.pages.Pages`
+        class that will compose a response out of it.
+
+        It is instantiated by a singleton object.
+
+        Parameters
+        ----------
+        Config: object
+            Singleton instance of `control.config.Config`.
+        Viewers: object
+            Singleton instance of `control.viewers.Viewers`.
+        Messages: object
+            Singleton instance of `control.messages.Messages`.
+        Mongo: object
+            Singleton instance of `control.mongo.Mongo`.
+        """
         self.Config = Config
         self.Viewers = Viewers
         self.Messages = Messages

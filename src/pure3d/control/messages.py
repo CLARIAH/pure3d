@@ -6,6 +6,18 @@ from control.helpers.generic import htmlEsc
 
 class Messages:
     def __init__(self, Config, flask=True):
+        """Sending messages to the user and sysadmin.
+
+        This class has methods to issue messages to the screen of the webuser
+        and to the log for the sysadmin.
+
+        It is instantiated by a singleton object.
+
+        Parameters
+        ----------
+        Config: object
+            Singleton instance of `control.config.Config`.
+        """
         self.Config = Config
         self.messages = []
         self.flask = flask

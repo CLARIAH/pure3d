@@ -11,6 +11,15 @@ VERSION_FILE = "version.txt"
 
 class Config:
     def __init__(self, Messages):
+        """All configuration details of the app.
+
+        It is instantiated by a singleton object.
+
+        Parameters
+        ----------
+        Messages: object
+            Singleton instance of `control.messages.Messages`.
+        """
         self.Messages = Messages
         self.good = False
         self.config = AttrDict()

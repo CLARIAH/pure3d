@@ -27,6 +27,20 @@ def castObjectId(value):
 
 class Mongo:
     def __init__(self, Config, Messages):
+        """CRUD interface to content in the MongoDb database.
+
+        This class has methods to connect to a MongoDb database,
+        to query its data, to insert, update and delete data.
+
+        It is instantiated by a singleton object.
+
+        Parameters
+        ----------
+        Config: object
+            Singleton instance of `control.config.Config`.
+        Messages: object
+            Singleton instance of `control.messages.Messages`.
+        """
         self.Config = Config
         self.Messages = Messages
         self.client = None

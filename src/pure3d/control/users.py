@@ -3,6 +3,22 @@ from control.helpers.generic import AttrDict
 
 class Users:
     def __init__(self, Config, Messages, Mongo):
+        """All about users and the current users.
+
+        This class has methods to login/authenticate a user,
+        to logout/deauthenticate users, to retrieve users' data.
+
+        It is instantiated by a singleton object.
+
+        Parameters
+        ----------
+        Config: object
+            Singleton instance of `control.config.Config`.
+        Messages: object
+            Singleton instance of `control.messages.Messages`.
+        Mongo: object
+            Singleton instance of `control.mongo.Mongo`.
+        """
         self.Config = Config
         self.Messages = Messages
         self.Mongo = Mongo
