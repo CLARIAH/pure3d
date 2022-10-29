@@ -1,12 +1,13 @@
 from textwrap import dedent
 from flask import render_template, make_response
+from control.mongo import castObjectId
 
 TABS = (
     ("home", "Home", True),
     ("about", "About", True),
     ("projects", "3D Projects", True),
     ("directory", "3D Directory", False),
-    ("surpriseme", "Surprise Me", False),
+    ("surpriseme", "Surprise Me", True),
     ("advancedsearch", "Advanced Search", False),
 )
 
@@ -54,6 +55,7 @@ class Pages:
 
     def project(self, projectId):
         Content = self.Content
+        projectId = castObjectId(projectId)
         projectInfo = Content.getRecord("projects", _id=projectId)
         editions = Content.getEditions(projectId)
         title = f"<h1>{projectInfo.title}</h1>"
@@ -66,6 +68,7 @@ class Pages:
 
     def edition(self, editionId):
         Content = self.Content
+        editionId = castObjectId(editionId)
         editionInfo = Content.getRecord("editions", _id=editionId)
         projectId = editionInfo.projectId
         back = self.backLink(projectId)
@@ -81,6 +84,7 @@ class Pages:
 
     def scene(self, sceneId, viewer, version, action):
         Content = self.Content
+        sceneId = castObjectId(sceneId)
         sceneInfo = Content.getRecord("scenes", _id=sceneId)
         projectId = sceneInfo.projectId
         editionId = sceneInfo.editionId
@@ -112,6 +116,7 @@ class Pages:
         Viewers = self.Viewers
         Auth = self.Auth
 
+        sceneId = castObjectId(sceneId)
         sceneInfo = Content.getRecord("scenes", _id=sceneId)
         sceneName = sceneInfo.name
 

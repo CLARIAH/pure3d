@@ -113,15 +113,20 @@ class Auth:
         if projectId is None:
             projectId = Mongo.getRecord("editions", _id=editionId).projectId
 
-        projectRole = Mongo.getRecord(
-            "projectUsers", projectId=projectId, userId=user._id
-        ).role
+        projectRole = (
+            None
+            if user._id is None
+            else Mongo.getRecord(
+                "projectUsers", projectId=projectId, userId=castObjectId(user._id)
+            ).role
+        )
         projectPub = (
             "published"
             if Mongo.getRecord("projects", _id=projectId).isPublished
             else "unpublished"
         )
 
+        self.Messages.debug(logmsg=f"{user._id=} {user.name=} {user.role=} {projectRole=} {projectPub=}")
         projectRules = Config.auth.projectRules[projectPub]
         condition = (
             projectRules[user.role] if user.role in projectRules else projectRules[None]

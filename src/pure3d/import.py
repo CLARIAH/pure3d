@@ -74,7 +74,7 @@ def importContent():
     ):
         Mongo.checkCollection(table, reset=True)
 
-    textPath = f"{dataDir}/{PROJECTS}"
+    textPath = f"{dataDir}/{TEXTS}"
     textFiles = listFiles(textPath, ".md")
 
     for textFile in textFiles:

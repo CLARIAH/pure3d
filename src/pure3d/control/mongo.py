@@ -87,6 +87,8 @@ class Mongo:
     def getRecord(self, table, **criteria):
         result = self.execute(table, "find_one", criteria, {})
         if result is None:
+            Messages = self.Messages
+            Messages.warning(logmsg=f"No record in {table} with {criteria}")
             result = {}
         return AttrDict(result)
 

@@ -59,6 +59,7 @@ class Content:
             "projects", "find", {}, dict(title=True, name=True, candy=True)
         ):
             row = AttrDict(row)
+            self.Messages.debug(logmsg=f"{row.name=}")
             projectId = row._id
             permitted = Auth.authorise("view", project=projectId)
             if not permitted:
