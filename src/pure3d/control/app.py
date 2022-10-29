@@ -158,10 +158,11 @@ def appFactory():
             edition=editionName,
             byName=True,
         )
-        Messages.info(
-            logmsg=f"WEBDAV auth: {permitted=} {Auth.user=}"
-            f" {projectName=} {editionName=} {path=}"
-        )
+        if not permitted:
+            Messages.info(
+                logmsg=f"WEBDAV unauthorised by user {Auth.user}"
+                f" on {projectName=} {editionName=} {path=}"
+            )
         return permitted
 
     @app.route("/auth/webdav/<path:path>", methods=tuple(WEBDAV_METHODS))

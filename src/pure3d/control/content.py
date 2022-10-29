@@ -50,20 +50,13 @@ class Content:
     def getText(self, name, projectId=None, editionId=None):
         Mongo = self.Mongo
 
-        table = "texts"
-        condition = {}
-
         if editionId is not None:
-            table = "editions"
-            condition = dict(editionId=editionId)
+            text = Mongo.getRecord("editions", _id=editionId).texts.get(name, "")
         elif projectId is not None:
-            table = "projects"
-            condition = dict(projectId=projectId)
+            text = Mongo.getRecord("projects", _id=projectId).texts.get(name, "")
         else:
-            table = "texts"
-
-        record = Mongo.getRecord(table, name=name, **condition)
-        return markdown(record.text or "")
+            text = Mongo.getRecord("texts", name=name).text or ""
+        return markdown(text)
 
     def getSurprise(self):
         return "<h2>You will be surprised!</h2>"
@@ -78,7 +71,6 @@ class Content:
             "projects", "find", {}, dict(title=True, name=True, candy=True)
         ):
             row = AttrDict(row)
-            self.Messages.debug(logmsg=f"{row.name=}")
             projectId = row._id
             permitted = Auth.authorise("view", project=projectId)
             if not permitted:
@@ -242,7 +234,7 @@ class Content:
 
         exists = os.path.isfile(dataPath)
         if not permitted or not exists:
-            logmsg = f"Issues in accessing {dataPath}: "
+            logmsg = f"Accessing {dataPath}: "
             if not permitted:
                 logmsg = "not allowed. "
             if not exists:

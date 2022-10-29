@@ -149,7 +149,7 @@ class Viewers:
                 <body>
                 <voyager-{element}
                   root="{viewerRoot}"
-                  document="{sceneName}"
+                  document="{sceneName}.json"
                   resourceroot="{viewerStatic}"
                 > </voyager-{element}>
                 </body>

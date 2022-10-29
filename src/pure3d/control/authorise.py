@@ -147,7 +147,6 @@ class Auth:
             else "unpublished"
         )
 
-        self.Messages.debug(logmsg=f"{user._id=} {user.name=} {user.role=} {projectRole=} {projectPub=}")
         projectRules = Config.auth.projectRules[projectPub]
         condition = (
             projectRules[user.role] if user.role in projectRules else projectRules[None]
