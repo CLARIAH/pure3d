@@ -118,10 +118,6 @@ def appFactory():
     def viewerFrame(sceneId, viewer, version, action):
         return Pages.viewerFrame(sceneId, viewer, version, action)
 
-    @app.route("/data/texts/<string:fileName>")
-    def dataTexts(fileName):
-        return Pages.dataTexts(fileName)
-
     @app.route(
         "/data/projects/<string:projectName>/",
         defaults=dict(editionName="", path=""),

@@ -5,10 +5,10 @@ from control.messages import Messages
 from control.config import Config
 from control.mongo import Mongo
 
-from control.helpers.files import listFiles, listImages, readPath, readJson, readYaml
+from control.helpers.files import listFiles, listImages, readYaml
 
 
-TEXTS = "texts"
+META = "meta"
 PROJECTS = "projects"
 EDITIONS = "editions"
 
@@ -24,7 +24,7 @@ def importContent():
     Messages.plain(logmsg=f"Data directory = {dataDir}")
 
     for table in (
-        "texts",
+        "meta",
         "projects",
         "editions",
         "scenes",
@@ -33,18 +33,16 @@ def importContent():
     ):
         Mongo.checkCollection(table, reset=True)
 
-    textPath = f"{dataDir}/{TEXTS}"
-    textFiles = listFiles(textPath, ".md")
+    metaPath = f"{dataDir}/{META}"
+    metaFiles = listFiles(metaPath, ".yml")
 
-    for textFile in textFiles:
-        text = readPath(f"{textPath}/{textFile}.md")
-        textInfo = dict(
-            name=textFile,
-            text=text,
+    for metaFile in metaFiles:
+        meta = readYaml(f"{metaPath}/{metaFile}.yml")
+        metaInfo = dict(
+            name=metaFile,
+            meta=meta,
         )
-        result = Mongo.execute("texts", "insert_one", textInfo)
-        textId = result.inserted_id if result is not None else None
-        textId
+        Mongo.execute("meta", "insert_one", metaInfo)
 
     projectsPath = f"{dataDir}/{PROJECTS}"
     projectIdByName = {}
@@ -58,19 +56,12 @@ def importContent():
 
                 meta = {}
                 metaPath = f"{projectPath}/meta"
-                metaFiles = listFiles(metaPath, ".json")
+                metaFiles = listFiles(metaPath, ".yml")
 
                 for metaFile in metaFiles:
-                    meta[metaFile] = readJson(f"{metaPath}/{metaFile}.json")
+                    meta[metaFile] = readYaml(f"{metaPath}/{metaFile}.yml")
 
-                title = meta.get("dc", {}).get("dc.title", projectName)
-
-                texts = {}
-                textPath = f"{projectPath}/texts"
-                textFiles = listFiles(textPath, ".md")
-
-                for textFile in textFiles:
-                    texts[textFile] = readPath(f"{textPath}/{textFile}.md")
+                title = meta.get("dc", {}).get("title", projectName)
 
                 candy = {}
                 candyPath = f"{projectPath}/candy"
@@ -82,7 +73,6 @@ def importContent():
                     title=title,
                     name=projectName,
                     meta=meta,
-                    texts=texts,
                     candy=candy,
                 )
 
@@ -100,19 +90,12 @@ def importContent():
 
                             meta = {}
                             metaPath = f"{editionPath}/meta"
-                            metaFiles = listFiles(metaPath, ".json")
-
-                            title = meta.get("dc", {}).get("dc.title", editionName)
+                            metaFiles = listFiles(metaPath, ".yml")
 
                             for metaFile in metaFiles:
-                                meta[metaFile] = readJson(f"{metaPath}/{metaFile}.json")
+                                meta[metaFile] = readYaml(f"{metaPath}/{metaFile}.yml")
 
-                            texts = {}
-                            textPath = f"{editionPath}/texts"
-                            textFiles = listFiles(textPath, ".md")
-
-                            for textFile in textFiles:
-                                texts[textFile] = readPath(f"{textPath}/{textFile}.md")
+                            title = meta.get("dc", {}).get("title", editionName)
 
                             scenes = listFiles(editionPath, ".json")
                             sceneSet = set(scenes)
@@ -137,7 +120,6 @@ def importContent():
                                 name=editionName,
                                 projectId=projectId,
                                 meta=meta,
-                                texts=texts,
                                 candy=candy,
                             )
                             result = Mongo.execute(

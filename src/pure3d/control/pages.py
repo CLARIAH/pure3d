@@ -1,6 +1,7 @@
 from textwrap import dedent
 from flask import render_template, make_response
 from control.mongo import castObjectId
+from markdown import markdown
 
 TABS = (
     ("home", "Home", True),
@@ -10,6 +11,14 @@ TABS = (
     ("surpriseme", "Surprise Me", True),
     ("advancedsearch", "Advanced Search", False),
 )
+
+CAPTIONS = {
+    "title": ("{}", True),
+    "description.abstract": ("Intro", True),
+    "description.description": ("Description", True),
+    "provenance": ("About", True),
+    "instructionalMethod": ("How to use", True),
+}
 
 
 class Pages:
@@ -49,48 +58,82 @@ class Pages:
         self.Auth = Auth
         self.Users = Users
 
-    def home(self):
+    def putText(self, field, level, projectId=None, editionId=None):
         Content = self.Content
-        intro = Content.getText("intro")
-        left = (intro,)
+
+        content = Content.getMeta("dc", field, projectId=projectId, editionId=editionId)
+        info = CAPTIONS.get(field, None)
+
+        if info is None:
+            return content
+
+        (heading, asMd) = info
+
+        if asMd:
+            heading = markdown(heading)
+            content = markdown(content)
+
+        return dedent(
+            f"""
+            <h{level}>{heading.format(content)}</h{level}>
+            {content}
+            """
+        )
+
+    def putTexts(self, fieldSpecs, projectId=None, editionId=None):
+        return tuple(
+            self.putText(
+                *fieldSpec.split("@", 1), projectId=projectId, editionId=editionId
+            )
+            for fieldSpec in fieldSpecs
+        )
+
+    def home(self):
+        left = self.putTexts(
+            (
+                "title@1",
+                "descritpion.abstract@2",
+            )
+        )
         return self.page("home", left=left)
 
     def about(self):
-        Content = self.Content
-        intro = Content.getText("intro")
-        about = Content.getText("about")
-        left = (intro,)
-        right = (about,)
+        left = self.putTexts(("title@1",))
+        right = self.putTexts(
+            (
+                "description.abstract@2",
+                "description.description@2",
+                "provenance@2",
+            )
+        )
         return self.page("about", left=left, right=right)
 
     def surprise(self):
         Content = self.Content
-        intro = Content.getText("intro")
         surpriseMe = Content.getSurprise()
-        left = (intro,)
+        left = self.putTexts(("title@1",))
         right = (surpriseMe,)
         return self.page("surpriseme", left=left, right=right)
 
     def projects(self):
         Content = self.Content
-        title = """<h2>Scholarly projects</h2>"""
         projects = Content.getProjects()
-        left = (
-            title,
-            projects,
-        )
+        left = (*self.putTexts(("title@2",)), projects)
         return self.page("projects", left=left)
 
     def project(self, projectId):
         Content = self.Content
         projectId = castObjectId(projectId)
-        projectInfo = Content.getRecord("projects", _id=projectId)
         editions = Content.getEditions(projectId)
-        title = f"<h1>{projectInfo.title}</h1>"
-        left = (title, editions)
-        right = tuple(
-            Content.getText(item, projectId=projectId)
-            for item in ("intro", "about", "description")
+        left = (*self.putTexts(("title@3",), projectId=projectId), editions)
+        right = self.putTexts(
+            (
+                "description.abstract@4",
+                "description.description@4",
+                "provenance@4",
+                "instructionalMethod@4",
+            ),
+            projectId=projectId,
         )
         return self.page("projects", left=left, right=right, projectId=projectId)
 
@@ -99,16 +142,7 @@ class Pages:
         editionId = castObjectId(editionId)
         editionInfo = Content.getRecord("editions", _id=editionId)
         projectId = editionInfo.projectId
-        back = self.backLink(projectId)
-        title = f"<h2>{editionInfo.title}</h2>"
-        scenes = Content.getScenes(projectId, editionId)
-        left = (back, title, scenes)
-        right = tuple(
-            Content.getText(item, editionId=editionId) for item in ("about", "sources")
-        )
-        return self.page(
-            "projects", left=left, right=right, projectId=projectId, editionId=editionId
-        )
+        return self.scenes(projectId, editionId, None, None, None, None)
 
     def scene(self, sceneId, viewer, version, action):
         Content = self.Content
@@ -116,8 +150,14 @@ class Pages:
         sceneInfo = Content.getRecord("scenes", _id=sceneId)
         projectId = sceneInfo.projectId
         editionId = sceneInfo.editionId
+        return self.scenes(projectId, editionId, sceneId, viewer, version, action)
+
+    def scenes(self, projectId, editionId, sceneId, viewer, version, action):
+        Content = self.Content
+        Auth = self.Auth
+
+        action = Auth.checkModifiable(projectId, editionId, action)
         back = self.backLink(projectId)
-        title = f"<h3>{sceneInfo.name}</h3>"
         scenes = Content.getScenes(
             projectId,
             editionId,
@@ -126,9 +166,20 @@ class Pages:
             version=version,
             action=action,
         )
-        left = (back, title, scenes)
-        right = tuple(
-            Content.getText(item, editionId=editionId) for item in ("about", "sources")
+        left = (
+            back,
+            *self.putTexts(("title@4",), projectId=projectId, editionId=editionId),
+            scenes,
+        )
+        right = self.putTexts(
+            (
+                "description.abstract@5",
+                "description.description@5",
+                "provenance@5",
+                "instructionalMethod@5",
+            ),
+            projectId=projectId,
+            editionId=editionId,
         )
         return self.page(
             "projects",
@@ -136,7 +187,6 @@ class Pages:
             right=right,
             projectId=projectId,
             editionId=editionId,
-            action=action,
         )
 
     def viewerFrame(self, sceneId, viewer, version, action):
@@ -161,12 +211,6 @@ class Pages:
         viewerCode = Viewers.genHtml(urlBase, sceneName, viewer, version, action)
         return render_template("viewer.html", viewerCode=viewerCode)
 
-    def dataTexts(self, fileName):
-        Content = self.Content
-
-        data = Content.getData(fileName)
-        return make_response(data)
-
     def dataProjects(self, projectName, editionName, path):
         Content = self.Content
 
@@ -178,7 +222,6 @@ class Pages:
         url,
         projectId=None,
         editionId=None,
-        action="view",
         left=(),
         right=(),
     ):
@@ -188,7 +231,6 @@ class Pages:
         Users = self.Users
 
         userActive = Auth.user._id
-        action = Auth.checkModifiable(projectId, editionId, action)
 
         navigation = self.navigation(url)
         testUsers = Users.wrapTestUsers(userActive) if config.testMode else ""

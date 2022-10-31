@@ -48,16 +48,28 @@ class Content:
     def addAuth(self, Auth):
         self.Auth = Auth
 
-    def getText(self, name, projectId=None, editionId=None):
+    def getMeta(
+        self, nameSpace, fieldPath, projectId=None, editionId=None, asMd=False
+    ):
         Mongo = self.Mongo
 
+        fields = fieldPath.split(".")
+
         if editionId is not None:
-            text = Mongo.getRecord("editions", _id=editionId).texts.get(name, "")
+            text = (
+                Mongo.getRecord("editions", _id=editionId)
+                .meta.get(nameSpace, {})
+                .get(fields[0], "")
+            )
         elif projectId is not None:
-            text = Mongo.getRecord("projects", _id=projectId).texts.get(name, "")
+            text = Mongo.getRecord("projects", _id=projectId).meta.get(nameSpace, {}).get(fields[0], "")
         else:
-            text = Mongo.getRecord("texts", name=name).text or ""
-        return markdown(text)
+            text = Mongo.getRecord("meta", name=nameSpace).meta.get(fields[0], "")
+        for field in fields[1:]:
+            text = text.get(field, {})
+        if type(text) is not str:
+            text = ""
+        return markdown(text) if asMd else text
 
     def getSurprise(self):
         return "<h2>You will be surprised!</h2>"
