@@ -2,7 +2,7 @@ from control.helpers.generic import AttrDict
 
 
 class Users:
-    def __init__(self, Config, Messages, Mongo):
+    def __init__(self, config, Messages, Mongo):
         """All about users and the current users.
 
         This class has methods to login/authenticate a user,
@@ -12,28 +12,29 @@ class Users:
 
         Parameters
         ----------
-        Config: object
-            Singleton instance of `control.config.Config`.
+        config: AttrDict
+            App-wide configuration data obtained from
+            `control.config.Config.config`.
         Messages: object
             Singleton instance of `control.messages.Messages`.
         Mongo: object
             Singleton instance of `control.mongo.Mongo`.
         """
-        self.Config = Config
+        self.config = config
         self.Messages = Messages
         self.Mongo = Mongo
 
     def wrapTestUsers(self, userActive):
-        Config = self.Config
+        config = self.config
         Mongo = self.Mongo
 
-        if not Config.testMode:
+        if not config.testMode:
             return ""
 
         def wrap(title, href, cls, text):
             return (
                 f'<a title="{title}" href="{href}" class="button small {cls}">'
-                f'{text}</a>'
+                f"{text}</a>"
             )
 
         active = "active" if userActive is None else ""

@@ -6,7 +6,7 @@ from control.config import Config
 from control.messages import Messages
 
 
-Config = Config(Messages).getConfig()
+config = Config(Messages(None), dataDirOnly=True).config
 
 BASE = os.path.dirname(os.path.dirname(__file__))
 
@@ -31,7 +31,7 @@ WEBDAV_METHODS = dict(
 config = {
     "provider_mapping": {
         "/webdav/": {
-            "root": Config.dataDir,
+            "root": config.dataDir,
             "readonly": False,
         },
     },

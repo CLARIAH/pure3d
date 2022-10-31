@@ -19,7 +19,7 @@ COMPONENT = dict(
 
 
 class Content:
-    def __init__(self, Config, Viewers, Messages, Mongo):
+    def __init__(self, config, Viewers, Messages, Mongo):
         """Retrieving content from database and file system.
 
         This class has methods to retrieve various pieces of content
@@ -30,8 +30,9 @@ class Content:
 
         Parameters
         ----------
-        Config: object
-            Singleton instance of `control.config.Config`.
+        config: AttrDict
+            App-wide configuration data obtained from
+            `control.config.Config.config`.
         Viewers: object
             Singleton instance of `control.viewers.Viewers`.
         Messages: object
@@ -39,7 +40,7 @@ class Content:
         Mongo: object
             Singleton instance of `control.mongo.Mongo`.
         """
-        self.Config = Config
+        self.config = config
         self.Viewers = Viewers
         self.Messages = Messages
         self.Mongo = Mongo
@@ -67,9 +68,7 @@ class Content:
 
         wrapped = []
 
-        for row in Mongo.execute(
-            "projects", "find", {}, dict(title=True, name=True, candy=True)
-        ):
+        for row in Mongo.execute("projects", "find"):
             row = AttrDict(row)
             projectId = row._id
             permitted = Auth.authorise("view", project=projectId)
@@ -96,12 +95,7 @@ class Content:
 
         wrapped = []
 
-        for row in Mongo.execute(
-            "editions",
-            "find",
-            dict(projectId=projectId),
-            dict(title=True, name=True, candy=True),
-        ):
+        for row in Mongo.execute("editions", "find", dict(projectId=projectId)):
             row = AttrDict(row)
             editionId = row._id
             permitted = Auth.authorise("view", project=projectId, edition=editionId)
@@ -152,15 +146,11 @@ class Content:
 
         wrapped = []
 
-        for row in Mongo.execute(
-            "scenes",
-            "find",
-            dict(editionId=editionId),
-            dict(name=True, projectName=True, projectId=True),
-        ):
+        for row in Mongo.execute("scenes", "find", dict(editionId=editionId)):
             row = AttrDict(row)
+            self.Messages.debug(logmsg=f"{row=}")
 
-            isSceneActive = row._id == sceneId
+            isSceneActive = sceneId is None and row.default or row._id == sceneId
             (frame, buttons) = Viewers.getButtons(
                 row._id, actions, isSceneActive, viewer, version, action
             )
@@ -172,7 +162,7 @@ class Content:
                 row.candy,
                 sceneUrl,
                 iconUrlBase,
-                active=sceneId is None or isSceneActive,
+                active=isSceneActive,
                 frame=frame,
                 buttons=buttons,
             )
@@ -208,11 +198,11 @@ class Content:
         return None
 
     def getData(self, path, projectName="", editionName=""):
-        Config = self.Config
+        config = self.config
         Messages = self.Messages
         Auth = self.Auth
 
-        dataDir = Config.dataDir
+        dataDir = config.dataDir
 
         urlBase = (
             "texts"

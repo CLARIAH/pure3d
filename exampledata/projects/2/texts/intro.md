@@ -1,1 +1,0 @@
-The Lighting the Darkness 3D Scholarly Model tells of the rich history of coal mining in the province of Dutch Limburg through the mining lamp collection of Hans Dubbel.

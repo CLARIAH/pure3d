@@ -8,30 +8,29 @@ from control.content import Content
 from control.users import Users
 from control.pages import Pages
 from control.editsessions import EditSessions
-from control.authorise import Auth
+from control.auth import Auth
 from control.webdavapp import WEBDAV_METHODS
 
 from control.helpers.generic import AttrDict
 
 if True:
-    Config = Config(Messages(None)).getConfig()
-    Messages = Messages(Config)
+    config = Config(Messages(None)).config
+    Messages = Messages(config)
+    Viewers = Viewers(config)
 
-    Mongo = Mongo(Config, Messages)
+    Mongo = Mongo(config, Messages)
 
-    Viewers = Viewers(Config, Mongo)
-
-    Users = Users(Config, Messages, Mongo)
-    Content = Content(Config, Viewers, Messages, Mongo)
-    Auth = Auth(Config, Messages, Mongo, Users, Content)
+    Users = Users(config, Messages, Mongo)
+    Content = Content(config, Viewers, Messages, Mongo)
+    Auth = Auth(config, Messages, Mongo, Users, Content)
     EditSessions = EditSessions(Mongo)
 
     Content.addAuth(Auth)
     Viewers.addAuth(Auth)
 
-    Pages = Pages(Config, Viewers, Messages, Content, Auth, Users)
+    Pages = Pages(config, Viewers, Messages, Content, Auth, Users)
 else:
-    (Config, Messages, Mongo, Viewers, Users, Content, Auth, EditSessions, Pages) = (
+    (config, Messages, Mongo, Viewers, Users, Content, Auth, EditSessions, Pages) = (
         AttrDict(dict(secret_key=None)),
         None,
         None,
@@ -49,7 +48,7 @@ else:
 
 def appFactory():
     app = Flask(__name__, static_folder="../static")
-    app.secret_key = Config.secret_key
+    app.secret_key = config.secret_key
 
     def redirectResult(url, good):
         code = 302 if good else 303

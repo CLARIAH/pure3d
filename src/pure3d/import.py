@@ -6,63 +6,22 @@ from control.config import Config
 from control.mongo import Mongo
 
 from control.helpers.files import listFiles, listImages, readPath, readJson, readYaml
-from control.helpers.generic import AttrDict
 
 
 TEXTS = "texts"
 PROJECTS = "projects"
 EDITIONS = "editions"
 
-VIEWER_DEFAULT = "voyager"
+SCENE_DEFAULT = "intro"
 
-Config = Config(Messages(None, flask=False)).getConfig()
+Config = Config(Messages(None, flask=False)).config
 Messages = Messages(Config, flask=False)
 Mongo = Mongo(Config, Messages)
 
 
-def importViewers():
-    yamlDir = Config.yamlDir
-    Mongo.checkCollection("viewers", reset=True)
-    viewerDir = Config.viewerDir
-    viewerSettings = readYaml(f"{yamlDir}/viewers.yaml")
-    if viewerSettings is None:
-        Messages.error(logmsg=f"No viewer settings file {yamlDir}/viewers.yaml")
-        return
-
-    with os.scandir(viewerDir) as vd:
-        for entry in vd:
-            if entry.is_dir():
-                viewerName = entry.name
-                if viewerName not in viewerSettings:
-                    Messages.warning(
-                        logmsg=(
-                            f"Skipping viewer {viewerName}"
-                            "because not defined in viewers.yaml"
-                        )
-                    )
-                    continue
-                viewerConfig = viewerSettings[viewerName]
-                viewerPath = f"{viewerDir}/{viewerName}"
-                versions = []
-
-                with os.scandir(viewerPath) as sd:
-                    for entry in sd:
-                        if entry.is_dir():
-                            version = entry.name
-                            versions.append(version)
-
-                viewerInfo = AttrDict(
-                    name=viewerName,
-                    versions=versions,
-                    config=viewerConfig,
-                )
-                if viewerName == VIEWER_DEFAULT:
-                    viewerInfo.default = True
-                Mongo.execute("viewers", "insert_one", viewerInfo)
-
-
 def importContent():
     dataDir = Config.dataDir
+    Messages.plain(logmsg=f"Data directory = {dataDir}")
 
     for table in (
         "texts",
@@ -94,6 +53,7 @@ def importContent():
         for entry in pd:
             if entry.is_dir():
                 projectName = entry.name
+                Messages.plain(logmsg=f"PROJECT {projectName}")
                 projectPath = f"{projectsPath}/{projectName}"
 
                 meta = {}
@@ -187,12 +147,18 @@ def importContent():
                                 result.inserted_id if result is not None else None
                             )
 
+                            sceneDefault = None
+
                             for scene in scenes:
+                                default = sceneDefault is None and scene == SCENE_DEFAULT
+                                if default:
+                                    sceneDefault = scene
                                 sceneInfo = dict(
                                     name=scene,
                                     editionId=editionId,
                                     projectId=projectId,
                                     candy=sceneCandy[scene],
+                                    default=default,
                                 )
                                 result = Mongo.execute(
                                     "scenes", "insert_one", sceneInfo
@@ -220,6 +186,7 @@ def importContent():
         userIdByName[userName] = userId
 
     for (projectName, isPublished) in projectStatus.items():
+        Messages.plain(logmsg=f"PROJECT {projectName} published: {isPublished}")
         Mongo.execute(
             "projects",
             "update_one",
@@ -239,7 +206,5 @@ def importContent():
 
 if __name__ == "__main__":
     tasks = set(sys.argv[1:])
-    if "viewers" in tasks:
-        importViewers()
     if "content" in tasks:
         importContent()

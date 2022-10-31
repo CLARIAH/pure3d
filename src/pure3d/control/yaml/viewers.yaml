@@ -1,3 +1,5 @@
 voyager:
-  view: "/data"
-  edit: "/webdav"
+  modes:
+    view: "/data"
+    edit: "/webdav"
+  default: true

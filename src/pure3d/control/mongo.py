@@ -26,7 +26,7 @@ def castObjectId(value):
 
 
 class Mongo:
-    def __init__(self, Config, Messages):
+    def __init__(self, config, Messages):
         """CRUD interface to content in the MongoDb database.
 
         This class has methods to connect to a MongoDb database,
@@ -36,26 +36,27 @@ class Mongo:
 
         Parameters
         ----------
-        Config: object
-            Singleton instance of `control.config.Config`.
+        config: AttrDict
+            App-wide configuration data obtained from
+            `control.config.Config.config`.
         Messages: object
             Singleton instance of `control.messages.Messages`.
         """
-        self.Config = Config
+        self.config = config
         self.Messages = Messages
         self.client = None
         self.mongo = None
-        self.database = Config.database
+        self.database = config.database
 
     def connect(self):
-        Config = self.Config
+        config = self.config
         client = self.client
         mongo = self.mongo
         database = self.database
 
         if mongo is None:
             try:
-                client = MongoClient(Config.mongoHost, Config.mongoPort, username=Config.mongoUser, password=Config.mongoPassword)
+                client = MongoClient(config.mongoHost, config.mongoPort, username=config.mongoUser, password=config.mongoPassword)
                 mongo = client[database]
             except Exception as e:
                 self.Messages.error(

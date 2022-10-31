@@ -5,7 +5,7 @@ from control.helpers.generic import AttrDict
 
 
 class Auth:
-    def __init__(self, Config, Messages, Mongo, Users, Content):
+    def __init__(self, config, Messages, Mongo, Users, Content):
         """All about authorised data access.
 
         This class knows users and content,
@@ -16,8 +16,9 @@ class Auth:
 
         Parameters
         ----------
-        Config: object
-            Singleton instance of `control.config.Config`.
+        config: AttrDict
+            App-wide configuration data obtained from
+            `control.config.Config.config`.
         Messages: object
             Singleton instance of `control.messages.Messages`.
         Mongo: object
@@ -27,7 +28,7 @@ class Auth:
         Content: object
             Singleton instance of `control.content.Content`.
         """
-        self.Config = Config
+        self.config = config
         self.Messages = Messages
         self.Mongo = Mongo
         self.Users = Users
@@ -56,10 +57,10 @@ class Auth:
         return result
 
     def checkLogin(self):
-        Config = self.Config
+        config = self.config
         Messages = self.Messages
         self.clearUser()
-        if Config.testMode:
+        if config.testMode:
             userId = request.args.get("userid", None)
             result = self.getUser(userId)
             userName = self.user.name
@@ -108,7 +109,7 @@ class Auth:
         session.pop("userid", None)
 
     def authorise(self, action, project=None, edition=None, byName=False):
-        Config = self.Config
+        config = self.config
         Mongo = self.Mongo
 
         user = self.user
@@ -147,7 +148,7 @@ class Auth:
             else "unpublished"
         )
 
-        projectRules = Config.auth.projectRules[projectPub]
+        projectRules = config.auth.projectRules[projectPub]
         condition = (
             projectRules[user.role] if user.role in projectRules else projectRules[None]
         ).get(action, False)

@@ -13,7 +13,7 @@ TABS = (
 
 
 class Pages:
-    def __init__(self, Config, Viewers, Messages, Content, Auth, Users):
+    def __init__(self, config, Viewers, Messages, Content, Auth, Users):
         """Making responses that can be displayed as web pages.
 
         This class has methods that correspond to routes in the app,
@@ -24,8 +24,9 @@ class Pages:
 
         Parameters
         ----------
-        Config: object
-            Singleton instance of `control.config.Config`.
+        config: AttrDict
+            App-wide configuration data obtained from
+            `control.config.Config.config`.
         Viewers: object
             Singleton instance of `control.viewers.Viewers`.
         Messages: object
@@ -41,7 +42,7 @@ class Pages:
         Users: object
             Singleton instance of `control.users.Users`.
         """
-        self.Config = Config
+        self.config = config
         self.Viewers = Viewers
         self.Messages = Messages
         self.Content = Content
@@ -181,7 +182,7 @@ class Pages:
         left=(),
         right=(),
     ):
-        Config = self.Config
+        config = self.config
         Messages = self.Messages
         Auth = self.Auth
         Users = self.Users
@@ -190,11 +191,11 @@ class Pages:
         action = Auth.checkModifiable(projectId, editionId, action)
 
         navigation = self.navigation(url)
-        testUsers = Users.wrapTestUsers(userActive) if Config.testMode else ""
+        testUsers = Users.wrapTestUsers(userActive) if config.testMode else ""
 
         return render_template(
             "index.html",
-            versionInfo=Config.versionInfo,
+            versionInfo=config.versionInfo,
             navigation=navigation,
             materialLeft="\n".join(left),
             materialRight="\n".join(right),

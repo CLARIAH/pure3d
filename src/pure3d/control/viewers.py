@@ -1,10 +1,8 @@
 from textwrap import dedent
 
-from control.helpers.generic import AttrDict
-
 
 class Viewers:
-    def __init__(self, Config, Mongo):
+    def __init__(self, config):
         """Knowledge of the installed 3D viewers.
 
         This class knows which (versions of) viewers are installed,
@@ -14,24 +12,13 @@ class Viewers:
 
         Parameters
         ----------
-        Config: object
-            Singleton instance of `control.config.Config`.
-        Mongo: object
-            Singleton instance of `control.mongo.Mongo`.
+        config: AttrDict
+            App-wide configuration data obtained from
+            `control.config.Config.config`.
         """
-        self.Config = Config
-        self.Mongo = Mongo
-
-        viewers = AttrDict()
-        self.viewers = viewers
-        self.default = None
-
-        for v in Mongo.execute("viewers", "find"):
-            v = AttrDict(v)
-            viewer = v.name
-            viewers[viewer] = AttrDict(versions=v.versions, config=AttrDict(v.config))
-            if v.default:
-                self.default = viewer
+        self.config = config
+        self.viewers = config.viewers
+        self.viewerDefault = config.viewerDefault
 
     def addAuth(self, Auth):
         self.Auth = Auth
@@ -39,7 +26,7 @@ class Viewers:
     def check(self, viewer, version):
         viewers = self.viewers
         if viewer not in viewers:
-            viewer = self.default
+            viewer = self.viewerDefault
         versions = viewers[viewer].versions
         if version not in versions:
             version = versions[-1]
@@ -54,8 +41,8 @@ class Viewers:
         frame = ""
 
         for viewer in viewers:
-            isViewerActive = viewer == viewerActive
-            vwActive = "active" if isSceneActive and isViewerActive else ""
+            isViewerActive = isSceneActive and viewer == viewerActive
+            vwActive = "active" if isViewerActive else ""
             buttons.append(
                 dedent(
                     f"""<span class="vw"><span class="vwl {vwActive}">{viewer}</span>
@@ -65,25 +52,14 @@ class Viewers:
             )
 
             for version in viewers[viewer].versions:
-                isVersionActive = version == versionActive
-                vsActive = (
-                    "active"
-                    if isSceneActive and isViewerActive and isVersionActive
-                    else ""
-                )
+                isVersionActive = isViewerActive and version == versionActive
+                vsActive = "active" if isVersionActive else ""
                 buttons.append(
                     f"""<span class="vv"><span class="vvl {vsActive}">{version}</span>"""
                 )
                 for action in actions:
-                    isActionActive = action == actionActive
-                    btActive = (
-                        "active"
-                        if isSceneActive
-                        and isViewerActive
-                        and isVersionActive
-                        and isActionActive
-                        else ""
-                    )
+                    isActionActive = isVersionActive and action == actionActive
+                    btActive = "active" if isActionActive else ""
 
                     elem = "a"
                     attStr = ""
@@ -115,11 +91,13 @@ class Viewers:
         return (frame, "\n".join(buttons))
 
     def genHtml(self, urlBase, sceneName, viewer, version, action):
-        Config = self.Config
-        debugMode = Config.debugMode
+        config = self.config
+        debugMode = config.debugMode
+        viewerUrlBase = config.viewerUrlBase
+
         ext = "dev" if debugMode else "min"
 
-        viewerStatic = f"/static/viewers/{viewer}/{version}"
+        viewerStatic = f"{viewerUrlBase}/{viewer}/{version}"
         viewerRoot = self.getRoot(urlBase, action, viewer)
 
         if viewer == "voyager":
@@ -173,8 +151,8 @@ class Viewers:
         if viewer not in viewers:
             return None
 
-        config = viewers[viewer].config
+        modes = viewers[viewer].modes
 
-        prefix = config.edit if action == "edit" else config.view
+        prefix = modes[action] or modes.view
 
         return f"{prefix}/{urlBase}"

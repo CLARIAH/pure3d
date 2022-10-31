@@ -80,10 +80,7 @@
   padding: 0.3em 0.2em;
   margin: 0.3em 2em;
 }
-.vwl {
-  font-size: small;
-}
-.vw {
+.vwv {
   display: flex;
   flex-flow: column wrap;
   justify-content: flex-start;
@@ -92,6 +89,9 @@
   border: 0.2em solid var(--viewer-back);
   padding: 0.3em 0.2em;
   margin: 0.3em 2em;
+}
+.vwl {
+  font-size: small;
 }
 
 .vv {
