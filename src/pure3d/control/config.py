@@ -21,6 +21,7 @@ class Config:
             Singleton instance of `control.messages.Messages`.
         """
         self.Messages = Messages
+        Messages.debugAdd(self)
         self.good = True
         self.config = AttrDict()
         self.checkEnv(dataDirOnly)

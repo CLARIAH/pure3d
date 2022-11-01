@@ -11,6 +11,7 @@ from control.helpers.files import listFiles, listImages, readYaml
 META = "meta"
 PROJECTS = "projects"
 EDITIONS = "editions"
+WORKFLOW = "workflow"
 
 SCENE_DEFAULT = "intro"
 
@@ -33,16 +34,13 @@ def importContent():
     ):
         Mongo.checkCollection(table, reset=True)
 
-    metaPath = f"{dataDir}/{META}"
-    metaFiles = listFiles(metaPath, ".yml")
+    metaDir = f"{dataDir}/{META}"
+    metaFiles = listFiles(metaDir, ".yml")
+    meta = {}
 
     for metaFile in metaFiles:
-        meta = readYaml(f"{metaPath}/{metaFile}.yml")
-        metaInfo = dict(
-            name=metaFile,
-            meta=meta,
-        )
-        Mongo.execute("meta", "insert_one", metaInfo)
+        meta[metaFile] = readYaml(f"{metaDir}/{metaFile}.yml")
+    Mongo.execute("meta", "insert_one", dict(meta=meta))
 
     projectsPath = f"{dataDir}/{PROJECTS}"
     projectIdByName = {}
@@ -55,11 +53,11 @@ def importContent():
                 projectPath = f"{projectsPath}/{projectName}"
 
                 meta = {}
-                metaPath = f"{projectPath}/meta"
-                metaFiles = listFiles(metaPath, ".yml")
+                metaDir = f"{projectPath}/meta"
+                metaFiles = listFiles(metaDir, ".yml")
 
                 for metaFile in metaFiles:
-                    meta[metaFile] = readYaml(f"{metaPath}/{metaFile}.yml")
+                    meta[metaFile] = readYaml(f"{metaDir}/{metaFile}.yml")
 
                 title = meta.get("dc", {}).get("title", projectName)
 
@@ -89,11 +87,11 @@ def importContent():
                             editionPath = f"{editionsPath}/{editionName}"
 
                             meta = {}
-                            metaPath = f"{editionPath}/meta"
-                            metaFiles = listFiles(metaPath, ".yml")
+                            metaDir = f"{editionPath}/meta"
+                            metaFiles = listFiles(metaDir, ".yml")
 
                             for metaFile in metaFiles:
-                                meta[metaFile] = readYaml(f"{metaPath}/{metaFile}.yml")
+                                meta[metaFile] = readYaml(f"{metaDir}/{metaFile}.yml")
 
                             title = meta.get("dc", {}).get("title", editionName)
 
@@ -150,7 +148,7 @@ def importContent():
                                 )
                                 sceneId
 
-    workflowPath = f"{dataDir}/yaml/workflow.yaml"
+    workflowPath = f"{dataDir}/{WORKFLOW}/init.yml"
     workflow = readYaml(workflowPath)
     users = workflow["users"]
     projectUsers = workflow["projectUsers"]

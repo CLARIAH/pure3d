@@ -43,28 +43,28 @@ class Content:
         self.config = config
         self.Viewers = Viewers
         self.Messages = Messages
+        Messages.debugAdd(self)
         self.Mongo = Mongo
 
     def addAuth(self, Auth):
         self.Auth = Auth
 
-    def getMeta(
-        self, nameSpace, fieldPath, projectId=None, editionId=None, asMd=False
-    ):
+    def getMeta(self, nameSpace, fieldPath, projectId=None, editionId=None, asMd=False):
         Mongo = self.Mongo
+        self.debug(f"{nameSpace=}")
 
         fields = fieldPath.split(".")
 
-        if editionId is not None:
-            text = (
-                Mongo.getRecord("editions", _id=editionId)
-                .meta.get(nameSpace, {})
-                .get(fields[0], "")
-            )
-        elif projectId is not None:
-            text = Mongo.getRecord("projects", _id=projectId).meta.get(nameSpace, {}).get(fields[0], "")
-        else:
-            text = Mongo.getRecord("meta", name=nameSpace).meta.get(fields[0], "")
+        meta = (
+            Mongo.getRecord("editions", _id=editionId)
+            if editionId is not None
+            else Mongo.getRecord("projects", _id=projectId)
+            if projectId is not None
+            else Mongo.getRecord("meta")
+        ).meta or {}
+        self.debug(f"{projectId=} {editionId=} {nameSpace=} {meta=}")
+        text = meta.get(nameSpace, {}).get(fields[0], "" if len(fields) == 0 else {})
+
         for field in fields[1:]:
             text = text.get(field, {})
         if type(text) is not str:

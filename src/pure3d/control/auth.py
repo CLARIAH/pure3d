@@ -30,6 +30,7 @@ class Auth:
         """
         self.config = config
         self.Messages = Messages
+        Messages.debugAdd(self)
         self.Mongo = Mongo
         self.Users = Users
         self.Content = Content

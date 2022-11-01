@@ -54,85 +54,43 @@ class Pages:
         self.config = config
         self.Viewers = Viewers
         self.Messages = Messages
+        Messages.debugAdd(self)
         self.Content = Content
         self.Auth = Auth
         self.Users = Users
 
-    def putText(self, field, level, projectId=None, editionId=None):
-        Content = self.Content
-
-        content = Content.getMeta("dc", field, projectId=projectId, editionId=editionId)
-        info = CAPTIONS.get(field, None)
-
-        if info is None:
-            return content
-
-        (heading, asMd) = info
-
-        if asMd:
-            heading = markdown(heading)
-            content = markdown(content)
-
-        return dedent(
-            f"""
-            <h{level}>{heading.format(content)}</h{level}>
-            {content}
-            """
-        )
-
-    def putTexts(self, fieldSpecs, projectId=None, editionId=None):
-        return tuple(
-            self.putText(
-                *fieldSpec.split("@", 1), projectId=projectId, editionId=editionId
-            )
-            for fieldSpec in fieldSpecs
-        )
-
     def home(self):
-        left = self.putTexts(
-            (
-                "title@1",
-                "descritpion.abstract@2",
-            )
-        )
+        left = self.putTexts("title@1 + description.abstract@2")
         return self.page("home", left=left)
 
     def about(self):
-        left = self.putTexts(("title@1",))
+        left = self.putTexts("title@1 + description.abstract@2")
         right = self.putTexts(
-            (
-                "description.abstract@2",
-                "description.description@2",
-                "provenance@2",
-            )
+            "description.description@2 + provenance@2"
         )
         return self.page("about", left=left, right=right)
 
     def surprise(self):
         Content = self.Content
         surpriseMe = Content.getSurprise()
-        left = self.putTexts(("title@1",))
-        right = (surpriseMe,)
+        left = self.putTexts("title@1")
+        right = surpriseMe
         return self.page("surpriseme", left=left, right=right)
 
     def projects(self):
         Content = self.Content
         projects = Content.getProjects()
-        left = (*self.putTexts(("title@2",)), projects)
+        left = self.putTexts("title@2") + projects
         return self.page("projects", left=left)
 
     def project(self, projectId):
         Content = self.Content
         projectId = castObjectId(projectId)
         editions = Content.getEditions(projectId)
-        left = (*self.putTexts(("title@3",), projectId=projectId), editions)
+        left = self.putTexts("title@3", projectId=projectId) + editions
         right = self.putTexts(
-            (
-                "description.abstract@4",
-                "description.description@4",
-                "provenance@4",
-                "instructionalMethod@4",
-            ),
+            "description.abstract@4 + description.description@4 + "
+            "provenance@4 + instructionalMethod@4",
             projectId=projectId,
         )
         return self.page("projects", left=left, right=right, projectId=projectId)
@@ -167,17 +125,13 @@ class Pages:
             action=action,
         )
         left = (
-            back,
-            *self.putTexts(("title@4",), projectId=projectId, editionId=editionId),
-            scenes,
+            back
+            + self.putTexts("title@4", projectId=projectId, editionId=editionId)
+            + scenes
         )
         right = self.putTexts(
-            (
-                "description.abstract@5",
-                "description.description@5",
-                "provenance@5",
-                "instructionalMethod@5",
-            ),
+            "description.abstract@5 + description.description@5 + "
+            "provenance@5 + instructionalMethod@5",
             projectId=projectId,
             editionId=editionId,
         )
@@ -222,8 +176,8 @@ class Pages:
         url,
         projectId=None,
         editionId=None,
-        left=(),
-        right=(),
+        left="",
+        right="",
     ):
         config = self.config
         Messages = self.Messages
@@ -239,8 +193,8 @@ class Pages:
             "index.html",
             versionInfo=config.versionInfo,
             navigation=navigation,
-            materialLeft="\n".join(left),
-            materialRight="\n".join(right),
+            materialLeft=left,
+            materialRight=right,
             messages=Messages.generateMessages(),
             testUsers=testUsers,
         )
@@ -286,3 +240,36 @@ class Pages:
         href = f""" href="{projectUrl}" """
         text = """back to the project page"""
         return f"""<p><a {cls} {href}>{text}</a></p>"""
+
+    def putText(self, field, level, projectId=None, editionId=None):
+        Content = self.Content
+
+        content = Content.getMeta("dc", field, projectId=projectId, editionId=editionId)
+        info = CAPTIONS.get(field, None)
+
+        if info is None:
+            return content
+
+        (heading, asMd) = info
+        skip = "{}" in heading
+
+        if asMd:
+            heading = markdown(heading)
+            content = markdown(content)
+
+        return dedent(
+            f"""
+            <h{level}>{heading.format(content)}</h{level}>
+            {"" if skip else content}
+            """
+        )
+
+    def putTexts(self, fieldSpecs, projectId=None, editionId=None):
+        return "\n".join(
+            self.putText(
+                *fieldSpec.strip().split("@", 1),
+                projectId=projectId,
+                editionId=editionId,
+            )
+            for fieldSpec in fieldSpecs.split("+")
+        )

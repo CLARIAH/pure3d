@@ -26,6 +26,11 @@ class Messages:
     def clearMessages(self):
         self.messages.clear()
 
+    def debugAdd(self, dest):
+        def dbg(m):
+            self.debug(logmsg=m)
+        setattr(dest, "debug", dbg)
+
     def debug(self, msg=None, logmsg=None):
         if msg is not None:
             self._addMessage("debug", f"DEBUG: {msg}")

@@ -44,6 +44,7 @@ class Mongo:
         """
         self.config = config
         self.Messages = Messages
+        Messages.debugAdd(self)
         self.client = None
         self.mongo = None
         self.database = config.database
@@ -101,6 +102,7 @@ class Mongo:
 
     def getRecord(self, table, **criteria):
         result = self.execute(table, "find_one", criteria, {})
+        self.debug(f"{table=} {criteria=} {result=}")
         if result is None:
             Messages = self.Messages
             Messages.warning(logmsg=f"No record in {table} with {criteria}")

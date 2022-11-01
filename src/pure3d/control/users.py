@@ -22,6 +22,7 @@ class Users:
         """
         self.config = config
         self.Messages = Messages
+        Messages.debugAdd(self)
         self.Mongo = Mongo
 
     def wrapTestUsers(self, userActive):
