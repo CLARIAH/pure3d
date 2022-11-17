@@ -18,4 +18,6 @@ config = {
     "verbose": 1,
 }
 
-app = WsgiDAVApp(config)
+
+def getWebdavApp():
+    return WsgiDAVApp(config)

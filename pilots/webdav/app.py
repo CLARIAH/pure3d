@@ -2,13 +2,14 @@ import os
 from cheroot import wsgi
 from wsgidav.wsgidav_app import WsgiDAVApp
 
+HOST = int(os.environ["PILOT_HOST"])
 PORT = int(os.environ["PILOT_PORT"])
 
 BASE = os.path.dirname(os.path.dirname(__file__))
 DATA_DIR = f"{BASE}/data/3d"
 
 config = {
-    "host": "127.0.0.1",
+    "host": HOST,
     "port": PORT,
     "provider_mapping": {
         "/": DATA_DIR,

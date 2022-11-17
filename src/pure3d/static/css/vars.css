@@ -165,6 +165,9 @@
     --viewer-back:                     hsla(  0,   0%,  95%, 1  );
     --version-back:                    hsla(  0,   0%,  90%, 1  );
 
+    --caption-border:                  hsla(  0,   0%,  90%, 1  );
+    --caption-border-active:           hsla( 30, 100%,  60%, 1  );
+
     /* SIZES */
 
     --sidebar-width:                   20rem;

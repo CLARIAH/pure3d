@@ -80,10 +80,7 @@
   padding: 0.3em 0.2em;
   margin: 0.3em 2em;
 }
-.vwl {
-  font-size: small;
-}
-.vw {
+.vwv {
   display: flex;
   flex-flow: column wrap;
   justify-content: flex-start;
@@ -92,6 +89,9 @@
   border: 0.2em solid var(--viewer-back);
   padding: 0.3em 0.2em;
   margin: 0.3em 2em;
+}
+.vwl {
+  font-size: small;
 }
 
 .vv {
@@ -120,4 +120,18 @@
   flex-flow: row nowrap;
   justify-content: flex-start;
   align-content: flex-start;
+}
+
+div.caption {
+  display: flex;
+  flex-flow: column nowrap;
+  border-radius: 0.4em;
+  border-style: solid;
+  border-width: 0.2em;
+  border-color: var(--caption-border);
+  margin-bottom: 1em;
+}
+
+div.caption.active {
+  border-color: var(--caption-border-active);
 }

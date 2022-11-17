@@ -5,13 +5,13 @@ Run Pure3D webapp, optionally start a browsing session as well.
 
 Usage
 
-Run it from the /scripts directory in the repo.
+Run it from the /src directory in the repo.
 
-./pure3d.sh [test|prod|local]
-./pure3d.sh
+./start.sh [test|prod]
+./start.sh
     Test mode
 
-./pure3d.sh prod
+./start.sh prod
     Production mode
 
 Options:
@@ -20,8 +20,6 @@ Options:
     Start a browsing session after starting the app.
 
 "
-
-srcdir="${0%/*}"
 
 flaskdebug=""
 flasktest=""
@@ -42,8 +40,6 @@ while [ ! -z "$1" ]; do
         flaskdebug="--debug"
         flasktest="test"
         shift
-    elif [[ "$1" == "local" ]]; then
-        shift
     elif [[ "$1" == "--browse" ]]; then
         browse="v"
         shift
@@ -55,11 +51,14 @@ while [ ! -z "$1" ]; do
 done
 
 
-cd "$srcdir/.."
+cd ..
 repodir="`pwd`"
-printf "Working in repo $repodir\n"
-srcdir="$repodir/src"
-cd "$srcdir"
+
+if [[ ! -d "data" ]]; then
+    mkdir data
+fi
+
+cd src/pure3d
 
 export flasktest
 export flaskdebug
@@ -68,7 +67,6 @@ export repodir
 export FLASK_APP=index
 
 if [[ "$browse" == "v" ]]; then
-    cd "$srcdir/pure3d/"
     flask $flaskdebug run --host $flaskhost --port $flaskport &
     pid=$!
     sleep 1
@@ -77,7 +75,6 @@ if [[ "$browse" == "v" ]]; then
     echo "flask runs as process $pid"
     wait "$pid"
 else
-    cd "$srcdir/pure3d/"
     flask $flaskdebug run --host $flaskhost --port $flaskport &
     pid=$!
     trap "kill $pid" SIGTERM

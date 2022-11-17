@@ -1,54 +1,52 @@
-from control.helpers.files import readYaml
+from control.helpers.generic import AttrDict
 
 
 class Users:
-    def __init__(self, Config, Messages):
-        self.Config = Config
+    def __init__(self, config, Messages, Mongo):
+        """All about users and the current users.
+
+        This class has methods to login/authenticate a user,
+        to logout/deauthenticate users, to retrieve users' data.
+
+        It is instantiated by a singleton object.
+
+        Parameters
+        ----------
+        config: AttrDict
+            App-wide configuration data obtained from
+            `control.config.Config.config`.
+        Messages: object
+            Singleton instance of `control.messages.Messages`.
+        Mongo: object
+            Singleton instance of `control.mongo.Mongo`.
+        """
+        self.config = config
         self.Messages = Messages
+        Messages.debugAdd(self)
+        self.Mongo = Mongo
 
-    def getTestUsers(self):
-        Config = self.Config
-        Messages = self.Messages
-        yamlDir = Config.yamlDir
+    def wrapTestUsers(self, userActive):
+        config = self.config
+        Mongo = self.Mongo
 
-        testUsers = readYaml(f"{yamlDir}/testusers.yaml")
-        userNameById = {}
-        userRoleById = {}
-        testUserIds = set()
+        if not config.testMode:
+            return ""
 
-        for (name, info) in testUsers.items():
-            userId = info["id"]
-            if userId in testUserIds:
-                prevName = userNameById[userId]
-                Messages.warning(
-                    msg=f"duplicate test user {userId} = {name}, {prevName}"
-                )
-                continue
-            testUserIds.add(userId)
-            userNameById[userId] = name
-            userRoleById[userId] = info["role"]
+        def wrap(title, href, cls, text):
+            return (
+                f'<a title="{title}" href="{href}" class="button small {cls}">'
+                f"{text}</a>"
+            )
 
-        return dict(
-            testUserIds=testUserIds,
-            userNameById=userNameById,
-            userRoleById=userRoleById,
-        )
+        active = "active" if userActive is None else ""
 
-    def getPermissions(self):
-        Config = self.Config
-        yamlDir = Config.yamlDir
+        html = []
+        html.append(wrap("if not logged in", "/logout", active, "logged out"))
 
-        authData = readYaml(f"{yamlDir}/authorise.yaml")
-        return authData
+        for user in sorted(Mongo.execute("users", "find"), key=lambda r: r["name"]):
+            user = AttrDict(user)
 
-    def getUserProject(self):
-        Config = self.Config
-        yamlDir = Config.yamlDir
+            active = "active" if str(user._id) == userActive else ""
+            html.append(wrap(user.role, f"/login?userid={user._id}", active, user.name))
 
-        projectUsers = readYaml(f"{yamlDir}/projectusers.yaml")
-
-        userProjects = {}
-        for (project, users) in projectUsers.items():
-            for (user, role) in users.items():
-                userProjects.setdefault(user, {})[project] = role
-        return dict(projectUsers=projectUsers, userProjects=userProjects)
+        return "\n".join(html)

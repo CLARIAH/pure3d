@@ -1,63 +1,60 @@
-import os
-
-from flask import Flask, render_template, redirect, make_response, abort
+from flask import Flask, redirect, abort, request
 
 from control.messages import Messages
 from control.config import Config
 from control.mongo import Mongo
 from control.viewers import Viewers
-from control.projects import Projects, ProjectError
+from control.content import Content
 from control.users import Users
 from control.pages import Pages
-from control.sync import Sync
 from control.editsessions import EditSessions
-from control.authorise import Auth
+from control.auth import Auth
+from control.webdavapp import WEBDAV_METHODS
 
-Config = Config(Messages).getConfig()
-Messages = Messages(Config)
-Viewers = Viewers(Config)
+from control.helpers.generic import AttrDict
+
+if True:
+    config = Config(Messages(None)).config
+    Messages = Messages(config)
+    Viewers = Viewers(config)
+
+    Mongo = Mongo(config, Messages)
+
+    Users = Users(config, Messages, Mongo)
+    Content = Content(config, Viewers, Messages, Mongo)
+    Auth = Auth(config, Messages, Mongo, Users, Content)
+    EditSessions = EditSessions(Mongo)
+
+    Content.addAuth(Auth)
+    Viewers.addAuth(Auth)
+
+    Pages = Pages(config, Viewers, Messages, Content, Auth, Users)
+else:
+    (config, Messages, Mongo, Viewers, Users, Content, Auth, EditSessions, Pages) = (
+        AttrDict(dict(secret_key=None)),
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+    )
+
 
 # create and configure app
 
 
-Mongo = Mongo(Config, Messages)
-Users = Users(Config, Messages)
-Projects = Projects(Config, Viewers, Messages)
-Auth = Auth(Config, Messages, Users, Projects)
-Projects.addAuth(Auth)
-Viewers.addAuth(Auth)
-Pages = Pages(Config, Messages, Projects, ProjectError, Auth)
-Sync = Sync(Messages, Mongo, Projects)
-EditSessions = EditSessions(Mongo)
-
-
-def prepare():
-    Sync.sync(allowRemove=not Config.testMode)
-
-
 def appFactory():
     app = Flask(__name__, static_folder="../static")
-    app.secret_key = Config.secret_key
+    app.secret_key = config.secret_key
 
     def redirectResult(url, good):
         code = 302 if good else 303
         return redirect(url, code=code)
 
     # app url routes start here
-
-    @app.route("/")
-    @app.route("/home")
-    def home():
-        return Pages.base("home", left=("home",))
-
-    @app.route("/about")
-    def about():
-        return Pages.base("about", left=("home",), right=("about",))
-
-    @app.route("/surpriseme")
-    def surpriseme():
-        content = "<h2>You will be surprised!</h2>"
-        return Pages.base("surpriseme", left=("home",), content=content)
 
     @app.route("/login")
     def login():
@@ -72,158 +69,101 @@ def appFactory():
         Auth.deauthenticate()
         return redirectResult("/", True)
 
+    @app.route("/")
+    @app.route("/home")
+    def home():
+        return Pages.home()
+
+    @app.route("/about")
+    def about():
+        return Pages.about()
+
+    @app.route("/surpriseme")
+    def surpriseme():
+        return Pages.surprise()
+
     @app.route("/projects")
     def projects():
-        title = """<h2>Scholarly projects</h2>"""
+        return Pages.projects()
 
-        return Pages.base("projects", left=("list",), title=title)
+    @app.route("/projects/<string:projectId>")
+    def project(projectId):
+        return Pages.project(projectId)
 
-    @app.route("/projects/<int:projectId>")
-    def projectPage(projectId):
-        title = """<h2>Editions in this project</h2>"""
-
-        return Pages.base(
-            "projects",
-            projectId=projectId,
-            left=("list",),
-            right=(
-                "title",
-                "home",
-                "about",
-                "description",
-            ),
-            title=title,
-        )
-
-    @app.route("/projects/<int:projectId>/editions/<int:editionId>")
-    def editionPage(projectId, editionId):
-        title = """<h2>Scenes in this edition</h2>"""
-
-        return Pages.base(
-            "projects",
-            projectId=projectId,
-            editionId=editionId,
-            left=("list",),
-            right=(
-                "title",
-                "about",
-                "sources",
-            ),
-            title=title,
-        )
-
-    @app.route("/projects/<int:projectId>/editions/<int:editionId>/<string:sceneName>")
-    def scenePage(projectId, editionId, sceneName):
-        return Pages.base(
-            "projects",
-            projectId=projectId,
-            editionId=editionId,
-            sceneName=sceneName,
-            left=("list",),
-            right=(
-                "about",
-                "sources",
-            ),
-        )
+    @app.route("/editions/<string:editionId>")
+    def edition(editionId):
+        return Pages.edition(editionId)
 
     @app.route(
-        "/projects/<int:projectId>/editions/<int:editionId>/<string:sceneName>/<string:viewerVersion>"
+        "/scenes/<string:sceneId>",
+        defaults=dict(viewer="", version="", action=""),
     )
-    def sceneViewer(projectId, editionId, sceneName, viewerVersion):
-        return Pages.base(
-            "projects",
-            projectId=projectId,
-            editionId=editionId,
-            sceneName=sceneName,
-            viewerVersion=viewerVersion,
-            left=("list",),
-            right=(
-                "about",
-                "sources",
-            ),
-        )
+    @app.route(
+        "/scenes/<string:sceneId>/<string:viewer>",
+        defaults=dict(version="", action=""),
+    )
+    @app.route(
+        "/scenes/<string:sceneId>/<string:viewer>/<string:version>",
+        defaults=dict(action=""),
+    )
+    @app.route(
+        "/scenes/<string:sceneId>/<string:viewer>/<string:version>/<string:action>",
+    )
+    def scene(sceneId, viewer, version, action):
+        return Pages.scene(sceneId, viewer, version, action)
 
     @app.route(
-        "/projects/<int:projectId>/editions/<int:editionId>/<string:sceneName>/<string:viewerVersion>/<string:action>"
+        "/viewer/<string:viewer>/<string:version>/<string:action>/<string:sceneId>"
     )
-    def sceneWorker(projectId, editionId, sceneName, viewerVersion, action):
-        return Pages.base(
-            "projects",
-            projectId=projectId,
-            editionId=editionId,
-            sceneName=sceneName,
-            viewerVersion=viewerVersion,
-            action=action,
-            left=("list",),
-            right=(
-                "about",
-                "sources",
-            ),
-        )
+    def viewerFrame(sceneId, viewer, version, action):
+        return Pages.viewerFrame(sceneId, viewer, version, action)
 
     @app.route(
-        "/viewer/<string:viewerVersion>/<string:action>/<int:projectId>/<int:editionId>/<string:sceneName>"
+        "/data/projects/<string:projectName>/",
+        defaults=dict(editionName="", path=""),
     )
-    def voyager(viewerVersion, action, projectId, editionId, sceneName):
-        try:
-            (rootPath, rootUrl, rootExists) = Projects.getLocation(
-                projectId,
-                editionId,
-                None,
-                None,
-                None,
-                action=action,
-            )
-            (scenePath, sceneUrl, sceneExists) = Projects.getLocation(
-                projectId,
-                editionId,
-                sceneName,
-                None,
-                None,
-            )
-        except ProjectError as e:
-            msg = f"Voyager viewer: {e}"
-            Messages.error(msg=msg, logmsg=msg)
+    @app.route(
+        "/data/projects/<string:projectName>/<path:path>",
+        defaults=dict(editionName=""),
+    )
+    @app.route(
+        "/data/projects/<string:projectName>/editions/<string:editionName>/",
+        defaults=dict(path=""),
+    )
+    @app.route(
+        "/data/projects/<string:projectName>/editions/<string:editionName>/<path:path>",
+    )
+    def dataProjects(projectName, editionName, path):
+        return Pages.dataProjects(projectName, editionName, path)
 
-        viewerCode = Viewers.genHtml(
-            viewerVersion,
-            action,
-            projectId,
-            editionId,
-            f"{rootUrl}/",
-            f"{sceneName}.json",
+    @app.route(
+        "/auth/webdav/projects/<string:projectName>/editions/<string:editionName>/",
+        defaults=dict(path=""),
+        methods=tuple(WEBDAV_METHODS),
+    )
+    @app.route(
+        "/auth/webdav/projects/<string:projectName>/editions/<string:editionName>/"
+        "<path:path>",
+        methods=tuple(WEBDAV_METHODS),
+    )
+    def authwebdav(projectName, editionName, path):
+        permitted = Auth.authorise(
+            WEBDAV_METHODS[request.method],
+            project=projectName,
+            edition=editionName,
+            byName=True,
         )
-
-        return render_template(
-            "voyager.html",
-            viewerCode=viewerCode,
-        )
-
-    @app.route("/data/<path:path>")
-    def data(path):
-        dataDir = Config.dataDir
-
-        dataPath = f"{dataDir}/{path}"
-        if not os.path.isfile(dataPath):
-            Messages.error(
-                msg="Accessing a file",
-                logmsg=f"File does notexist: {dataPath}",
+        if not permitted:
+            Messages.info(
+                logmsg=f"WEBDAV unauthorised by user {Auth.user}"
+                f" on {projectName=} {editionName=} {path=}"
             )
+        return permitted
 
-        with open(dataPath, "rb") as fh:
-            textData = fh.read()
-
-        return make_response(textData)
-
-    @app.route("/auth/webdav/<path:path>")
-    def authwebdav(path):
-        authenticated = Auth.authenticate()
-        if authenticated:
-            Messages.info(logmsg=f"User = {Auth.user} {path=}")
-            return True
-        else:
-            Messages.info(logmsg=f"Unauthenticated {path=}")
-            return False
+    @app.route("/auth/webdav/<path:path>", methods=tuple(WEBDAV_METHODS))
+    def webdavinvalid(path):
+        Messages.info(logmsg=f"Invalid webdav access {path=}")
+        return False
 
     @app.route("/no/webdav/<path:path>")
     def nowebdav(path):
@@ -231,12 +171,3 @@ def appFactory():
         abort(404)
 
     return app
-
-
-def decide(env):
-    for (k, v) in env.items():
-        Messages.plain(logmsg=f"{k} = {v}")
-    return False
-
-
-prepare()

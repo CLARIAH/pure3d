@@ -53,6 +53,10 @@ _temp/
 .tf/
 .ipynb_checkpoints/
 
+# Data files #
+#####################
+data/
+
 # Experiments
 _experiments/
 exp_*

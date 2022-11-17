@@ -1,8 +1,8 @@
 actions:
   - allocate
   - create
-  - read
-  - update
+  - view
+  - edit
   - delete
 
 # meaning of project rules
@@ -21,43 +21,43 @@ actions:
 #  a list of project specific roles
 #  that are permitted to do the action
 #
-projectrules:
+projectRules:
   published:
     null:
       create: false
-      read: true
-      update: false
+      view: true
+      edit: false
       delete: false
     guest:
       create: false
-      read: true
-      update: false
+      view: true
+      edit: false
       delete: false
     user:
       create: false
-      read: true
-      update: false
+      view: true
+      edit: false
       delete: false
     admin:
       create: false
-      read: true
-      update: false
+      view: true
+      edit: false
       delete: false
   unpublished:
     null:
       create: false
-      read: false
-      update: false
+      view: false
+      edit: false
       delete: false
     guest:
       create:
       - editor
       - creator
-      read:
+      view:
       - reader
       - editor
       - creator
-      update:
+      edit:
       - editor
       - creator
       delete:
@@ -66,11 +66,11 @@ projectrules:
       create:
       - editor
       - creator
-      read:
+      view:
       - reader
       - editor
       - creator
-      update:
+      edit:
       - editor
       - creator
       delete:
@@ -80,11 +80,11 @@ projectrules:
       create:
       - editor
       - creator
-      read:
+      view:
       - reader
       - editor
       - creator
-      update:
+      edit:
       - editor
       - creator
       delete:
@@ -99,6 +99,6 @@ projectrules:
 
   admin:
     - create
-    - read
-    - update
+    - view
+    - edit
     - delete

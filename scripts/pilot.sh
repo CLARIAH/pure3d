@@ -7,12 +7,12 @@ Usage
 
 Run it from the /scripts directory in the repo.
 
-./pilot.sh name ['prod'] [port]
+./pilot.sh name ['prod'] [host:port]
     Run named pilot in debug mode.
     An environment variable PILOT_MODE will be set to dev or prod
     default dev, if 'prod' is passed: prod
 
-    You can also specify a port.
+    You can also specify a host:port.
 """
 
 scriptdir=`pwd`
@@ -38,10 +38,16 @@ else
     PILOT_MODE="dev"
 fi
 if [[ "$1" == "" ]]; then
+    PILOT_HOST="127.0.0.1"
     PILOT_PORT="5000"
 else
-    PILOT_PORT="$1"
+    PILOT_HOST="$1"
     shift
+    if [[ "$1" == "" ]]; then
+        PILOT_PORT="5000"
+    else
+        PILOT_PORT="$1"
+    fi
 fi
 
 if [[ ! -d "$pilotname" ]]; then
@@ -51,6 +57,7 @@ fi
 
 cd "$pilotname"
 export PILOT_MODE
+export PILOT_HOST
 export PILOT_PORT
 
 # start server
@@ -58,7 +65,7 @@ export PILOT_PORT
 if [[ -f "cmd.sh" ]]; then
     ./cmd.sh &
 else
-    flask --debug --app app:app run --port $PILOT_PORT &
+    flask --debug --app app:app run --host $PILOT_HOST --port $PILOT_PORT &
 fi
 pid=$!
 pgid=`ps -o pgid= $pid | grep -o '[0-9]*'`
@@ -70,7 +77,7 @@ sleep 1
 if [[ -f "url.txt" ]]; then
     url=`cat url.txt`
 else
-    url="http://127.0.0.1:$PILOT_PORT/"
+    url="http://$PILOT_HOST:$PILOT_PORT/"
 fi
 
 python3 "$scriptdir/browser.py" "$url"

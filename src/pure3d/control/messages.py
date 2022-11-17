@@ -5,12 +5,31 @@ from control.helpers.generic import htmlEsc
 
 
 class Messages:
-    def __init__(self, Config):
-        self.Config = Config
+    def __init__(self, config, flask=True):
+        """Sending messages to the user and sysadmin.
+
+        This class has methods to issue messages to the screen of the webuser
+        and to the log for the sysadmin.
+
+        It is instantiated by a singleton object.
+
+        Parameters
+        ----------
+        config: AttrDict
+            App-wide configuration data obtained from
+            `control.config.Config.config`.
+        """
+        self.config = config
         self.messages = []
+        self.flask = flask
 
     def clearMessages(self):
         self.messages.clear()
+
+    def debugAdd(self, dest):
+        def dbg(m):
+            self.debug(logmsg=m)
+        setattr(dest, "debug", dbg)
 
     def debug(self, msg=None, logmsg=None):
         if msg is not None:
@@ -25,7 +44,8 @@ class Messages:
         if logmsg is not None:
             sys.stderr.write(f"ERROR: {logmsg}\n")
             sys.stderr.flush()
-            abort(404)
+            if self.flask:
+                abort(404)
 
     def warning(self, msg=None, logmsg=None):
         if msg is not None:
@@ -59,8 +79,12 @@ class Messages:
         return "\n".join(html)
 
     def _addMessage(self, tp, msg):
-        Config = self.Config
+        config = self.config
 
-        debugMode = Config.debugMode
-        if tp != "debug" or debugMode:
-            self.messages.append((tp, msg))
+        if config is None:
+            sys.stderr.write(f"{tp}: {msg}\n")
+            sys.stderr.flush()
+        else:
+            debugMode = config.debugMode
+            if tp != "debug" or debugMode:
+                self.messages.append((tp, msg))

@@ -84,7 +84,6 @@ def checkLinks(inDir, references, mediaFiles):
             status = 2
         elif os.path.exists(f"{inDir}/{refPath}"):
             if refPath not in media:
-                print(f"{refPath=}")
                 status = 4
             else:
                 status = 0

@@ -6,15 +6,32 @@ from control.config import Config
 from control.messages import Messages
 
 
-Config = Config(Messages).getConfig()
+config = Config(Messages(None), dataDirOnly=True).config
 
 BASE = os.path.dirname(os.path.dirname(__file__))
-DATA_DIR = f"{BASE}/data/3d"
+
+WEBDAV_METHODS = dict(
+    HEAD="view",
+    GET="view",
+    PUT="edit",
+    POST="edit",
+    OPTIONS="view",
+    TRACE="view",
+    DELETE="edit",
+    PROPFIND="view",
+    PROPPATCH="edit",
+    MKCOL="edit",
+    COPY="edit",
+    MOVE="edit",
+    LOCK="edit",
+    UNLOCK="edit",
+)
+
 
 config = {
     "provider_mapping": {
         "/webdav/": {
-            "root": Config.dataDir,
+            "root": config.dataDir,
             "readonly": False,
         },
     },
@@ -22,4 +39,6 @@ config = {
     "verbose": 1,
 }
 
-app = WsgiDAVApp(config)
+
+def getWebdavApp():
+    return WsgiDAVApp(config)
