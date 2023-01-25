@@ -75,7 +75,7 @@ def toJson(fileIn, fileOut):
     try:
         with open(fileIn, "r") as yaml_in, open(fileOut, "w") as json_out:
             yaml_convert = yaml.safe_load(yaml_in)
-            json.dump(yaml_convert, json_out, sort_keys=False)
+            json.dump(yaml_convert, json_out, sort_keys=False, indent=2)
     except Exception as e:
         print(str(e))
         good = False
