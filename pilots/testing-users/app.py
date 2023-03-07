@@ -2,7 +2,7 @@ from flask import Flask, render_template
 
 users = ['user1', 'user2', 'user3','user4']
 
-def buttons():
+def user_buttons():
 
     html = []
     for user in users:
@@ -16,24 +16,25 @@ def buttons():
     html = '\n'.join(html) 
     return html
 
-
 def create_app():
     # create the flask app
     app = Flask(__name__)
 
+
     @app.route('/')
     def home():
-        user = buttons()
+        user = user_buttons()
         return render_template('app.html', user=user, user_text=" ")
 
     
     @app.route('/<userN>')
     def userMessage(userN):
+        user  = user_buttons()
         user_text = f"This is {userN}"
-        user  = buttons()
         return render_template('app.html', user=user, user_text=user_text)
     
     return app
 
 
-
+if __name__ == '__main__':
+    create_app().run(debug=True)
