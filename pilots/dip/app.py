@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, abort, make_response, request
+from flask import Flask, render_template, url_for, abort, make_response
 import os
 import sys
 import json

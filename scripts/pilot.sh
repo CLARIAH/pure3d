@@ -13,6 +13,9 @@ Run it from the /scripts directory in the repo.
     default dev, if 'prod' is passed: prod
 
     You can also specify a host:port.
+
+./pilot.sh name --test
+    Run to execute unit tests for named pilot
 """
 
 scriptdir=`pwd`
@@ -30,6 +33,11 @@ fi
 pilotname="$1"
 shift
 
+if [[ "$1" == "--test" ]]; then
+    echo "Running all tests..."
+    pytest
+    exit 1
+fi
 
 if [[ "$1" == "prod" ]]; then
     PILOT_MODE="prod"
@@ -59,6 +67,7 @@ cd "$pilotname"
 export PILOT_MODE
 export PILOT_HOST
 export PILOT_PORT
+
 
 # start server
 

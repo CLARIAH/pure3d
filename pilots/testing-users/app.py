@@ -12,7 +12,7 @@ def user_buttons():
                 <button type="submit" class=cv_btn>{user}</button>
                 </a>
                 """
-        ) 
+        )
     html = '\n'.join(html)
     return html
 
@@ -30,15 +30,16 @@ def create_app():
     def userMessage(userN):
         user = user_buttons()
         user_text = f"""
-        <!-- {userN} logged in-->
         This is {userN}.
         """
         return render_template(
             'app.html',
             user=user,
-            user_text=user_text)   
+            user_text=user_text,
+            userN=userN)
     return app
 
 
 if __name__ == '__main__':
-    create_app().run(debug=True)
+    app = create_app()
+    app.run(debug=True)
