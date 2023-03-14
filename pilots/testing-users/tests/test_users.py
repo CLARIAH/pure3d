@@ -1,9 +1,8 @@
-from flask import url_for
 import pytest
 
 
 def test_home_route(client):
-    response = client.get(url_for("home"))
+    response = client.get('/')
     assert response.status_code == 200
 
 
