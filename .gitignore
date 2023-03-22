@@ -55,7 +55,7 @@ _temp/
 
 # Data files #
 #####################
-
+data/
 
 # Experiments
 _experiments/
