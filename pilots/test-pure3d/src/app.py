@@ -1,82 +1,71 @@
 from flask import Flask, render_template
-from functions import user_buttons, yaml_parser
-import os
-
-BASE = os.path.expanduser(
-    "~/github/clariah/pure3d/pilots/test-pure3d")
-SRC = f"{BASE}/src"
+from functions import user_buttons, workflow
 
 app = Flask(__name__)
 
 
-@app.route('/')
-@app.route('/home')
+@app.route("/")
+@app.route("/home")
 def home():
-    return render_template(
-        'index.html',
-        user=user_buttons(),
-        user_text="")
+    return render_template("index.html", user=user_buttons(), user_text="")
 
 
-@app.route('/<username>')
+@app.route("/<username>")
 def login(username):
     user_text = f"""
     {username} is logged in.
     """
     return render_template(
-        'index.html',
+        "index.html",
         user=user_buttons(),
         user_text=user_text)
 
 
-@app.route('/projects')
+@app.route("/projects")
 def projects():
-    projects_list = []
-    yaml_filename = f"{SRC}/workflow/init"
-    yaml_parsed = yaml_parser(yaml_filename)
-    projects = dict(yaml_parsed["userRole"]["project"])
 
-    for key, value in projects.items():
-        dict_value = dict(value)
-        projects_key = key
+    users_roles, projectsRoles = workflow()
 
-        for key, value in dict_value.items():
-            projects_list.append(f"""
-                Project {projects_key} :
-                <br>
-                {key} : {value}
-                <br>
-                editions available:
-                <br>
-                <br>
-                """)
-    projects_list = '\n'.join(projects_list)
-
-    return render_template(
-        'projects.html',
-        user=user_buttons(),
-        projects_list=projects_list)
-
-
-@app.route('/users')
-def users():
-    user_roles_list = []
-    yaml_filename = f"{SRC}/workflow/init"
-    yaml_parsed = yaml_parser(yaml_filename)
-    users_roles = dict(yaml_parsed["userRole"]["site"])
-
-    for key, value in users_roles.items():
-        user_roles_list.append(f"""
-        {key} : {value}
-        <br>
-        """)
-    user_roles_list = '\n'.join(user_roles_list)
+    #projects_list = []
+    #yaml_parsed = yaml_parseraml_filename)
     
+    #editions_list = []
+    #ep = {}
+    #editions = dict(yaml_parsed["userRole"]["edition"])
+    #for p in projects_key:
+        #ep = editions[p]
+        #for ed_key, ed_value in ep.items():
+            #for ed_key in projects_key:
+                #for ed_value_key, ed_value_value in dict(ed_value).items():
+                    #for ed_value_value_key, ed_value_value_value in dict(
+                       # ed_value_value
+                    #).items():
+                        #editions_list.append(
+                            #f"""
+                        #Edition {ed_value}
+                        #<br>
+                        #{ed_value_key}: {ed_value_value}
+                        #"""
+                        #)
+    #editions_list = "\n".join(editions_list)
+
     return render_template(
-        'users.html',
+        "projects.html",
         user=user_buttons(),
-        user_roles=user_roles_list)
+        projects_list=projectsRoles,
+        #editions_list=editions_list,
+    )
 
 
-if __name__ == '__main__':
+@app.route("/users")
+def users():
+    users_roles, projectsRoles = workflow()
+
+    return render_template(
+        "users.html", user=user_buttons(),
+        user_roles=users_roles
+    )
+
+
+if __name__ == "__main__":
     app.run(debug=True)
