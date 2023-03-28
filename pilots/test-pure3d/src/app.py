@@ -3,6 +3,7 @@ from functions import user_buttons, workflow
 
 app = Flask(__name__)
 
+users_roles, projectsRoles, editions, projectStatus, editionStatus = workflow()
 
 @app.route("/")
 @app.route("/home")
@@ -24,42 +25,18 @@ def login(username):
 @app.route("/projects")
 def projects():
 
-    users_roles, projectsRoles = workflow()
-
-    #projects_list = []
-    #yaml_parsed = yaml_parseraml_filename)
-    
-    #editions_list = []
-    #ep = {}
-    #editions = dict(yaml_parsed["userRole"]["edition"])
-    #for p in projects_key:
-        #ep = editions[p]
-        #for ed_key, ed_value in ep.items():
-            #for ed_key in projects_key:
-                #for ed_value_key, ed_value_value in dict(ed_value).items():
-                    #for ed_value_value_key, ed_value_value_value in dict(
-                       # ed_value_value
-                    #).items():
-                        #editions_list.append(
-                            #f"""
-                        #Edition {ed_value}
-                        #<br>
-                        #{ed_value_key}: {ed_value_value}
-                        #"""
-                        #)
-    #editions_list = "\n".join(editions_list)
-
     return render_template(
         "projects.html",
         user=user_buttons(),
         projects_list=projectsRoles,
-        #editions_list=editions_list,
+        editions_list=editions,
+        projectStatus=projectStatus,
+        editionStatus=editionStatus
     )
 
 
 @app.route("/users")
 def users():
-    users_roles, projectsRoles = workflow()
 
     return render_template(
         "users.html", user=user_buttons(),

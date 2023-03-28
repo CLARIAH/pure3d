@@ -1,6 +1,15 @@
 {% extends 'index.html'%}
 
-{% block content %} {{projects_list | safe}} 
+{% block content %} 
+<h2> Project Roles </h2>
+
+{{projects_list | safe}} 
+{{projectStatus | safe}}
+<br>
+<h2> Edition Roles </h2> 
+{{editions_list | safe}} 
+{{editionStatus | safe}}
+
 {% endblock %}
 
 
