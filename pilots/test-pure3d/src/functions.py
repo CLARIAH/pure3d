@@ -31,10 +31,12 @@ def yaml_parser(filename):
 def workflow():
     filename = f"{SRC}/workflow/init"
     workflow_yaml = yaml_parser(filename)
-    user = workflow_yaml.userRole
-    status = workflow_yaml.status
+    userRole = workflow_yaml["userRole"]
+    project_status = workflow_yaml["status"]["project"]
+    edition_status = workflow_yaml["status"]["edition"]
+    projects_page = {}
 
-    for userRoles, userValues in user.items():
+    for userRoles, userValues in userRole.items():
         if userRoles == "site":
             users_list = []
             for username, role in userValues.items():
@@ -45,60 +47,32 @@ def workflow():
                 )
             users_list = "\n".join(users_list)
 
-        if userRoles == "project":
-            projects_info = []
-            for project_No, projectRoles in userValues.items():
-                for projectUser, projectRole in projectRoles.items():
-                    projects_info.append(
-                            f"""
-                        Project {project_No}
-                        <br>
-                        {projectUser} : {projectRole}
-                        <br>
-                        """
-                    )
-            projects_info = "\n".join(projects_info)         
+    for project_id, project_data in userRole["project"].items():
+        project_role = list(project_data.keys())[0]
+        project_user = list(project_data.values())[0]
+        isVisible = project_status["values"][project_id]
+        editions = {}
+        for edition_id, edition_data in userRole["edition"][project_id].items():
+            users = {}
+            for edition_user, edition_role in edition_data.items():
+                users = dict(editionUser=edition_user,
+                             editionRole=edition_role)
+            isPublished = edition_status["values"][project_id][edition_id]
+            editions[edition_id] = {"users": users, "isPublished": isPublished}
+        projects_page[project_id] = {
+            "projectRole": project_role,
+            "projectUser": project_user,
+            "isVisible": isVisible,
+            "editions": editions,
+        }
 
-        elif userRoles == "edition":
-
-            editions = []
-            for projectNos, editionValues in userValues.items():
-
-                for editionNo, editionRoles in editionValues.items():
-                    editions.append(f"""
-                                        <br> Project {projectNos}
-                                        Edition {editionNo}: {editionRoles}
-                                        <br>
-                                        """
-                                    )
-            editions = "\n".join(editions)
-
-    for statusKey, statusValues in status.items():
-        field = statusValues.field
-        values = statusValues.values
-        
-        for projectStatusKeys, projectStatusValues in values.items():
-            if statusKey == "project":
-                projectStatus = []
-                projectStatus.append(
-                    f""" <br>
-                    Project {projectStatusKeys} Status {field}: {projectStatusValues} 
-                    """
-                    )
-                projectStatus = "\n".join(projectStatus)
-                #print(projectStatus)
-
-            elif statusKey == "edition":
-                editionStatus = []
-                for editionStatusKeys, editionStatusValues in projectStatusValues.items():
-                    editionStatus.append(f"""
+    projects_html = []
+    for projectNames, projectInfos in projects_page.items():
+        projects_html.append(
+                f"""
+                    Project {projectNames}
                     <br>
-                                        Project {projectStatusKeys} -
-                                        Edition {editionStatusKeys}
-                                        {field} : {editionStatusValues}
-                                        <br>
-                                        """
-                                         )
-                editionStatus = "\n".join(editionStatus)
-                #print(editionStatus)
-    return users_list, projects_info, editions, projectStatus, editionStatus
+                    """
+            )
+    projects_html = "\n".join(projects_html)
+    return users_list, projects_html
