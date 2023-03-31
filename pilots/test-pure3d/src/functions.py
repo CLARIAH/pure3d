@@ -55,12 +55,13 @@ def workflow():
         editions = {}
         for edition, edition_data in userRole["edition"][project].items():
             edition_title = name["edition"][project][edition]["title"]
-            edition_user = list(edition_data.keys())[0]
-            edition_role = list(edition_data.values())[0]
+            users = {}
+            for user, user_role in edition_data.items():
+                users[user] = user_role
             isPublished = status["edition"]["values"][project][edition]
             editions[edition] = {
                 "editionTitle": edition_title,
-                "users": {"editionUser": edition_user, "editionRole": edition_role},
+                "users": users,
                 "isPublished": isPublished,
             }
         projects[project] = {
@@ -128,24 +129,23 @@ def editionsList(project):
             """
         )
         editions_list = "\n".join(editions_list)
-
-    return project_users, editions_list
+        return project_users, editions_list
 
 
 def editions_page(project, edition):
     a, projects = workflow()
     editions = projects[project]["editions"][edition]
-    edition_user = editions["users"]["editionUser"]
-    edition_role = editions["users"]["editionRole"]
     edition_title = editions["editionTitle"]
-    edition_users = []
-    edition_users.append(
-        f"""
-        <h1>{edition_title}</h2> <br>
-        {edition_user} : {edition_role}
-        <br>
-        """
-    )
-    edition_users = "\n".join(edition_users)
-    return edition_users
-
+    users = editions["users"]
+    for user, role in users.items():
+        edition_users = []
+        edition_users.append(
+            f"""
+            <h1>{edition_title}</h1> <br>
+            <h2> Edition Users </h2>
+            {user} : {role}
+            <br>
+            """
+        )
+        edition_users = "\n".join(edition_users)
+        return edition_users

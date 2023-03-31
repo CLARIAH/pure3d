@@ -30,12 +30,12 @@ def projects():
 @app.route("/projects/<project_title>")
 # Display for individual project
 def project_page(project_title):
-    projects_user, eList = editionsList(project_title)
+    projects_user, editions_list = editionsList(project_title)
     return render_template(
         "editions.html",
         user=user_buttons(),
         project_user=projects_user,
-        editions_list=eList,
+        editions_list=editions_list,
     )
 
 
