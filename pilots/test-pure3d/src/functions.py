@@ -49,10 +49,8 @@ def workflow():
     projects = {}
     for project, project_data in userRole["project"].items():
         project_title = name["project"][project]["title"]
-        project_role = list(project_data.keys())[0]
-        # print(project_role)
-        project_user = list(project_data.values())[0]
-        # print(project_user)
+        project_user = list(project_data.keys())[0]
+        project_role = list(project_data.values())[0]
         isVisible = status["project"]["values"][project]
         editions = {}
         for edition, edition_data in userRole["edition"][project].items():
@@ -60,50 +58,94 @@ def workflow():
             edition_user = list(edition_data.keys())[0]
             edition_role = list(edition_data.values())[0]
             isPublished = status["edition"]["values"][project][edition]
-            editions[edition_title] = {
-                "users": {"editionUser": edition_user,
-                          "editionRole": edition_role},
+            editions[edition] = {
+                "editionTitle": edition_title,
+                "users": {"editionUser": edition_user, "editionRole": edition_role},
                 "isPublished": isPublished,
             }
-        projects[project_title] = {
+        projects[project] = {
+            "projectTitle": project_title,
             "projectRole": project_role,
             "projectUser": project_user,
             "isVisible": isVisible,
             "editions": editions,
         }
 
-        projects_list = []
-        for title, info in projects.items():
-            project_status = info["isVisible"]
-            project_user = info["projectUser"]
-            project_role = info["projectRole"]
-            projects_list.append(
-                    f"""
-                    <a href= projects/{title}>{title}</a>
+    return users_list, projects
+
+
+def projectsList():
+    a, projects = workflow()
+    projects_list = []
+    for projectID, info in projects.items():
+        project_status = info["isVisible"]
+        title = info["projectTitle"]
+        projects_list.append(
+            f"""
+                    <a href= projects/{projectID}>{title}</a>
                     <br>
                     isVisible: {project_status}
                     <br>
                     <br>
                     """
-                )
-            editions = projects[title]["editions"]
-            for editionTitles, editionInfo in editions.items():
-                editions_list = []
-                edition_status = editionInfo["isPublished"]
-                edition_user = editionInfo["users"]["editionUser"]
-                edition_role = editionInfo["users"]["editionRole"]
-                editions_list.append(
-                    f"""
-                    Project Organisers - {project_user} : {project_role}
-                    <br>
-                    {editionTitles}
-                    <br>
-                    isPublished: {edition_status}
-                    <br>
-                    <br>
-                    <br>
-                    """
-                )
-            editions_list = "\n".join(editions_list)
-        projects_list = "\n".join(projects_list)
-    return users_list, projects_list, projects, editions_list
+        )
+    projects_list = "\n".join(projects_list)
+    return projects_list
+
+
+def editionsList(project):
+    a, projects = workflow()
+    project_users = []
+    project_role = projects[project]["projectRole"]
+    project_user = projects[project]["projectUser"]
+    project_title = projects[project]["projectTitle"]
+    project_users.append(
+        f"""
+            <h1>{project_title}</h1>
+            <br>
+            <h2> Project Users </h2>
+            {project_user} : {project_role}
+            <br>
+        """
+    )
+    project_users = "\n".join(project_users)
+
+    editions = projects[project]["editions"]
+    for editionID, editionInfo in editions.items():
+        editions_list = []
+        edition_status = editionInfo["isPublished"]
+        edition_title = editionInfo["editionTitle"]
+        editions_list.append(
+            f"""
+
+                <a href = /projects/{project}/{editionID}>
+                {edition_title}
+                </a>
+                <br>
+                isPublished: {edition_status}
+                <br>
+                <br>
+            """
+        )
+        editions_list = "\n".join(editions_list)
+
+    return project_users, editions_list
+
+
+def editions_page(project, edition):
+    a, projects = workflow()
+    editions = projects[project]["editions"][edition]
+    edition_user = editions["users"]["editionUser"]
+    edition_role = editions["users"]["editionRole"]
+    edition_title = editions["editionTitle"]
+    edition_users = []
+    edition_users.append(
+        f"""
+        <h1>{edition_title}</h2> <br>
+        {edition_user} : {edition_role}
+        <br>
+        """
+    )
+    edition_users = "\n".join(edition_users)
+    return edition_users
+

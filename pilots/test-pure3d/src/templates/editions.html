@@ -1,3 +1,5 @@
 {% extends 'layout.html'%} {% block content %}
+{{project_user | safe}}
 <h2>Editions</h2>
-{{editions_list | safe}} {% endblock %}
+{{editions_list  | safe}} 
+{% endblock %}

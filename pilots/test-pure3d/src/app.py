@@ -1,8 +1,8 @@
 from flask import Flask, render_template
-from functions import user_buttons, workflow
+from functions import user_buttons, workflow, editionsList, projectsList, editions_page
 
 app = Flask(__name__)
-users_roles, projects_list, projects, elist = workflow()
+users_roles, projects = workflow()
 
 
 @app.route("/")
@@ -21,16 +21,32 @@ def login(username):
 
 @app.route("/projects")
 def projects():
+    projects_list = projectsList()
     return render_template(
         "projects.html", user=user_buttons(), projects_list=projects_list
     )
 
 
-@app.route("/projects/<string:project_title>")
+@app.route("/projects/<project_title>")
 # Display for individual project
 def project_page(project_title):
+    projects_user, eList = editionsList(project_title)
     return render_template(
-        "editions.html", user=user_buttons(), editions_list=elist
+        "editions.html",
+        user=user_buttons(),
+        project_user=projects_user,
+        editions_list=eList,
+    )
+
+
+@app.route("/projects/<project_title>/<edition_title>")
+def edition_page(project_title, edition_title):
+    edition_users = editions_page(project_title, edition_title)
+    return render_template(
+        "editionUsers.html",
+        user=user_buttons(),
+        edition_users=edition_users
+        
     )
 
 
