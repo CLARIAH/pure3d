@@ -31,10 +31,9 @@ def yaml_parser(filename):
 def workflow():
     filename = f"{SRC}/workflow/init"
     workflow_yaml = yaml_parser(filename)
-    userRole = workflow_yaml["userRole"]
-    project_status = workflow_yaml["status"]["project"]
-    edition_status = workflow_yaml["status"]["edition"]
-    projects_page = {}
+    userRole = workflow_yaml.userRole
+    status = workflow_yaml.status
+    name = workflow_yaml.name
 
     for userRoles, userValues in userRole.items():
         if userRoles == "site":
@@ -47,32 +46,64 @@ def workflow():
                 )
             users_list = "\n".join(users_list)
 
-    for project_id, project_data in userRole["project"].items():
+    projects = {}
+    for project, project_data in userRole["project"].items():
+        project_title = name["project"][project]["title"]
         project_role = list(project_data.keys())[0]
+        # print(project_role)
         project_user = list(project_data.values())[0]
-        isVisible = project_status["values"][project_id]
+        # print(project_user)
+        isVisible = status["project"]["values"][project]
         editions = {}
-        for edition_id, edition_data in userRole["edition"][project_id].items():
-            users = {}
-            for edition_user, edition_role in edition_data.items():
-                users = dict(editionUser=edition_user,
-                             editionRole=edition_role)
-            isPublished = edition_status["values"][project_id][edition_id]
-            editions[edition_id] = {"users": users, "isPublished": isPublished}
-        projects_page[project_id] = {
+        for edition, edition_data in userRole["edition"][project].items():
+            edition_title = name["edition"][project][edition]["title"]
+            edition_user = list(edition_data.keys())[0]
+            edition_role = list(edition_data.values())[0]
+            isPublished = status["edition"]["values"][project][edition]
+            editions[edition_title] = {
+                "users": {"editionUser": edition_user,
+                          "editionRole": edition_role},
+                "isPublished": isPublished,
+            }
+        projects[project_title] = {
             "projectRole": project_role,
             "projectUser": project_user,
             "isVisible": isVisible,
             "editions": editions,
         }
 
-    projects_html = []
-    for projectNames, projectInfos in projects_page.items():
-        projects_html.append(
-                f"""
-                    Project {projectNames}
+        projects_list = []
+        for title, info in projects.items():
+            project_status = info["isVisible"]
+            project_user = info["projectUser"]
+            project_role = info["projectRole"]
+            projects_list.append(
+                    f"""
+                    <a href= projects/{title}>{title}</a>
+                    <br>
+                    isVisible: {project_status}
+                    <br>
                     <br>
                     """
-            )
-    projects_html = "\n".join(projects_html)
-    return users_list, projects_html
+                )
+            editions = projects[title]["editions"]
+            for editionTitles, editionInfo in editions.items():
+                editions_list = []
+                edition_status = editionInfo["isPublished"]
+                edition_user = editionInfo["users"]["editionUser"]
+                edition_role = editionInfo["users"]["editionRole"]
+                editions_list.append(
+                    f"""
+                    Project Organisers - {project_user} : {project_role}
+                    <br>
+                    {editionTitles}
+                    <br>
+                    isPublished: {edition_status}
+                    <br>
+                    <br>
+                    <br>
+                    """
+                )
+            editions_list = "\n".join(editions_list)
+        projects_list = "\n".join(projects_list)
+    return users_list, projects_list, projects, editions_list

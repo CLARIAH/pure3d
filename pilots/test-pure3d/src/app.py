@@ -2,7 +2,7 @@ from flask import Flask, render_template
 from functions import user_buttons, workflow
 
 app = Flask(__name__)
-users_roles, projects_list = workflow()
+users_roles, projects_list, projects, elist = workflow()
 
 
 @app.route("/")
@@ -23,6 +23,14 @@ def login(username):
 def projects():
     return render_template(
         "projects.html", user=user_buttons(), projects_list=projects_list
+    )
+
+
+@app.route("/projects/<string:project_title>")
+# Display for individual project
+def project_page(project_title):
+    return render_template(
+        "editions.html", user=user_buttons(), editions_list=elist
     )
 
 
