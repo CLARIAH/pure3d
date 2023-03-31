@@ -43,10 +43,7 @@ def project_page(project_title):
 def edition_page(project_title, edition_title):
     edition_users = editions_page(project_title, edition_title)
     return render_template(
-        "editionUsers.html",
-        user=user_buttons(),
-        edition_users=edition_users
-        
+        "editionUsers.html", user=user_buttons(), edition_users=edition_users
     )
 
 
