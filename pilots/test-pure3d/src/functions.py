@@ -129,7 +129,8 @@ def editionsList(project):
             """
         )
         editions_list = "\n".join(editions_list)
-        return project_users, editions_list
+        print(editions_list)
+    return project_users, editions_list
 
 
 def editions_page(project, edition):

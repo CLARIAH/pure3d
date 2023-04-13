@@ -1,11 +1,18 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, session, url_for, redirect
 from functions import user_buttons, workflow, editionsList, projectsList, editions_page
 
 app = Flask(__name__)
 users_roles, projects = workflow()
 
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 @app.route("/")
+def index():
+    if 'username' in session:
+        return f'Logged in as {session["username"]}'
+    return 'You are not logged in'
+
+
 @app.route("/home")
 def home():
     return render_template("index.html", user=user_buttons(), user_text="")
@@ -17,6 +24,19 @@ def login(username):
     {username} is logged in.
     """
     return render_template("index.html", user=user_buttons(), user_text=user_text)
+
+
+@app.route("/<username>/login")
+def logging(username):
+    session['username'] = f"{username}"
+    return redirect(url_for('index'))
+
+
+@app.route('/logout')
+def logout():
+    # remove the username from the session if it's there
+    session.pop('username', None)
+    return redirect(url_for('index'))
 
 
 @app.route("/projects")
@@ -31,6 +51,7 @@ def projects():
 # Display for individual project
 def project_page(project_title):
     projects_user, editions_list = editionsList(project_title)
+
     return render_template(
         "editions.html",
         user=user_buttons(),
