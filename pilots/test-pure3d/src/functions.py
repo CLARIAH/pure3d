@@ -111,8 +111,8 @@ def editionsList(project):
     project_users = "\n".join(project_users)
 
     editions = projects[project]["editions"]
+    editions_list = []
     for editionID, editionInfo in editions.items():
-        editions_list = []
         edition_status = editionInfo["isPublished"]
         edition_title = editionInfo["editionTitle"]
         editions_list.append(
@@ -127,8 +127,8 @@ def editionsList(project):
                 <br>
             """
         )
-        editions_list = "\n".join(editions_list)
-        print(editions_list)
+    editions_list = "\n".join(editions_list)
+    print(editions_list)
     return project_users, editions_list
 
 
@@ -137,8 +137,8 @@ def editions_page(project, edition):
     editions = projects[project]["editions"][edition]
     edition_title = editions["editionTitle"]
     users = editions["users"]
+    edition_users = []
     for user, role in users.items():
-        edition_users = []
         edition_users.append(
             f"""
             <h1>{edition_title}</h1> <br>
@@ -147,5 +147,6 @@ def editions_page(project, edition):
             <br>
             """
         )
-        edition_users = "\n".join(edition_users)
-        return edition_users
+    edition_users = "\n".join(edition_users)
+    print(edition_users)
+    return edition_users
