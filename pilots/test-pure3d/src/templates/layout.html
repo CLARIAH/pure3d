@@ -14,7 +14,12 @@
     <div id="page-container">
       <div id="content-wrap">
         <h1>PURE 3D</h1>
-        {% block users %} {% endblock %}
+        {{user| safe}}
+        <br />
+        <br />
+        <!-- {{userN}} logged in-->
+        {{user_text}}
+        <br />
         <nav>
           <br />
           <div class="warpper">
@@ -27,7 +32,6 @@
             <a href="/projects"
               ><input class="radio" id="projects" name="group" type="projects"
             /></a>
-  
 
             <div class="tabs">
               <label class="tab" id="home-tab" for="home">Home</label>
