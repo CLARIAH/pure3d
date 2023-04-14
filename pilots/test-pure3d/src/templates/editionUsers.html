@@ -1,3 +1,5 @@
 {% extends 'layout.html'%} {% block content %}
-
+<h1>{{edition_title | safe}}</h1> <br>
+<h2> Edition Users </h2>
+<br>
 {{edition_users | safe}} {% endblock %}

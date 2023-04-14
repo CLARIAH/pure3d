@@ -141,12 +141,10 @@ def editions_page(project, edition):
     for user, role in users.items():
         edition_users.append(
             f"""
-            <h1>{edition_title}</h1> <br>
-            <h2> Edition Users </h2>
             {user} : {role}
             <br>
             """
         )
     edition_users = "\n".join(edition_users)
     print(edition_users)
-    return edition_users
+    return edition_users, edition_title

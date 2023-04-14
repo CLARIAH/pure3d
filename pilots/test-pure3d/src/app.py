@@ -59,11 +59,12 @@ def project_page(project_title):
 @app.route("/projects/<project_title>/<edition_title>")
 def edition_page(project_title, edition_title):
     user_text = session.get("user_text")
-    edition_users = editions_page(project_title, edition_title)
+    edition_users, edition_title = editions_page(project_title, edition_title)
     return render_template(
         "editionUsers.html",
         user=user_buttons(),
         edition_users=edition_users,
+        edition_title=edition_title,
         user_text=user_text,
     )
 
