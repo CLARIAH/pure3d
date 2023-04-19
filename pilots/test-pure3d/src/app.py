@@ -1,13 +1,12 @@
 from flask import Flask, render_template, session, url_for, redirect
 from flask_session import Session
-from functions import user_buttons, workflow, editionsList, projectsList, editions_page
+from user_login import user_buttons
+from functions import workflow, editions_list, projects_list, editions_page
 
 app = Flask(__name__)
 app.secret_key = b"1fd10cad570c541436d134d760429d5901edfc71522723ad4e75d2aa0215ef3"
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
-
-users_roles, projects = workflow()
 
 
 @app.route("/<username>/login")
@@ -24,19 +23,17 @@ def login(username):
 @app.route("/home")
 def home():
     user_text = session.get("user_text")
-    return render_template("index.html",
-                           user=user_buttons(),
-                           user_text=user_text)
+    return render_template("index.html", user=user_buttons(), user_text=user_text)
 
 
 @app.route("/projects")
 def projects():
     user_text = session.get("user_text")
-    projects_list = projectsList()
+    all_projects = projects_list()
     return render_template(
         "projects.html",
         user=user_buttons(),
-        projects_list=projects_list,
+        all_projects=all_projects,
         user_text=user_text,
     )
 
@@ -45,13 +42,13 @@ def projects():
 # Display for individual project
 def project_page(project_title):
     user_text = session.get("user_text")
-    projects_user, editions_list = editionsList(project_title)
+    projects_user, all_editions = editions_list(project_title)
 
     return render_template(
         "editions.html",
         user=user_buttons(),
         project_user=projects_user,
-        editions_list=editions_list,
+        all_editions=all_editions,
         user_text=user_text,
     )
 
@@ -72,11 +69,9 @@ def edition_page(project_title, edition_title):
 @app.route("/users")
 def users():
     user_text = session.get("user_text")
+    users_roles, projects = workflow()
     return render_template(
-        "users.html",
-        user=user_buttons(),
-        user_roles=users_roles,
-        user_text=user_text
+        "users.html", user=user_buttons(), user_roles=users_roles, user_text=user_text
     )
 
 

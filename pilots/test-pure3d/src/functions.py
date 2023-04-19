@@ -5,21 +5,6 @@ from generic import deepAttrDict
 BASE = os.path.expanduser("~/github/clariah/pure3d/pilots/test-pure3d")
 SRC = f"{BASE}/src"
 
-users = ["user1", "user2", "user3", "user4"]
-
-
-def user_buttons():
-    html = []
-    for user in users:
-        html.append(
-            f"""<a href = "/{user}/login">
-                <button type="submit">{user}</button>
-                </a>
-                """
-        )
-    html = "\n".join(html)
-    return html
-
 
 def yaml_parser(filename):
     with open(f"{filename}.yml", "r") as yml_file:
@@ -74,7 +59,7 @@ def workflow():
     return users_list, projects
 
 
-def projectsList():
+def projects_list():
     a, projects = workflow()
     projects_list = []
     for projectID, info in projects.items():
@@ -93,7 +78,7 @@ def projectsList():
     return projects_list
 
 
-def editionsList(project):
+def editions_list(project):
     a, projects = workflow()
     project_users = []
     project_role = projects[project]["projectRole"]
@@ -128,7 +113,6 @@ def editionsList(project):
             """
         )
     editions_list = "\n".join(editions_list)
-    print(editions_list)
     return project_users, editions_list
 
 
@@ -146,5 +130,4 @@ def editions_page(project, edition):
             """
         )
     edition_users = "\n".join(edition_users)
-    print(edition_users)
     return edition_users, edition_title
