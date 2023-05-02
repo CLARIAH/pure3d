@@ -1,4 +1,4 @@
-from flask import Flask, render_template, session, url_for, redirect
+from flask import Flask, render_template, session, url_for, redirect, request
 from flask_session import Session
 from user_login import user_buttons
 from functions import workflow, editions_list, projects_list, editions_page
@@ -66,10 +66,12 @@ def edition_page(project_title, edition_title):
     )
 
 
-@app.route("/users")
+@app.route("/users", methods=["GET", "POST"])
 def users():
     user_text = session.get("user_text")
     users_roles, projects = workflow()
+    if request.method == 'POST':
+        
     return render_template(
         "users.html", user=user_buttons(), user_roles=users_roles, user_text=user_text
     )
