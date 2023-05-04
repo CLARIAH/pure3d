@@ -1,0 +1,15 @@
+site:
+  artist: user
+  costas: root
+  daniel: guest
+  historian: user
+  house1: guest
+  house2: guest
+  kelly: root
+  mount1: user
+  mount2: user
+  social: admin
+  stud1: user
+  stud2: user
+  stud3: user
+  susan: root

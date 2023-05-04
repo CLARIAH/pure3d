@@ -1,7 +1,10 @@
-from flask import Flask, render_template, session, url_for, redirect, request
+from flask import Flask, render_template, session, url_for, redirect, request, jsonify
 from flask_session import Session
-from user_login import user_buttons
-from functions import workflow, editions_list, projects_list, editions_page
+from users import user_buttons, user_roles, userRole, filename
+from workflow import editions_list, projects_list, editions_page
+
+import yaml
+
 
 app = Flask(__name__)
 app.secret_key = b"1fd10cad570c541436d134d760429d5901edfc71522723ad4e75d2aa0215ef3"
@@ -66,15 +69,31 @@ def edition_page(project_title, edition_title):
     )
 
 
-@app.route("/users", methods=["GET", "POST"])
+@app.route("/users")
 def users():
     user_text = session.get("user_text")
-    users_roles, projects = workflow()
-    if request.method == 'POST':
-        
+    users_html = user_roles()
     return render_template(
-        "users.html", user=user_buttons(), user_roles=users_roles, user_text=user_text
+        "users.html", user=user_buttons(), users_html=users_html, user_text=user_text
     )
+
+
+# Define the Flask route for updating the user role
+@app.route("/update_user_role", methods=["POST"])
+def update_user_role():
+    # Get the key and value from the POST request data
+    key = request.form["key"]
+    value = request.form["value"]
+
+    # Update the value in the YAML data
+    userRole["site"][key] = value
+
+    # Write the updated YAML data back to the file
+    with open(filename, "w") as f:
+        yaml.safe_dump(userRole, f)
+
+    # Return a JSON response indicating success
+    return jsonify({"success": True})
 
 
 if __name__ == "__main__":
