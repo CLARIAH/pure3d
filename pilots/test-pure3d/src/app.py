@@ -1,8 +1,8 @@
 from flask import Flask, render_template, session, url_for, redirect, request, jsonify
 from flask_session import Session
-from users import user_buttons, user_roles, userRole, filename
+from users import user_buttons, user_roles
 from workflow import editions_list, projects_list, editions_page
-
+from variables import SRC
 import yaml
 
 
@@ -74,7 +74,7 @@ def users():
     user_text = session.get("user_text")
     users_html = user_roles()
     return render_template(
-        "users.html", user=user_buttons(), users_html=users_html, user_text=user_text
+        "users.html", user=user_buttons(), user_text=user_text, user_role=users_html
     )
 
 
@@ -85,12 +85,16 @@ def update_user_role():
     key = request.form["key"]
     value = request.form["value"]
 
-    # Update the value in the YAML data
-    userRole["site"][key] = value
+    filename = f"{SRC}/workflow/init.yml"
+    with open(filename, "r") as file:
+        data = yaml.safe_load(file)
+
+    # Update the data dictionary with the modified user role dictionary
+    data["userRole"]["site"][key] = value
 
     # Write the updated YAML data back to the file
     with open(filename, "w") as f:
-        yaml.safe_dump(userRole, f)
+        yaml.dump(data, f)
 
     # Return a JSON response indicating success
     return jsonify({"success": True})

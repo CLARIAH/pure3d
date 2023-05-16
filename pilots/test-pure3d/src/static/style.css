@@ -20,3 +20,10 @@
   display: none;
 }
 
+tr.success {
+  background-color: #d4edda;
+}
+
+tr.error {
+  background-color: #f8d7da;
+}

@@ -28,6 +28,7 @@ def user_roles():
     for userRoles, userValues in userRole.items():
         if userRoles == "site":
             html = []
+
             for key, value in userValues.items():
                 select_options = ""
                 for option in options:
@@ -37,20 +38,16 @@ def user_roles():
                     )
 
                 html.append(
-                    f"""<head>
-                        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-                        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-                        </head>
-
-                        <tr>
-                            <td>{key}</td>
-                            <td id='{key}'>
-                                <span class='value'>{value}</span>
-                                <select onchange='changeUserRole("{key}", this.value)'>
-                                    {select_options}
-                                </select>
-                            </td>
-                        </tr>
+                    f"""
+                    <tr>
+                        <td>{key}</td>
+                        <td id="{key}">
+                            <span class="value">{value}</span>
+                            <select id='select-{key}' onchange='changeUserRole("{key}", this.value)'>
+                                {select_options}
+                            </select>
+                        </td>
+                    </tr>
                     """
                 )
             html = "\n".join(html)

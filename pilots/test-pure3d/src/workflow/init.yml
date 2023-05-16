@@ -1,84 +1,82 @@
-userRole:
-  site:
-    susan: root
-    costas: admin
-    kelly: user
-    daniel: guest
-    historian: user
-    mount1: user
-    mount2: user
-    house1: user
-    house2: user
-    artist: user
-    stud1: user
-    stud2: user
-    stud3: user
-    social: user
-  project:
-    "1":
-      historian: organiser
-    "2":
-      artist: organiser
-    "3":
-      social: organiser
+name:
   edition:
-    "1":
-      "1":
-        mount1: editor
-        mount2: reader
-      "2":
-        house1: editor
-        house2: reader
-    "2":
-      "1":
-        stud1: editor
-        stud2: reader
-      "2":
-        stud1: editor
-        stud3: reader
-    "3":
-      "1":
-        social: editor
-        stud1: reader
-
-status:
+    '1':
+      '1':
+        title: 25 Northumberland Road
+      '2':
+        title: Clanwilliam House
+    '2':
+      '1':
+        title: Yurt
+      '2':
+        title: Hurdy-Gurdy
+    '3':
+      '1':
+        title: Diaconie Weeshuis
   project:
-    field: isVisible
-    values:
-      "1": true
-      "2": true
-      "3": true
+    '1':
+      title: Contested Memories - The Battle of Mount Street Bridge
+    '2':
+      title: Tokyo University Workshop 2022
+    '3':
+      title: Diaconie Weeshuis
+status:
   edition:
     field: isPublished
     values:
-      "1":
-        "1": true
-        "2": false
-      "2":
-        "1": true
-        "2": false
-      "3":
-        "1": false
-
-name: 
+      '1':
+        '1': true
+        '2': false
+      '2':
+        '1': true
+        '2': false
+      '3':
+        '1': false
   project:
-      "1": 
-        title: Contested Memories - The Battle of Mount Street Bridge
-      "2":
-        title: Tokyo University Workshop 2022
-      "3":
-        title: Diaconie Weeshuis
+    field: isVisible
+    values:
+      '1': true
+      '2': true
+      '3': true
+userRole:
   edition:
-    "1":
-      "1":
-        title: 25 Northumberland Road
-      "2":
-        title: Clanwilliam House
-    "2":
-      "1":
-        title: Yurt
-      "2":
-        title: Hurdy-Gurdy
-    "3":
-      "1":
-        title: Diaconie Weeshuis
+    '1':
+      '1':
+        mount1: editor
+        mount2: reader
+      '2':
+        house1: editor
+        house2: reader
+    '2':
+      '1':
+        stud1: editor
+        stud2: reader
+      '2':
+        stud1: editor
+        stud3: reader
+    '3':
+      '1':
+        social: editor
+        stud1: reader
+  project:
+    '1':
+      historian: organiser
+    '2':
+      artist: organiser
+    '3':
+      social: organiser
+  site:
+    artist: user
+    costas: root
+    daniel: user
+    historian: user
+    house1: guest
+    house2: user
+    kelly: root
+    mount1: user
+    mount2: user
+    social: guest
+    stud1: admin
+    stud2: user
+    stud3: user
+    susan: admin
