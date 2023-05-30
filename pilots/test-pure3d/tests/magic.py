@@ -1,8 +1,9 @@
 """Change the sys path so that `test` modules can import `control` modules."""
-
 import sys
 import os
 
-SERVER_PATH = os.path.split(os.path.split(os.path.realpath(__file__))[0])[0]
+# Get the parent directory of the current directory (where the test files are located)
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-sys.path.insert(0, SERVER_PATH)
+# Add the parent directory of the "src" folder to the Python module search path
+sys.path.insert(0, parent_dir)

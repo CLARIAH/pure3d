@@ -1,11 +1,13 @@
-function changeUserRole(key, value) {
+function changeDataValues(key, value, type, project) {
   // Get the existing data from the form
   var formData = new FormData();
   formData.append('key', key);
   formData.append('value', value);
-
+  formData.append('type', type); 
+  formData.append('project', project); 
+  
   // Make an AJAX request to the Flask server to update the value in the YAML file
-  fetch('/update_user_role', {
+  fetch('/update_data_values', {
     method: 'POST',
     body: formData
   })

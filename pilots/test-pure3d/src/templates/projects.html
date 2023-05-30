@@ -1,4 +1,8 @@
 {% extends 'layout.html'%} {% block content %}
 <h2>Projects</h2>
-
-{{all_projects | safe}} {% endblock %}
+<table>
+  <tbody>
+    {{all_projects | safe}}
+  </tbody>
+</table>
+{% endblock %}

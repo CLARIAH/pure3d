@@ -43,7 +43,7 @@ def user_roles():
                         <td>{key}</td>
                         <td id="{key}">
                             <span class="value">{value}</span>
-                            <select id='select-{key}' onchange='changeUserRole("{key}", this.value)'>
+                            <select id='select-{key}' onchange='changeDataValues("{key}", this.value, "user", " ")'>
                                 {select_options}
                             </select>
                         </td>

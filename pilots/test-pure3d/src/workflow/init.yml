@@ -25,19 +25,19 @@ status:
     field: isPublished
     values:
       '1':
-        '1': true
-        '2': false
+        '1': 'False'
+        '2': 'True'
       '2':
         '1': true
         '2': false
       '3':
-        '1': false
+        '1': 'True'
   project:
     field: isVisible
     values:
-      '1': true
-      '2': true
-      '3': true
+      '1': 'True'
+      '2': 'False'
+      '3': 'False'
 userRole:
   edition:
     '1':
@@ -66,17 +66,17 @@ userRole:
     '3':
       social: organiser
   site:
-    artist: user
-    costas: root
-    daniel: user
+    artist: admin
+    costas: guest
+    daniel: guest
     historian: user
-    house1: guest
+    house1: user
     house2: user
-    kelly: root
+    kelly: user
     mount1: user
     mount2: user
-    social: guest
-    stud1: admin
-    stud2: user
+    social: admin
+    stud1: user
+    stud2: admin
     stud3: user
-    susan: admin
+    susan: guest

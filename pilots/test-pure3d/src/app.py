@@ -26,18 +26,23 @@ def login(username):
 @app.route("/home")
 def home():
     user_text = session.get("user_text")
-    return render_template("index.html", user=user_buttons(), user_text=user_text)
+    username = session.get("user")
+    return render_template(
+        "index.html", user=user_buttons(), user_text=user_text, username=username
+    )
 
 
 @app.route("/projects")
 def projects():
     user_text = session.get("user_text")
+    username = session.get("user")
     all_projects = projects_list()
     return render_template(
         "projects.html",
         user=user_buttons(),
         all_projects=all_projects,
         user_text=user_text,
+        username=username,
     )
 
 
@@ -45,6 +50,7 @@ def projects():
 # Display for individual project
 def project_page(project_title):
     user_text = session.get("user_text")
+    username = session.get("user")
     projects_user, all_editions = editions_list(project_title)
 
     return render_template(
@@ -53,12 +59,14 @@ def project_page(project_title):
         project_user=projects_user,
         all_editions=all_editions,
         user_text=user_text,
+        username=username,
     )
 
 
 @app.route("/projects/<project_title>/<edition_title>")
 def edition_page(project_title, edition_title):
     user_text = session.get("user_text")
+    username = session.get("user")
     edition_users, edition_title = editions_page(project_title, edition_title)
     return render_template(
         "editionUsers.html",
@@ -66,38 +74,55 @@ def edition_page(project_title, edition_title):
         edition_users=edition_users,
         edition_title=edition_title,
         user_text=user_text,
+        username=username,
     )
 
 
 @app.route("/users")
 def users():
     user_text = session.get("user_text")
+    username = session.get("user")
     users_html = user_roles()
     return render_template(
-        "users.html", user=user_buttons(), user_text=user_text, user_role=users_html
+        "users.html",
+        user=user_buttons(),
+        user_text=user_text,
+        username=username,
+        user_role=users_html,
     )
 
 
 # Define the Flask route for updating the user role
-@app.route("/update_user_role", methods=["POST"])
+@app.route("/update_data_values", methods=["POST"])
 def update_user_role():
     # Get the key and value from the POST request data
     key = request.form["key"]
     value = request.form["value"]
+    update_type = request.form["type"]
+    project = request.form["project"]
 
     filename = f"{SRC}/workflow/init.yml"
     with open(filename, "r") as file:
         data = yaml.safe_load(file)
 
-    # Update the data dictionary with the modified user role dictionary
-    data["userRole"]["site"][key] = value
+    if update_type == "user":
+        # Update the data dictionary with the modified user roles dictionary
+        data["userRole"]["site"][key] = value
+    elif update_type == "project":
+        # Update the data dictionary with the modified project statuses dictionary
+        data["status"]["project"]["values"][key] = value
+    elif update_type == "edition":
+        # Update the data dictionary with the modified edition statuses dictionary
+        data["status"]["edition"]["values"][project][key] = value
+    else:
+        return jsonify(success=False, error="Invalid update type")
 
     # Write the updated YAML data back to the file
     with open(filename, "w") as f:
         yaml.dump(data, f)
 
     # Return a JSON response indicating success
-    return jsonify({"success": True})
+    return jsonify(success=True)
 
 
 if __name__ == "__main__":

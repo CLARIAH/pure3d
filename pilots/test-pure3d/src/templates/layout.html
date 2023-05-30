@@ -8,6 +8,8 @@
       type="text/css"
       href="{{ url_for('static',filename='style.css')}}"
     />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block head %} {% endblock %}
   </head>
 
@@ -18,7 +20,7 @@
         {{user| safe}}
         <br />
         <br />
-        <!-- {{userN}} logged in-->
+        <!-- {{username}} logged in-->
         {{user_text}}
         <br />
         <nav>

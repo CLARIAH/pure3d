@@ -1,6 +1,8 @@
 from functions import yaml_parser
 from variables import SRC
 
+status_bool = [True, False]
+
 
 def workflow():
     filename = f"{SRC}/workflow/init"
@@ -44,12 +46,23 @@ def projects_list():
     for projectID, info in projects.items():
         project_status = info["isVisible"]
         title = info["projectTitle"]
+        select_options = ""
+        for status in status_bool:
+            selected = "selected" if project_status == status else ""
+            select_options += f"<option value='{status}' {selected}>{status}</option>"
+
         projects_list.append(
-            f"""
-                    <a href= projects/{projectID}>{title}</a>
-                    <br>
-                    isVisible: {project_status}
-                    <br>
+            f"""    <tr>
+                        <td><a href= projects/{projectID}>{title}</a></td>
+                    </tr>
+                    <tr>
+                        <td id="{projectID}">isPublished:
+                                <span class="value">{project_status}</span>
+                                <select id='select-{projectID}' onchange='changeDataValues("{projectID}", this.value, "project"," ")'>
+                                    {select_options}
+                                </select>
+                        </td>
+                    </tr>
                     <br>
                     """
         )
@@ -79,17 +92,26 @@ def editions_list(project):
     for editionID, editionInfo in editions.items():
         edition_status = editionInfo["isPublished"]
         edition_title = editionInfo["editionTitle"]
-        editions_list.append(
-            f"""
 
-                <a href = /projects/{project}/{editionID}>
-                {edition_title}
-                </a>
-                <br>
-                isPublished: {edition_status}
-                <br>
-                <br>
-            """
+        select_options = ""
+        for status in status_bool:
+            selected = "selected" if edition_status == status else ""
+            select_options += f"<option value='{status}' {selected}>{status}</option>"
+
+        editions_list.append(
+            f"""    <tr>
+                        <td><a href = /projects/{project}/{editionID}>{edition_title}</a></td>
+                    </tr>
+                    <tr>
+                        <td id="{editionID}"> isPublished:
+                                <span class="value">{edition_status}</span>
+                                <select id='select-{editionID}' onchange='changeDataValues("{editionID}", this.value, "edition", "{project}")'>
+                                    {select_options}
+                                </select>
+                        </td>
+                    </tr>
+                    <br>
+                    """
         )
     editions_list = "\n".join(editions_list)
     return project_users, editions_list

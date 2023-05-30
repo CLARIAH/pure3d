@@ -35,6 +35,7 @@ shift
 
 if [[ "$1" == "--test" ]]; then
     echo "Running all tests..."
+    cd "$pilotname"
     pytest
     exit 1
 fi
