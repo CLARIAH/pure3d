@@ -1,6 +1,6 @@
+import magic
 import pytest
 from src.app import app
-import magic
 
 
 @pytest.fixture

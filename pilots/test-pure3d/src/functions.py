@@ -1,5 +1,5 @@
 import yaml
-from generic import deepAttrDict
+from src.generic import deepAttrDict
 
 
 def yaml_parser(filename):

@@ -17,12 +17,16 @@
     <div id="page-container">
       <div id="content-wrap">
         <h1>PURE 3D</h1>
-        {{user| safe}}
+        {{user| safe}} 
         <br />
         <br />
-        <!-- {{username}} logged in-->
         {{user_text}}
         <br />
+        <a href = "/logout">
+          <p align="right">
+            <input type="button" value="Log Out" />
+          </p>
+        </a>
         <nav>
           <br />
           <div class="warpper">

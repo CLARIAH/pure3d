@@ -1,5 +1,5 @@
-from functions import yaml_parser
-from variables import SRC
+from src.functions import yaml_parser
+from src.variables import SRC
 
 status_bool = [True, False]
 

@@ -1,5 +1,5 @@
-from functions import yaml_parser
-from variables import SRC
+from src.functions import yaml_parser
+from src.variables import SRC
 
 filename = f"{SRC}/workflow/init"
 workflow_yaml = yaml_parser(filename)

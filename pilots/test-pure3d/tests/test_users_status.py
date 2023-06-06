@@ -1,4 +1,4 @@
-import magic
+#import magic
 
 
 def test_users_route(client):

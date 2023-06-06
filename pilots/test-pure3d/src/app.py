@@ -1,14 +1,24 @@
-from flask import Flask, render_template, session, url_for, redirect, request, jsonify
+from flask import (
+    Flask,
+    render_template,
+    session,
+    url_for,
+    redirect,
+    request,
+    jsonify,
+    make_response,
+)
 from flask_session import Session
-from users import user_buttons, user_roles
-from workflow import editions_list, projects_list, editions_page
-from variables import SRC
+from src.users import user_buttons, user_roles
+from src.workflow import editions_list, projects_list, editions_page
+from src.variables import SRC
 import yaml
 
 
 app = Flask(__name__)
 app.secret_key = b"1fd10cad570c541436d134d760429d5901edfc71522723ad4e75d2aa0215ef3"
 app.config["SESSION_TYPE"] = "filesystem"
+app.config['SESSION_COOKIE_NAME'] = 'some_session_cookie_name'
 Session(app)
 
 
@@ -19,7 +29,19 @@ def login(username):
             {username} is logged in.
             """
     session["user_text"] = user_text
-    return redirect(url_for("home"))
+    response = make_response(redirect(url_for("home")), 302)
+    response.headers["X-Comment"] = f"{username} logged in"
+    return response
+
+
+@app.route('/logout')
+def logout():
+    session.pop('user')
+    session.pop('user_text')
+    response = make_response(redirect(url_for("home")), 302)
+    response.headers["X-Comment"] = "user logged out"
+    return response
+
 
 
 @app.route("/")
