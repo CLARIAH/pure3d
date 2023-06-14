@@ -1,5 +1,12 @@
+import string
+import secrets
+
+
 def test_url_does_not_exists(client):
-    response = client.get("/someurl")
+    length = 8
+    characters = string.ascii_letters + string.digits
+    random_string = "".join(secrets.choice(characters) for _ in range(length))
+    response = client.get(f"/{random_string}")
     assert response.status_code == 404
 
 

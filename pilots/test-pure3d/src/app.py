@@ -7,6 +7,7 @@ from flask import (
     request,
     jsonify,
     make_response,
+    send_from_directory
 )
 from flask_session import Session
 from src.users import user_buttons, user_roles
@@ -20,6 +21,11 @@ app.secret_key = b"1fd10cad570c541436d134d760429d5901edfc71522723ad4e75d2aa0215e
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_COOKIE_NAME"] = "some_session_cookie_name"
 Session(app)
+
+
+@app.route("/favicon.ico")
+def favicon():
+    return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
 @app.route("/<username>/login")
@@ -131,21 +137,29 @@ def update_user_role():
         if key not in data["userRole"]["site"]:
             return make_response(jsonify(success=False, message="Invalid user"), 400)
         elif value not in ["root", "admin", "guest", "user"]:
-            return make_response(jsonify(success=False, message="Invalid user role"), 400)
+            return make_response(
+                jsonify(success=False, message="Invalid user role"), 400
+            )
         else:
             data["userRole"]["site"][key] = value
             with open(filename, "w") as f:
                 yaml.dump(data, f)
-            return jsonify(success=True, message=f"status of {key} has changed to {value}")
+            return jsonify(
+                success=True, message=f"status of {key} has changed to {value}"
+            )
     elif update_type == "project":
         if key not in data["name"]["project"]:
-            return make_response(jsonify(success=False, message="Project not found"), 400)
+            return make_response(
+                jsonify(success=False, message="Project not found"), 400
+            )
         # Update the data dictionary with the modified project statuses dictionary
         else:
             data["status"]["project"]["values"][key] = value
             with open(filename, "w") as f:
                 yaml.dump(data, f)
-            return jsonify(success=True, message=f"status of {key} has changed to {value}")
+            return jsonify(
+                success=True, message=f"status of {key} has changed to {value}"
+            )
     elif update_type == "edition":
         # Update the data dictionary with the modified edition statuses dictionary
         data["status"]["edition"]["values"][project][key] = value

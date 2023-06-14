@@ -1,18 +1,22 @@
-def test_css_file(client):
-    response = client.get("/static/style.css")
-    assert response.status_code == 200
+import pytest
+
+STATIC = "/static"
+CSS = f"{STATIC}/css"
+JS = f"{STATIC}/js"
 
 
-def test_js_file(client):
-    response = client.get("/static/js/main.js")
-    assert response.status_code == 200
-
-
-def test_invalid_css_file(client):
-    response = client.get("/static/invalid.css")
-    assert response.status_code == 404
-
-
-def test_invalid_js_file(client):
-    response = client.get("/static/js/invalid.js")
-    assert response.status_code == 404
+@pytest.mark.parametrize(
+    "file_path, expected_status_code",
+    [
+        (f"{STATIC}", 404),
+        (f"{CSS}/style.css", 200),
+        (f"{JS}/main.js", 200),
+        (f"{CSS}/invalid.css", 404),
+        (f"{JS}/invalid.js", 404),
+        (f"{STATIC}/favicon.ico", 200),
+        (f"{STATIC}/unknown.ico", 404),
+    ],
+)
+def test_static_files(client, file_path, expected_status_code):
+    response = client.get(file_path)
+    assert response.status_code == expected_status_code
