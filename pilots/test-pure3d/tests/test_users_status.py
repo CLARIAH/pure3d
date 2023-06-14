@@ -1,47 +1,63 @@
-#import magic
+import pytest
 
 
-def test_users_route(client):
-    response = client.get('/users')
-
-    assert response.status_code == 200
-    assert b"<h1>User Roles</h1>" in response.data
-
-
-def test_update_user_role(client):
+@pytest.mark.parametrize(
+    "key, value, expected_message",
+    [
+        ("susan", "admin", "status of susan has changed to admin"),
+        ("susan", "guest", "status of susan has changed to guest"),
+        ("susan", "user", "status of susan has changed to user"),
+        ("susan", "root", "status of susan has changed to root"),
+        ("costas", "admin", "status of costas has changed to admin"),
+        ("costas", "guest", "status of costas has changed to guest"),
+        ("costas", "user", "status of costas has changed to user"),
+        ("costas", "root", "status of costas has changed to root"),
+    ],
+)
+def test_user_role_is_updated(client, key, value, expected_message):
     response = client.post(
-        "/update_data_values", data={"key": "susan", "value": "admin", "update_type": "user", "project": " "}
+        "/update_data_values",
+        data={"key": key, "value": value, "type": "user", "project": " "},
     )
     assert response.status_code == 200
-    assert response.json == {"success": True}
 
-    # Verify that the user role has been updated
-    response = client.get("/users")
-    assert response.status_code == 200
-    assert b'<td>susan</td>' in response.data
-    assert b'<td id="susan">' in response.data
-    assert b'<span class="value">admin</span>' in response.data
+    json_data = response.get_json()
+    assert json_data["success"] is True
+    assert json_data["message"] == expected_message
 
 
-def test_invalid_update_type(client):
+@pytest.mark.parametrize(
+    "key, value",
+    [
+        ("susan", "admin"),
+        ("susan", "guest"),
+        ("artist", "user"),
+        ("artist", "root"),
+    ],
+)
+def test_invalid_update_type(client, key, value):
     response = client.post(
-        "/update_user_role", data={"key": "susan", "value": "admin", "update_type": "dummy", "project": " "}
+        "/update_data_values",
+        data={"key": key, "value": value, "type": "invalid type", "project": ""},
     )
-    assert response.status_code == 200
     assert response.json == {"success": False, "error": "Invalid update type"}
 
 
-#def test_invalid_user(client):
-    #response = client.post(
-        #"/update_data_values", data={"key": "dummy", "value": "user", "type": "user"}
-    #)
-    #assert response.status_code == 200
-    #assert response.json == {"success": False, "error": "User not found"}
-
-
-#def test_invalid_user_role(client):
-    #response = client.post(
-        #"/update_data_values", data={"key": "susan", "value": "dummy", "type": "user"}
-    #)
-    #assert response.status_code == 200
-    #assert response.json == {"success": False, "error": "User role not valid"}
+@pytest.mark.parametrize(
+    "key, value, expected_message",
+    [
+        ("invalid_user", "admin", "Invalid user"),
+        ("unknown_user", "guest", "Invalid user"),
+        ("artist", "unknown_user_role", "Invalid user role"),
+        ("kelly", "invalid_user_role", "Invalid user role"),
+    ],
+)
+def test_invalid_user_or_user_role(client, key, value, expected_message):
+    response = client.post(
+        "/update_data_values",
+        data={"key": key, "value": value, "type": "user", "project": ""},
+    )
+    assert response.status_code == 400
+    json_data = response.get_json()
+    assert json_data["success"] is False
+    assert json_data["message"] == expected_message

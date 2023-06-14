@@ -18,7 +18,7 @@ import yaml
 app = Flask(__name__)
 app.secret_key = b"1fd10cad570c541436d134d760429d5901edfc71522723ad4e75d2aa0215ef3"
 app.config["SESSION_TYPE"] = "filesystem"
-app.config['SESSION_COOKIE_NAME'] = 'some_session_cookie_name'
+app.config["SESSION_COOKIE_NAME"] = "some_session_cookie_name"
 Session(app)
 
 
@@ -34,14 +34,13 @@ def login(username):
     return response
 
 
-@app.route('/logout')
+@app.route("/logout")
 def logout():
-    session.pop('user')
-    session.pop('user_text')
+    session.pop("user")
+    session.pop("user_text")
     response = make_response(redirect(url_for("home")), 302)
     response.headers["X-Comment"] = "user logged out"
     return response
-
 
 
 @app.route("/")
@@ -129,21 +128,33 @@ def update_user_role():
 
     if update_type == "user":
         # Update the data dictionary with the modified user roles dictionary
-        data["userRole"]["site"][key] = value
+        if key not in data["userRole"]["site"]:
+            return make_response(jsonify(success=False, message="Invalid user"), 400)
+        elif value not in ["root", "admin", "guest", "user"]:
+            return make_response(jsonify(success=False, message="Invalid user role"), 400)
+        else:
+            data["userRole"]["site"][key] = value
+            with open(filename, "w") as f:
+                yaml.dump(data, f)
+            return jsonify(success=True, message=f"status of {key} has changed to {value}")
     elif update_type == "project":
+        if key not in data["name"]["project"]:
+            return make_response(jsonify(success=False, message="Project not found"), 400)
         # Update the data dictionary with the modified project statuses dictionary
-        data["status"]["project"]["values"][key] = value
+        else:
+            data["status"]["project"]["values"][key] = value
+            with open(filename, "w") as f:
+                yaml.dump(data, f)
+            return jsonify(success=True, message=f"status of {key} has changed to {value}")
     elif update_type == "edition":
         # Update the data dictionary with the modified edition statuses dictionary
         data["status"]["edition"]["values"][project][key] = value
+        with open(filename, "w") as f:
+            yaml.dump(data, f)
     else:
         return jsonify(success=False, error="Invalid update type")
 
-    # Write the updated YAML data back to the file
-    with open(filename, "w") as f:
-        yaml.dump(data, f)
-
-    # Return a JSON response indicating success
+    # Return a JSON response indicating success or failure
     return jsonify(success=True)
 
 

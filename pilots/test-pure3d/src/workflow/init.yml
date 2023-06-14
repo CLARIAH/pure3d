@@ -25,8 +25,8 @@ status:
     field: isPublished
     values:
       '1':
-        '1': 'False'
-        '2': 'True'
+        '1': 'True'
+        '2': 'False'
       '2':
         '1': true
         '2': false
@@ -35,8 +35,8 @@ status:
   project:
     field: isVisible
     values:
-      '1': 'True'
-      '2': 'False'
+      '1': 'False'
+      '2': 'True'
       '3': 'False'
 userRole:
   edition:
@@ -66,17 +66,17 @@ userRole:
     '3':
       social: organiser
   site:
-    artist: guest
-    costas: guest
+    artist: user
+    costas: root
     daniel: guest
-    historian: user
+    historian: admin
     house1: user
     house2: user
     kelly: user
     mount1: user
-    mount2: user
+    mount2: admin
     social: admin
     stud1: user
     stud2: admin
     stud3: user
-    susan: guest
+    susan: root
