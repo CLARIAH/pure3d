@@ -7,7 +7,7 @@ from flask import (
     request,
     jsonify,
     make_response,
-    send_from_directory
+    send_from_directory,
 )
 from flask_session import Session
 from src.users import user_buttons, user_roles
@@ -25,7 +25,9 @@ Session(app)
 
 @app.route("/favicon.ico")
 def favicon():
-    return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    return send_from_directory(
+        app.static_folder, "favicon.ico", mimetype="image/vnd.microsoft.icon"
+    )
 
 
 @app.route("/<username>/login")
@@ -121,12 +123,15 @@ def users():
 
 # Define the Flask route for updating the user role
 @app.route("/update_data_values", methods=["POST"])
-def update_user_role():
+def update_data_values():
     # Get the key and value from the POST request data
     key = request.form["key"]
     value = request.form["value"]
     update_type = request.form["type"]
     project = request.form["project"]
+
+    if key is None or value is None or update_type is None or project is None:
+        return make_response(jsonify(success=False, message="Missing required form data"), 400)
 
     filename = f"{SRC}/workflow/init.yml"
     with open(filename, "r") as file:
@@ -135,10 +140,10 @@ def update_user_role():
     if update_type == "user":
         # Update the data dictionary with the modified user roles dictionary
         if key not in data["userRole"]["site"]:
-            return make_response(jsonify(success=False, message="Invalid user"), 400)
+            return make_response(jsonify(success=False, message="Invalid user"), 404)
         elif value not in ["root", "admin", "guest", "user"]:
             return make_response(
-                jsonify(success=False, message="Invalid user role"), 400
+                jsonify(success=False, message="Invalid user role"), 422
             )
         else:
             data["userRole"]["site"][key] = value
@@ -158,18 +163,24 @@ def update_user_role():
             with open(filename, "w") as f:
                 yaml.dump(data, f)
             return jsonify(
-                success=True, message=f"status of {key} has changed to {value}"
+                success=True, message=f"project status of {key} is now {value}"
             )
     elif update_type == "edition":
         # Update the data dictionary with the modified edition statuses dictionary
-        data["status"]["edition"]["values"][project][key] = value
-        with open(filename, "w") as f:
-            yaml.dump(data, f)
+        if key not in data["name"]["edition"][project]:
+            return make_response(
+                jsonify(success=False, message="Edition not found"), 400
+            )
+        # Update the data dictionary with the modified edition statuses dictionary
+        else:
+            data["status"]["edition"]["values"][project][key] = value
+            with open(filename, "w") as f:
+                yaml.dump(data, f)
+            return jsonify(
+                success=True, message=f"edition status of {key} is now {value}"
+            )
     else:
         return jsonify(success=False, error="Invalid update type")
-
-    # Return a JSON response indicating success or failure
-    return jsonify(success=True)
 
 
 if __name__ == "__main__":
