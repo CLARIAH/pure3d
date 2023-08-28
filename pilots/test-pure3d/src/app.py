@@ -140,10 +140,10 @@ def update_data_values():
     if update_type == "user":
         # Update the data dictionary with the modified user roles dictionary
         if key not in data["userRole"]["site"]:
-            return make_response(jsonify(success=False, message="Invalid user"), 404)
+            return make_response(jsonify(success=False, message="Invalid user"), 400)
         elif value not in ["root", "admin", "guest", "user"]:
             return make_response(
-                jsonify(success=False, message="Invalid user role"), 422
+                jsonify(success=False, message="Invalid user role"), 400
             )
         else:
             data["userRole"]["site"][key] = value
@@ -163,7 +163,7 @@ def update_data_values():
             with open(filename, "w") as f:
                 yaml.dump(data, f)
             return jsonify(
-                success=True, message=f"project status of {key} is now {value}"
+                success=True, message=f"Project status of {key} is now {value}"
             )
     elif update_type == "edition":
         # Update the data dictionary with the modified edition statuses dictionary
@@ -177,7 +177,7 @@ def update_data_values():
             with open(filename, "w") as f:
                 yaml.dump(data, f)
             return jsonify(
-                success=True, message=f"edition status of {key} is now {value}"
+                success=True, message=f"Edition status of edition {key} in project {project} is now {value}"
             )
     else:
         return jsonify(success=False, error="Invalid update type")

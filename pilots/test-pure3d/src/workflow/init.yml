@@ -28,8 +28,8 @@ status:
         '1': 'False'
         '2': 'False'
       '2':
-        '1': true
-        '2': false
+        '1': 'False'
+        '2': 'False'
       '3':
         '1': 'True'
   project:
