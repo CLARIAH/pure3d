@@ -3,6 +3,10 @@
 
 
 # About
+
+**Notice: This repo is archived, but development is continuing towards the production stage in 
+[pure3dx](https://github.com/CLARIAH/pure3dx).**
+
 This repository contains software and documentation for Pure3D, an infrastructure and conceptual framework for publishing, depositing and exploring 3D worlds and objects.
 
 The work is the product of the [Pure3D project](https://pure3d.eu). 
@@ -45,7 +49,7 @@ At DANS, (see also [here](https://dans.knaw.nl/en/collaborations/pure3d/)):
 * [Raul Tavares](https://dans.knaw.nl/en/about/team/)
 
 # Authors
-* Sohini Mallick (code)
-* Dirk Roorda (documentation)
+* Sohini Mallick (experiments)
+* Dirk Roorda (code and documentation)
 
 
