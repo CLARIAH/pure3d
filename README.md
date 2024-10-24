@@ -1,5 +1,5 @@
 ![logo](images/pure3d.png)
-[![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+[![Project Status: Moved to https://github.com/CLARIAH/puredx – The project has been moved to a new location, and the version at that location should be considered authoritative.](https://www.repostatus.org/badges/latest/moved.svg)](https://www.repostatus.org/#moved) to [https://github.com/HuygensING/suriano](https://github.com/CLARIAH/puredx)
 
 
 # About
