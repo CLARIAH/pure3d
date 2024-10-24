@@ -1,5 +1,5 @@
 ![logo](images/pure3d.png)
-[![Project Status: Moved to https://github.com/CLARIAH/puredx – The project has been moved to a new location, and the version at that location should be considered authoritative.](https://www.repostatus.org/badges/latest/moved.svg)](https://www.repostatus.org/#moved) to [https://github.com/HuygensING/suriano](https://github.com/CLARIAH/puredx)
+[![Project Status: Moved to https://github.com/CLARIAH/puredx – The project has been moved to a new location, and the version at that location should be considered authoritative.](https://www.repostatus.org/badges/latest/moved.svg)](https://www.repostatus.org/#moved) to [https://github.com/CLARIAH/pure3dx](https://github.com/CLARIAH/puredx)
 
 
 # About
